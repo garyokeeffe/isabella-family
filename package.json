@@ -8,8 +8,11 @@
     "start": "node server.js",
     "dev": "PASSCODE=dev SESSION_SECRET=dev LOCAL_DATA_FILE=./local-data.json node server.js"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
-    "@google-cloud/firestore": "^7.11.0"
+    "@google-cloud/firestore": "^7.11.0",
+    "web-push": "^4.0.0"
   }
 }

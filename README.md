@@ -9,6 +9,7 @@ Google Cloud project; the data lives in your own Firestore database.
 - **Journal**: the last 7 days by day, with totals. Tap a line to fix the time, minutes per side, note, or remove it.
 - **More**: appointments (upcoming and past, with place and notes) and sleep sounds.
 - **Sleep sounds**: loops of real recordings (rain, ocean waves, stream, white noise, pink noise) with an optional auto-off.
+- **Feed reminders**: a push notification on each phone that turned them on, once it has been 3 hours (adjustable) since the last feed started; repeats every 30 minutes until a feed starts. A Cloud Scheduler job checks every 5 minutes.
 - **Night mode**: the moon button dims the whole app.
 - Works with a flaky connection: taps are kept on the phone and sent when it reconnects.
 - Spreadsheet (CSV) downloads live under More, "Export and account".

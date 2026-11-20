@@ -35,6 +35,9 @@ function fileStore(file) {
     async all() {
       return Object.values(load()).sort((a, b) => (a.at < b.at ? -1 : 1));
     },
+    async latest(n) {
+      return Object.values(load()).sort((a, b) => (a.at < b.at ? 1 : -1)).slice(0, n);
+    },
     async get(id) {
       return load()[id] || null;
     },
@@ -63,6 +66,9 @@ function firestoreStore(name) {
     async all() {
       return rows(await col.orderBy('at', 'asc').get());
     },
+    async latest(n) {
+      return rows(await col.orderBy('at', 'desc').limit(n).get());
+    },
     async get(id) {
       const d = await col.doc(id).get();
       return d.exists ? d.data() : null;
@@ -82,6 +88,82 @@ const makeStore = (name) =>
     : firestoreStore(name);
 const store = makeStore('events');
 const appts = makeStore('appointments');
+const pushSubs = makeStore('push');      // one row per phone that turned reminders on
+const settings = makeStore('settings');  // reminder interval, push keys, last reminder sent
+
+// ---------- feed reminders (push notifications) ----------
+
+const webpush = require('web-push');
+const CRON_KEY = process.env.CRON_KEY || '';
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'https://isabella.family';
+const PUSH_HOSTS = /(^|\.)(fcm\.googleapis\.com|push\.apple\.com|push\.services\.mozilla\.com|notify\.windows\.com)$/;
+const NUDGE_EVERY_MS = 30 * 60e3;   // repeat until a feed starts
+const GIVE_UP_AFTER_MS = 3 * 3600e3; // stop nudging this long after the first reminder was due
+
+let vapidKeys = null;
+async function getVapid() {
+  if (vapidKeys) return vapidKeys;
+  let doc = await settings.get('vapid');
+  if (!doc) {
+    // First run: make the key pair that identifies this app to the phones' push services, and keep it.
+    const k = webpush.generateVAPIDKeys();
+    await settings.put({ id: 'vapid', at: new Date().toISOString(), publicKey: k.publicKey, privateKey: k.privateKey });
+    doc = await settings.get('vapid');
+  }
+  vapidKeys = doc;
+  return doc;
+}
+async function getReminderConfig() {
+  return (await settings.get('reminders')) || { id: 'reminders', at: new Date().toISOString(), hours: 3, last_for: null, last_sent: null };
+}
+const subId = (endpoint) => crypto.createHash('sha256').update(endpoint).digest('hex').slice(0, 40);
+
+async function sendPush(sub, payload) {
+  if (process.env.PUSH_DRY_RUN) {
+    console.log('PUSH', sub.by, JSON.stringify(payload));
+    return true;
+  }
+  const v = await getVapid();
+  try {
+    await webpush.sendNotification(sub.subscription, JSON.stringify(payload), {
+      vapidDetails: { subject: VAPID_SUBJECT, publicKey: v.publicKey, privateKey: v.privateKey },
+      TTL: 1800,
+      urgency: 'high',
+    });
+    return true;
+  } catch (e) {
+    if (e.statusCode === 404 || e.statusCode === 410) await pushSubs.remove(sub.id); // that phone turned notifications off
+    else console.error('push failed', e.statusCode, String(e.body || e.message).slice(0, 200));
+    return false;
+  }
+}
+
+// Called every few minutes by Cloud Scheduler. Time is counted from the START of the last feed.
+async function checkReminders() {
+  const cfg = await getReminderConfig();
+  const feeds = (await store.latest(12)).filter((e) => e.kind === 'feed');
+  if (!feeds.length) return { sent: 0, why: 'no feeds yet' };
+  if (feeds.some((e) => e.in_progress)) return { sent: 0, why: 'feeding now' };
+  const last = feeds[0];
+  const elapsed = Date.now() - new Date(last.at);
+  const due = cfg.hours * 3600e3;
+  if (elapsed < due) return { sent: 0, why: 'not due' };
+  if (elapsed > due + GIVE_UP_AFTER_MS) return { sent: 0, why: 'gave up' };
+  if (cfg.last_for === last.id && cfg.last_sent && Date.now() - new Date(cfg.last_sent) < NUDGE_EVERY_MS - 60e3) return { sent: 0, why: 'nudged recently' };
+
+  const mins = Math.floor(elapsed / 60000);
+  const ended = last.last_side || (last.method === 'breast_left' ? 'left' : last.method === 'breast_right' ? 'right' : null);
+  const next = ended ? (ended === 'left' ? 'right' : 'left') : null;
+  const payload = {
+    title: 'Time to feed Isabella',
+    body: `Last feed started ${Math.floor(mins / 60)}h ${String(mins % 60).padStart(2, '0')}m ago.` + (next ? ` Start on the ${next}.` : ''),
+    tag: 'feed-reminder',
+  };
+  let sent = 0;
+  for (const sub of await pushSubs.all()) if (await sendPush(sub, payload)) sent++;
+  await settings.put({ ...cfg, last_for: last.id, last_sent: new Date().toISOString() });
+  return { sent, why: 'due' };
+}
 
 // ---------- auth ----------
 
@@ -269,7 +351,7 @@ function serveStatic(req, res, urlPath) {
   const size = fs.statSync(file).size;
   const headers = {
     'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream',
-    'Cache-Control': name === 'index.html' ? 'no-cache' : 'public, max-age=86400',
+    'Cache-Control': name === 'index.html' || name === 'sw.js' ? 'no-cache' : 'public, max-age=86400',
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'no-referrer',
     'Accept-Ranges': 'bytes',
@@ -324,7 +406,41 @@ async function handle(req, res) {
     return send(res, 200, { ok: true }, { 'Set-Cookie': `${COOKIE}=; Path=/; HttpOnly; Max-Age=0` });
   }
 
+  if (p === '/api/cron/reminders' && req.method === 'POST') {
+    const got = Buffer.from(String(req.headers['x-cron-key'] || '')), want = Buffer.from(CRON_KEY);
+    if (!CRON_KEY || got.length !== want.length || !crypto.timingSafeEqual(got, want)) return send(res, 403, { error: 'no' });
+    return send(res, 200, await checkReminders());
+  }
+
   if (!validSession(req)) return send(res, 401, { error: 'Sign in' });
+
+  if (p === '/api/reminders' && req.method === 'GET') {
+    return send(res, 200, { hours: (await getReminderConfig()).hours, publicKey: (await getVapid()).publicKey });
+  }
+  if (p === '/api/reminders' && req.method === 'POST') {
+    const hours = Number((await readJson(req)).hours);
+    if (!isFinite(hours) || hours < 1 || hours > 8) return send(res, 400, { error: 'Pick between 1 and 8 hours' });
+    await settings.put({ ...(await getReminderConfig()), hours: Math.round(hours * 2) / 2 });
+    return send(res, 200, { hours: Math.round(hours * 2) / 2 });
+  }
+  if (p === '/api/push/subscribe' && req.method === 'POST') {
+    const body = await readJson(req), sub = body.subscription || {};
+    let host = '';
+    try { const u = new URL(sub.endpoint); if (u.protocol === 'https:') host = u.hostname; } catch {}
+    if (!PUSH_HOSTS.test(host) || String(sub.endpoint).length > 1000 || !sub.keys || typeof sub.keys.p256dh !== 'string' || typeof sub.keys.auth !== 'string')
+      return send(res, 400, { error: 'This phone could not be set up for reminders' });
+    const id = subId(sub.endpoint);
+    await pushSubs.put({ id, at: new Date().toISOString(), by: String(body.by || '').slice(0, 40), subscription: { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh.slice(0, 200), auth: sub.keys.auth.slice(0, 100) } } });
+    return send(res, 200, { ok: true });
+  }
+  if ((p === '/api/push/unsubscribe' || p === '/api/push/test') && req.method === 'POST') {
+    const id = subId(String((await readJson(req)).endpoint || ''));
+    if (p === '/api/push/unsubscribe') { await pushSubs.remove(id); return send(res, 200, { ok: true }); }
+    const sub = await pushSubs.get(id);
+    if (!sub) return send(res, 404, { error: 'Reminders are not on for this phone' });
+    const ok = await sendPush(sub, { title: 'Isabella', body: 'Test: reminders are working on this phone.', tag: 'test' });
+    return send(res, ok ? 200 : 502, ok ? { ok: true } : { error: 'The notification could not be sent' });
+  }
 
   if (p === '/api/events' && req.method === 'GET') {
     const days = Math.min(Math.max(Number(url.searchParams.get('days')) || 3, 1), 60);

@@ -14,7 +14,7 @@ gcloud config set project "$PROJECT_ID" >/dev/null
 
 echo "==> Enabling services"
 gcloud services enable run.googleapis.com firestore.googleapis.com cloudbuild.googleapis.com \
-  artifactregistry.googleapis.com secretmanager.googleapis.com
+  artifactregistry.googleapis.com secretmanager.googleapis.com cloudscheduler.googleapis.com
 
 echo "==> Firestore database"
 if ! gcloud firestore databases describe --database="(default)" >/dev/null 2>&1; then
@@ -41,7 +41,10 @@ fi
 if ! gcloud secrets describe isabella-session >/dev/null 2>&1; then
   openssl rand -base64 48 | tr -d '\n' | gcloud secrets create isabella-session --data-file=- --replication-policy=automatic
 fi
-for s in isabella-passcode isabella-session; do
+if ! gcloud secrets describe isabella-cron >/dev/null 2>&1; then
+  openssl rand -hex 32 | tr -d '\n' | gcloud secrets create isabella-cron --data-file=- --replication-policy=automatic
+fi
+for s in isabella-passcode isabella-session isabella-cron; do
   gcloud secrets add-iam-policy-binding "$s" --member="serviceAccount:${SA}" \
     --role="roles/secretmanager.secretAccessor" >/dev/null
 done
@@ -49,9 +52,20 @@ done
 echo "==> Deploying"
 gcloud run deploy "$SERVICE" --source . --region "$REGION" --allow-unauthenticated \
   --service-account "$SA" \
-  --set-secrets "PASSCODE=isabella-passcode:latest,SESSION_SECRET=isabella-session:latest" \
+  --set-secrets "PASSCODE=isabella-passcode:latest,SESSION_SECRET=isabella-session:latest,CRON_KEY=isabella-cron:latest" \
   --set-env-vars "TZ_NAME=${TZ_NAME:-America/Phoenix}" \
   --memory 256Mi --max-instances 2
+
+echo "==> Feed-reminder check every 5 minutes"
+URL="$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')"
+CRON="$(gcloud secrets versions access latest --secret=isabella-cron)"
+if gcloud scheduler jobs describe isabella-reminders --location "$REGION" >/dev/null 2>&1; then
+  gcloud scheduler jobs update http isabella-reminders --location "$REGION" --schedule "*/5 * * * *" \
+    --uri "${URL}/api/cron/reminders" --http-method POST --update-headers "X-Cron-Key=${CRON}" >/dev/null
+else
+  gcloud scheduler jobs create http isabella-reminders --location "$REGION" --schedule "*/5 * * * *" \
+    --uri "${URL}/api/cron/reminders" --http-method POST --headers "X-Cron-Key=${CRON}" >/dev/null
+fi
 
 echo
 echo "Done. Open the URL above, sign in, and tap a button."

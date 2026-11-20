@@ -262,6 +262,13 @@
     <button class="quiet" type="button" id="apptPastBtn" hidden></button>
     <div class="list" id="apptPast" hidden></div>
 
+    <h2 class="sub">Feed reminders</h2>
+    <p class="note" style="margin:0 2px 14px">A notification on this phone when it has been this long since her last feed started. It repeats every 30 minutes until a feed starts.</p>
+    <div class="stepper"><button type="button" data-rem="-0.5" aria-label="Half an hour sooner">−</button><span class="val" id="remHours" style="min-width:120px"></span><button type="button" data-rem="0.5" aria-label="Half an hour later">+</button></div>
+    <button class="wide" type="button" id="remToggle" hidden></button>
+    <button class="quiet" type="button" id="remTest" hidden>Send a test notification</button>
+    <p class="note" id="remMsg" role="status"></p>
+
     <h2 class="sub">Sleep sounds</h2>
     <div class="tiles" id="soundTiles"></div>
     <div class="label">Turn off after</div>
@@ -484,18 +491,23 @@
   const buzz = () => { if (navigator.vibrate) navigator.vibrate(30); };
 
   function startFeed() {
-    const ev = { id: uuid(), at: new Date().toISOString(), by: who, note: '', kind: 'feed', in_progress: true, side: null, side_since: null, left_ms: 0, right_ms: 0, last_side: null };
+    // The side she is due to start on is selected straight away; tap the other one only if that is wrong.
+    const at = new Date().toISOString(), ns = nextSide();
+    const ev = { id: uuid(), at, by: who, note: '', kind: 'feed', in_progress: true, side: ns, side_since: ns ? at : null, left_ms: 0, right_ms: 0, last_side: ns };
     enqueue({ op: 'put', ev });
-    toast('Feeding started', () => enqueue({ op: 'del', id: ev.id }));
+    toast(ns ? 'Feeding started on the ' + ns : 'Feeding started', () => enqueue({ op: 'del', id: ev.id }));
   }
+  // True while the feed is still on the side the app picked for her and nothing else has been tapped.
+  const preselected = (e) => !!e.side && e.side_since === e.at && !e.left_ms && !e.right_ms;
   function bank(ev) { // move the running side's time into its total
     if (ev.side && ev.side_since) ev[ev.side + '_ms'] = sideMs(ev, ev.side);
     ev.side_since = null;
   }
   function tapSide(side) {
     const cur = feeding(); if (!cur) return;
-    const ev = plain(cur), was = ev.side;
+    const ev = plain(cur), was = ev.side, correcting = preselected(cur) && Date.now() - new Date(cur.at) < 120000;
     bank(ev);
+    if (correcting && was !== side) ev[was + '_ms'] = 0; // the pre-selected side was wrong: do not count those seconds
     if (was === side) ev.side = null;                                     // tap the active side again to pause
     else { ev.side = side; ev.side_since = new Date().toISOString(); ev.last_side = side; }
     enqueue({ op: 'put', ev });
@@ -533,6 +545,7 @@
     $('sideHint').textContent = Date.now() - new Date(cur.at) > 90 * 60000 ? 'Timer left running? Finish it, then fix the minutes in the Journal.'
       : hintSide ? 'Tap the side she is on. Last feed ended on the ' + other(hintSide) + '.'
       : untouched ? 'Tap the side she is on.'
+      : preselected(cur) ? 'Started on the ' + cur.side + ', the side she is due. Tap ' + (cur.side === 'left' ? 'Right' : 'Left') + ' if she is on the other one.'
       : cur.side ? 'Tap the other side when she switches.' : 'Paused. Tap a side to carry on.';
   }
 
@@ -773,23 +786,71 @@
     if (playing) $('soundStripText').textContent = 'Playing ' + soundName(playing).toLowerCase() + (stopAt ? ', off at ' + clock(new Date(stopAt).toISOString()) : '');
   }
 
+  // ----- feed reminders -----
+  const pushOk = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  let rem = { hours: 3, publicKey: null }, swReg = null, mySub = null;
+  const keyBytes = (b64) => { const s = atob((b64 + '='.repeat((4 - (b64.length % 4)) % 4)).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(s, (c) => c.charCodeAt(0)); };
+  const savePhone = () => api('/api/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: mySub.toJSON(), by: who }) });
+  function drawRem(msg) {
+    $('remHours').textContent = rem.hours + (rem.hours === 1 ? ' hour' : ' hours');
+    $('remToggle').hidden = !pushOk; $('remTest').hidden = !mySub;
+    $('remToggle').textContent = mySub ? 'Reminders are on for this phone. Turn off' : 'Turn on reminders on this phone';
+    $('remMsg').textContent = msg !== undefined ? msg : pushOk ? '' : 'This browser cannot show notifications. On an iPhone, open Isabella from its home-screen icon and come back to this page.';
+  }
+  async function initReminders() {
+    try { const r = await api('/api/reminders'); if (r.ok) rem = await r.json(); } catch {}
+    if (pushOk) {
+      try {
+        swReg = await navigator.serviceWorker.register('/sw.js');
+        mySub = await swReg.pushManager.getSubscription();
+        if (mySub) savePhone().catch(() => {}); // keep the server's record of this phone fresh
+      } catch {}
+    }
+    drawRem();
+  }
+  $('remToggle').onclick = async () => {
+    try {
+      if (mySub) {
+        await api('/api/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint: mySub.endpoint }) });
+        await mySub.unsubscribe(); mySub = null;
+        return drawRem('Reminders are off for this phone.');
+      }
+      if ((await Notification.requestPermission()) !== 'granted') return drawRem('Notifications are blocked for Isabella. Allow them in this phone\'s settings, then try again.');
+      if (!swReg) swReg = await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.ready;
+      mySub = await swReg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(rem.publicKey) });
+      const res = await savePhone();
+      if (!res.ok) { await mySub.unsubscribe(); mySub = null; return drawRem((await res.json()).error || 'Could not turn reminders on.'); }
+      drawRem('Reminders are on for this phone.');
+    } catch (e) { drawRem('Could not turn reminders on. ' + (e && e.message ? e.message : '')); }
+  };
+  $('remTest').onclick = async () => {
+    try { const res = await api('/api/push/test', { method: 'POST', body: JSON.stringify({ endpoint: mySub.endpoint }) }); drawRem(res.ok ? 'Test sent. It should appear in a few seconds.' : (await res.json()).error); }
+    catch { drawRem('No connection. Try again.'); }
+  };
+  for (const b of document.querySelectorAll('[data-rem]')) b.onclick = async () => {
+    const hours = Math.min(8, Math.max(1, rem.hours + Number(b.dataset.rem)));
+    rem.hours = hours; drawRem();
+    try { await api('/api/reminders', { method: 'POST', body: JSON.stringify({ hours }) }); } catch { drawRem('No connection. The change was not saved.'); }
+  };
+
   // ----- account -----
   $('accountBtn').onclick = () => { const b = $('accountBox'); b.hidden = !b.hidden; $('accountBtn').setAttribute('aria-expanded', !b.hidden); };
   function showLogin() { for (const id of ['app', 'tabs', 'moon']) $(id).hidden = true; $('login').hidden = false; $('name').value = who; }
-  function showApp() { $('login').hidden = true; for (const id of ['app', 'tabs', 'moon']) $(id).hidden = false; showTab('Today'); render(); renderAppts(); drawSounds(); }
+  function showApp() { $('login').hidden = true; for (const id of ['app', 'tabs', 'moon']) $(id).hidden = false; showTab('Today'); render(); renderAppts(); drawSounds(); drawRem(); }
   $('loginForm').onsubmit = async (e) => {
     e.preventDefault(); $('loginErr').textContent = '';
     try {
       const res = await api('/api/login', { method: 'POST', body: JSON.stringify({ passcode: $('pass').value }) });
       if (!res.ok) { $('loginErr').textContent = (await res.json()).error || 'Could not sign in'; return; }
       who = $('name').value.trim(); ls.set('who', who); $('pass').value = '';
-      showApp(); refresh();
+      showApp(); refresh(); initReminders();
     } catch { $('loginErr').textContent = 'No connection. Try again.'; }
   };
   $('signout').onclick = async () => { stopSound(); try { await api('/api/logout', { method: 'POST' }); } catch {} showLogin(); };
 
   // ----- start -----
-  if (who) { showApp(); refresh(); } else showLogin();
+  if (who) { showApp(); refresh(); initReminders(); } else showLogin();
   let ticks = 0;
   setInterval(() => {
     if (document.hidden || $('app').hidden) return;
