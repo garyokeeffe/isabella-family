@@ -150,6 +150,11 @@ function cleanEvent(input, existing) {
     if (!out.pee && !out.poop) throw new Error('diaper needs pee or poop');
   } else {
     out.method = METHODS.includes(src.method) ? src.method : null;
+    // A feed can be a running timer: `at` is when it started, duration_min is filled in when it finishes.
+    out.in_progress = !!src.in_progress;
+    const dur = src.duration_min === '' || src.duration_min == null ? null : Number(src.duration_min);
+    if (dur !== null && (!isFinite(dur) || dur < 0 || dur > 600)) throw new Error('bad duration');
+    out.duration_min = out.in_progress ? null : dur;
   }
   out.created_at = (existing && existing.created_at) || new Date().toISOString();
   out.updated_at = new Date().toISOString();
@@ -175,7 +180,7 @@ function cleanAppointment(input, existing) {
 
 // ---------- export ----------
 
-const CSV_COLS = ['id', 'at_utc', 'at_local', 'kind', 'pee', 'poop', 'method', 'by', 'note', 'created_at', 'updated_at'];
+const CSV_COLS = ['id', 'at_utc', 'at_local', 'kind', 'pee', 'poop', 'method', 'duration_min', 'in_progress', 'by', 'note', 'created_at', 'updated_at'];
 
 function localStamp(iso) {
   return new Date(iso).toLocaleString('sv-SE', { timeZone: TZ_NAME }); // YYYY-MM-DD HH:MM:SS
@@ -250,7 +255,7 @@ function serveStatic(res, urlPath) {
     'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream',
     'Cache-Control': name === 'index.html' ? 'no-cache' : 'public, max-age=86400',
     'Content-Security-Policy':
-      "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'",
+      "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; frame-ancestors 'none'",
   });
 }
 

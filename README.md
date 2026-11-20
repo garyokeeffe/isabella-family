@@ -3,8 +3,10 @@
 One-tap log of feedings and diaper changes for two phones. Runs in your own
 Google Cloud project; the data lives in your own Firestore database.
 
-- **Fed / Pee / Poop / Both**: one tap logs it with the time and who tapped.
-- After **Fed**, optional chips for Left side / Right side / Both sides. Ignore them and the feed is still logged.
+- **Start feeding** runs a timer both phones can see; **Finish feeding** saves the feed with how long it took.
+- **Pee / Poop / Both**: one tap logs it with the time and who tapped.
+- While feeding, optional chips for Left side / Right side / Both sides.
+- **Sleep sounds**: white noise, deep rumble, heartbeat and shushing, generated on the phone, with an optional auto-stop.
 - Tap any row to fix the time ("15 min earlier"), change it, add a note, or delete it.
 - **Appointments**: add doctor visits and other appointments with a date, place and notes; past ones stay on record.
 - Works with a flaky connection: taps are kept on the phone and sent when it reconnects.
@@ -57,6 +59,8 @@ Each person signs in once with their name and the passcode; the phone stays sign
 | `kind` | `feed` or `diaper` |
 | `pee`, `poop` | true/false (diapers) |
 | `method` | `breast_left`, `breast_right`, `breast_both` or empty (feeds) |
+| `duration_min` | how long the feed took, if timed |
+| `in_progress` | true while a feeding timer is running |
 | `by` | who logged it |
 | `note` | free text |
 | `created_at`, `updated_at` | when the row was written / last edited |

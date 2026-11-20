@@ -63,6 +63,7 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transition: transform .08s; }
   .act:active { transform: scale(.97); }
   .act svg { width: 40px; height: 40px; }
+  .act.feed.running { background: var(--card); color: var(--ink); border: 3px solid var(--primary); }
   .act.feed { grid-column: 1 / -1; background: var(--primary); color: var(--on-primary); border-color: var(--primary); min-height: 136px; font-size: 32px; flex-direction: row; gap: 14px; }
   .act.feed svg { width: 48px; height: 48px; }
   .act.done { background: var(--ink); color: var(--bg); border-color: var(--ink); }
@@ -75,6 +76,10 @@
   .chip { border: 1.5px solid var(--muted); background: var(--card); border-radius: 999px; padding: 12px 20px; font-size: 19px; min-height: 54px; }
   .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 600; }
 
+  .timer { font-size: 58px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
+  .stepper { display: flex; align-items: center; gap: 14px; }
+  .stepper button { width: 58px; height: 58px; border-radius: 50%; border: 1.5px solid var(--muted); background: var(--card); font-size: 28px; line-height: 1; }
+  .stepper .val { font-size: 22px; font-weight: 600; min-width: 110px; text-align: center; font-variant-numeric: tabular-nums; }
   .today { display: flex; gap: 8px; margin: 22px 0 0; }
   .today .tile { flex: 1; background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; padding: 10px 8px; text-align: center; }
   .today b { display: block; font-size: 28px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
@@ -164,7 +169,7 @@
   <div class="actions">
     <button class="act feed" data-log="feed">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.300S3.500 15 3.500 9.200A4.500 4.500 0 0 1 12 7.100a4.500 4.500 0 0 1 8.500 2.100c0 5.800-8.500 11.100-8.500 11.100Z"/></svg>
-      <span class="lbl">Fed</span>
+      <span class="lbl">Start feeding</span>
     </button>
     <button class="act pee" data-log="pee">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.200S5.500 10.400 5.500 15a6.500 6.500 0 0 0 13 0c0-4.600-6.500-11.800-6.500-11.800Z"/><path d="M9 15.200a3 3 0 0 0 2.400 2.900"/></svg>
@@ -181,8 +186,10 @@
   </div>
 
   <div class="detail" id="feedDetail" hidden>
-    <div class="q">Saved. Which side? You can skip this.</div>
+    <div class="timer" id="feedTimer">0:00</div>
+    <div class="q" id="feedQ">Feeding now. Which side?</div>
     <div class="chips" id="quickMethods"></div>
+    <button class="pastbtn" type="button" id="feedCancel">Cancel this feeding</button>
   </div>
 
   <div class="today" id="today" aria-label="Today so far"></div>
@@ -192,6 +199,15 @@
   <button class="addappt" type="button" id="apptAdd">Add an appointment</button>
   <button class="pastbtn" type="button" id="apptPastBtn" hidden></button>
   <div class="list" id="apptPast" hidden></div>
+
+  <h2>Sleep sounds</h2>
+  <div class="detail" style="margin-top:0">
+    <div class="chips" id="soundChips"></div>
+    <div class="q" style="margin:16px 0 10px">Stop by itself after</div>
+    <div class="chips" id="soundStop"></div>
+    <p class="hint" style="margin:14px 0 0">Keep the volume low and the phone away from where she sleeps.</p>
+  </div>
+  <audio id="player" loop preload="auto"></audio>
 
   <div id="lists"></div>
   <p class="hint" id="hint" hidden>Tap any line to fix the time or remove it.</p>
@@ -227,6 +243,10 @@
     <div class="field" id="editFeed">
       <label>Which side</label>
       <div class="chips" id="editMethods"></div>
+      <div id="editDur">
+        <label style="display:block;font-size:17px;color:var(--muted);margin:16px 0 8px">How long</label>
+        <div class="stepper"><button type="button" data-dur="-1" aria-label="One minute less">−</button><span class="val" id="editDurVal"></span><button type="button" data-dur="1" aria-label="One minute more">+</button></div>
+      </div>
     </div>
     <div class="field"><label for="editNote">Note (optional)</label><input id="editNote" type="text" maxlength="500"></div>
     <div class="btns">
@@ -276,7 +296,7 @@
   let who = ls.get('who', '');
   let server = [];                  // events as the server last reported them
   let queue = ls.get('queue', []);  // changes not yet confirmed by the server
-  let quickId = null, quickTimer = null, undoTimer = null, undoId = null, editing = null, flushing = false;
+  let undoTimer = null, editing = null, flushing = false;
 
   // ----- data -----
   const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, '0')).join(''));
@@ -362,7 +382,8 @@
   const dayKey = (d) => { const x = new Date(d); return x.getFullYear() + '-' + (x.getMonth() + 1) + '-' + x.getDate(); };
   function describe(e) {
     if (e.kind === 'diaper') return e.pee && e.poop ? 'Pee + poop' : e.poop ? 'Poop' : 'Pee';
-    let s = 'Fed';
+    let s = e.in_progress ? 'Feeding now' : 'Fed';
+    if (!e.in_progress && e.duration_min) s += ' ' + e.duration_min + ' min';
     if (e.method) s += ', ' + METHOD_LABEL[e.method].toLowerCase();
     return s;
   }
@@ -373,8 +394,9 @@
     const all = events();
     const lastFeed = all.find((e) => e.kind === 'feed');
     const lastDiaper = all.find((e) => e.kind === 'diaper');
-    $('feedAgo').textContent = lastFeed ? ago(lastFeed.at) : '–';
-    $('feedSub').textContent = lastFeed ? 'at ' + clock(lastFeed.at) + describe(lastFeed).replace(/^Fed/, '') : 'Nothing yet';
+    $('feedAgo').textContent = lastFeed ? (lastFeed.in_progress ? 'feeding now' : ago(lastFeed.at)) : '–';
+    $('feedSub').textContent = lastFeed ? (lastFeed.in_progress ? 'started ' : 'started at ') + clock(lastFeed.at) + (lastFeed.method ? ', ' + METHOD_LABEL[lastFeed.method].toLowerCase() : '') : 'Nothing yet';
+    paintFeed(true);
     $('diaperAgo').textContent = lastDiaper ? ago(lastDiaper.at) : '–';
     $('diaperSub').textContent = lastDiaper ? 'at ' + clock(lastDiaper.at) + ', ' + describe(lastDiaper).toLowerCase() : 'Nothing yet';
 
@@ -428,46 +450,135 @@
   }
 
   // ----- logging -----
-  function log(type) {
-    const ev = { id: uuid(), at: new Date().toISOString(), by: who, note: '' };
-    if (type === 'feed') Object.assign(ev, { kind: 'feed', method: null });
-    else Object.assign(ev, { kind: 'diaper', pee: type !== 'poop', poop: type !== 'pee' });
-    enqueue({ op: 'put', ev });
-    if (navigator.vibrate) navigator.vibrate(30);
-    confirmTap(type);
-    toast('Saved: ' + describe(ev).toLowerCase() + ', ' + clock(ev.at), ev.id);
-    if (type === 'feed') openQuick(ev.id); else closeQuick();
+  const feeding = () => events().find((e) => e.kind === 'feed' && e.in_progress);
+  const plain = (e) => { const c = { ...e }; delete c._pending; return c; };
+  function timerText(e) {
+    const s = Math.max(0, Math.floor((Date.now() - new Date(e.at)) / 1000)), hh = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+    return (hh ? hh + ':' + String(m).padStart(2, '0') : m) + ':' + String(s % 60).padStart(2, '0');
   }
+  const feedBtn = document.querySelector('[data-log="feed"]');
+
+  // The Fed button and the panel under it follow whether a feeding timer is running (on either phone).
+  function paintFeed(redrawChips) {
+    const cur = feeding();
+    $('feedDetail').hidden = !cur;
+    feedBtn.classList.toggle('running', !!cur);
+    if (!feedBtn.classList.contains('done')) feedBtn.querySelector('.lbl').textContent = cur ? 'Finish feeding' : 'Start feeding';
+    if (!cur) return;
+    $('feedTimer').textContent = timerText(cur);
+    $('feedQ').textContent = Date.now() - new Date(cur.at) > 90 * 60000
+      ? 'Still feeding? If the timer was left running, tap Finish feeding, then tap that line below to fix how long.'
+      : 'Feeding now. Which side?';
+    if (redrawChips) {
+      const copy = plain(cur);
+      drawMethods($('quickMethods'), copy, () => enqueue({ op: 'put', ev: copy }));
+    }
+  }
+
+  function log(type) {
+    if (navigator.vibrate) navigator.vibrate(30);
+    if (type === 'feed') return feeding() ? finishFeed() : startFeed();
+    const ev = { id: uuid(), at: new Date().toISOString(), by: who, note: '', kind: 'diaper', pee: type !== 'poop', poop: type !== 'pee' };
+    enqueue({ op: 'put', ev });
+    confirmTap(type);
+    toast('Saved: ' + describe(ev).toLowerCase() + ', ' + clock(ev.at), () => enqueue({ op: 'del', id: ev.id }));
+  }
+  function startFeed() {
+    const ev = { id: uuid(), at: new Date().toISOString(), by: who, note: '', kind: 'feed', method: null, in_progress: true, duration_min: null };
+    enqueue({ op: 'put', ev });
+    toast('Feeding timer started, ' + clock(ev.at), () => enqueue({ op: 'del', id: ev.id }));
+  }
+  function finishFeed() {
+    const cur = plain(feeding());
+    const done = { ...cur, in_progress: false, duration_min: Math.max(1, Math.round((Date.now() - new Date(cur.at)) / 60000)) };
+    enqueue({ op: 'put', ev: done });
+    confirmTap('feed');
+    toast('Saved: fed ' + done.duration_min + ' min', () => enqueue({ op: 'put', ev: { ...done, in_progress: true, duration_min: null } }));
+  }
+  $('feedCancel').onclick = () => { const cur = feeding(); if (cur) { enqueue({ op: 'del', id: cur.id }); toast('Feeding cancelled', () => enqueue({ op: 'put', ev: plain(cur) })); } };
 
   function confirmTap(type) {
     const b = document.querySelector('[data-log="' + type + '"]'), lbl = b.querySelector('.lbl');
     if (!b.dataset.name) b.dataset.name = lbl.textContent;
     lbl.textContent = 'Saved ✓'; b.classList.add('done');
-    clearTimeout(b._t); b._t = setTimeout(() => { lbl.textContent = b.dataset.name; b.classList.remove('done'); }, 1800);
+    clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('done'); if (type === 'feed') paintFeed(false); else lbl.textContent = b.dataset.name; }, 1800);
   }
 
-  function openQuick(id) {
-    quickId = id;
-    const draw = () => {
-      const ev = find(quickId); if (!ev) return closeQuick();
-      const copy = { ...ev }; delete copy._pending;
-      drawMethods($('quickMethods'), copy, () => { enqueue({ op: 'put', ev: copy }); draw(); armQuick(); });
-    };
-    $('feedDetail').hidden = false; draw(); armQuick();
-  }
-  function armQuick() { clearTimeout(quickTimer); quickTimer = setTimeout(closeQuick, 45000); }
-  function closeQuick() { quickId = null; clearTimeout(quickTimer); $('feedDetail').hidden = true; }
-
-  function toast(msg, id) {
-    undoId = id; $('toastMsg').textContent = msg; $('toast').hidden = false;
+  let undoFn = null;
+  function toast(msg, undo) {
+    undoFn = undo; $('toastMsg').textContent = msg; $('toast').hidden = false;
     clearTimeout(undoTimer); undoTimer = setTimeout(() => { $('toast').hidden = true; }, 10000);
   }
-  $('toastUndo').onclick = () => {
-    if (undoId) { if (undoId === quickId) closeQuick(); enqueue({ op: 'del', id: undoId }); }
-    $('toast').hidden = true;
-  };
+  $('toastUndo').onclick = () => { if (undoFn) undoFn(); undoFn = null; $('toast').hidden = true; };
 
   for (const b of document.querySelectorAll('[data-log]')) b.onclick = () => log(b.dataset.log);
+  let feedTicks = 0;
+  setInterval(() => {
+    if (document.hidden || !feeding()) return;
+    paintFeed(false);
+    if (++feedTicks % 10 === 0 && !editing && !apptEditing) refresh(); // pick up a finish from the other phone quickly
+  }, 1000);
+
+  // ----- sleep sounds: made on the phone, nothing is downloaded -----
+  const SOUNDS = [['white', 'White noise'], ['rumble', 'Deep rumble'], ['womb', 'Heartbeat'], ['shush', 'Shushing']];
+  const STOPS = [[0, 'Keep playing'], [30, '30 min'], [60, '1 hour']];
+  const player = $('player'), soundUrls = {};
+  let playing = null, stopMin = 0, stopAt = 0;
+  function makeSound(kind) {
+    const RATE = 22050, n = RATE * 30, f = RATE, total = n + f, src = new Float32Array(total), out = new Float32Array(n);
+    let b = 0, lp = 0;
+    for (let i = 0; i < total; i++) {
+      const w = Math.random() * 2 - 1;
+      if (kind === 'rumble' || kind === 'womb') { b = (b + 0.02 * w) / 1.02; src[i] = b * 3.5; }
+      else if (kind === 'shush') { lp += 0.25 * (w - lp); src[i] = w - lp; }
+      else src[i] = w;
+    }
+    // Blend the extra second at the end into the start so the loop has no click at the seam.
+    for (let i = 0; i < n; i++) out[i] = i < f ? src[i] * Math.sqrt(i / f) + src[n + i] * Math.sqrt(1 - i / f) : src[i];
+    const thump = (x) => (x < 0 ? 0 : Math.sin(2 * Math.PI * 65 * x) * Math.exp(-x * 16) + 0.4 * Math.sin(2 * Math.PI * 130 * x) * Math.exp(-x * 22));
+    let peak = 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / RATE;
+      if (kind === 'womb') { const x = t % (60 / 72); out[i] = out[i] * 0.6 + 0.9 * thump(x) + 0.6 * thump(x - 0.28); }
+      if (kind === 'shush') { const ph = (t % 1.5) / 1.5; out[i] *= 0.06 + (ph < 0.7 ? Math.pow(Math.sin((Math.PI * ph) / 0.7), 1.5) : 0); }
+      peak = Math.max(peak, Math.abs(out[i]));
+    }
+    const wav = new DataView(new ArrayBuffer(44 + n * 2)), str = (o, t) => { for (let i = 0; i < t.length; i++) wav.setUint8(o + i, t.charCodeAt(i)); };
+    str(0, 'RIFF'); wav.setUint32(4, 36 + n * 2, true); str(8, 'WAVEfmt '); wav.setUint32(16, 16, true); wav.setUint16(20, 1, true); wav.setUint16(22, 1, true);
+    wav.setUint32(24, RATE, true); wav.setUint32(28, RATE * 2, true); wav.setUint16(32, 2, true); wav.setUint16(34, 16, true); str(36, 'data'); wav.setUint32(40, n * 2, true);
+    for (let i = 0; i < n; i++) wav.setInt16(44 + i * 2, Math.round((out[i] / peak) * 0.85 * 32767), true);
+    return URL.createObjectURL(new Blob([wav], { type: 'audio/wav' }));
+  }
+  function stopSound() { player.pause(); playing = null; stopAt = 0; drawSounds(); }
+  function playSound(key) {
+    if (playing === key) return stopSound();
+    try {
+      player.src = soundUrls[key] || (soundUrls[key] = makeSound(key));
+      player.loop = true;
+      const p = player.play(); if (p && p.catch) p.catch(() => { playing = null; drawSounds(); });
+      playing = key; stopAt = stopMin ? Date.now() + stopMin * 60000 : 0;
+      if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: SOUNDS.find((x) => x[0] === key)[1], artist: 'Isabella' });
+    } catch { playing = null; }
+    drawSounds();
+  }
+  player.addEventListener('timeupdate', () => { if (stopAt && Date.now() >= stopAt) stopSound(); });
+  player.addEventListener('pause', () => { if (playing && !player.ended) { playing = null; drawSounds(); } });
+  function drawSounds() {
+    const c = $('soundChips'); c.textContent = '';
+    for (const [key, label] of SOUNDS) {
+      const on = playing === key;
+      const bt = Object.assign(document.createElement('button'), { className: 'chip' + (on ? ' on' : ''), type: 'button', textContent: on ? 'Stop ' + label.toLowerCase() : label });
+      bt.setAttribute('aria-pressed', on); bt.onclick = () => playSound(key); c.append(bt);
+    }
+    const st = $('soundStop'); st.textContent = '';
+    for (const [min, label] of STOPS) {
+      const bt = Object.assign(document.createElement('button'), { className: 'chip' + (stopMin === min ? ' on' : ''), type: 'button', textContent: label });
+      bt.setAttribute('aria-pressed', stopMin === min);
+      bt.onclick = () => { stopMin = min; stopAt = playing && min ? Date.now() + min * 60000 : 0; drawSounds(); };
+      st.append(bt);
+    }
+  }
+  drawSounds();
 
   // ----- edit sheet -----
   const toLocalInput = (iso) => { const d = new Date(iso); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
@@ -485,7 +596,11 @@
     $('editDiaper').hidden = editing.kind !== 'diaper';
     $('editFeed').hidden = editing.kind !== 'feed';
     if (editing.kind === 'diaper') for (const c of document.querySelectorAll('[data-diaper]')) c.classList.toggle('on', !!editing[c.dataset.diaper]);
-    else drawMethods($('editMethods'), editing, () => { editing.note = $('editNote').value; drawEdit(); });
+    else {
+      drawMethods($('editMethods'), editing, () => { editing.note = $('editNote').value; drawEdit(); });
+      $('editDur').hidden = !!editing.in_progress;
+      $('editDurVal').textContent = editing.duration_min ? editing.duration_min + ' min' : 'Not timed';
+    }
   }
   $('editAt').onchange = () => { const d = new Date($('editAt').value); if (!isNaN(d)) editing.at = d.toISOString(); };
   for (const c of document.querySelectorAll('[data-shift]')) c.onclick = () => {
@@ -497,6 +612,10 @@
     if (editing[k] && !editing[other]) return; // a diaper is always at least one of the two
     editing[k] = !editing[k]; drawEdit();
   };
+  for (const c of document.querySelectorAll('[data-dur]')) c.onclick = () => {
+    editing.duration_min = Math.min(240, Math.max(0, (editing.duration_min || 0) + Number(c.dataset.dur))) || null;
+    editing.note = $('editNote').value; drawEdit();
+  };
   const closeEdit = () => { $('scrim').hidden = true; editing = null; };
   $('editCancel').onclick = closeEdit;
   $('scrim').onclick = (e) => { if (e.target === $('scrim')) closeEdit(); };
@@ -506,7 +625,7 @@
     enqueue({ op: 'put', ev: editing }); closeEdit();
   };
   $('editDelete').onclick = () => {
-    const id = editing.id; if (id === quickId) closeQuick();
+    const id = editing.id;
     closeEdit(); enqueue({ op: 'del', id });
   };
   $('lists').onclick = (e) => { const row = e.target.closest('.row'); if (row) openEdit(row.dataset.id); };
