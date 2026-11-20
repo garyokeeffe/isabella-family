@@ -3,14 +3,27 @@
 One-tap log of feedings and diaper changes for two phones. Runs in your own
 Google Cloud project; the data lives in your own Firestore database.
 
-- **Start feeding** runs a timer both phones can see; **Finish feeding** saves the feed with how long it took.
+- **Today**: time since the last feed, which side to start on next, and the last diaper. One big button starts a feed.
+- **Feeding timer**: shared between both phones. Tap Left or Right when she switches; each side keeps its own time. Finish saves the feed.
 - **Pee / Poop / Both**: one tap logs it with the time and who tapped.
-- While feeding, optional chips for Left side / Right side / Both sides.
-- **Sleep sounds**: white noise, deep rumble, heartbeat and shushing, generated on the phone, with an optional auto-stop.
-- Tap any row to fix the time ("15 min earlier"), change it, add a note, or delete it.
-- **Appointments**: add doctor visits and other appointments with a date, place and notes; past ones stay on record.
+- **Journal**: the last 7 days by day, with totals. Tap a line to fix the time, minutes per side, note, or remove it.
+- **More**: appointments (upcoming and past, with place and notes) and sleep sounds.
+- **Sleep sounds**: loops of real recordings (rain, ocean waves, stream, white noise, pink noise) with an optional auto-off.
+- **Night mode**: the moon button dims the whole app.
 - Works with a flaky connection: taps are kept on the phone and sent when it reconnects.
-- **Download all as spreadsheet** at the bottom of the page gives you every row as a CSV file.
+- Spreadsheet (CSV) downloads live under More, "Export and account".
+
+### Sound credits
+
+From the [Blanket](https://github.com/rafaelmardojai/blanket) project's collection; trimmed, looped and levelled for this app.
+
+| Sound | Author | License |
+|---|---|---|
+| Rain | alex36917 (freesound.org) | CC BY |
+| Waves | Luftrum (freesound.org) | CC BY |
+| Stream | gluckose (freesound.org) | CC0 |
+| White noise | Jorge Stolfi (Wikimedia Commons) | CC BY-SA |
+| Pink noise | Omegatron (Wikimedia Commons) | CC BY-SA |
 
 ## Deploy
 
@@ -58,8 +71,9 @@ Each person signs in once with their name and the passcode; the phone stays sign
 | `at` | when it happened, UTC ISO timestamp |
 | `kind` | `feed` or `diaper` |
 | `pee`, `poop` | true/false (diapers) |
-| `method` | `breast_left`, `breast_right`, `breast_both` or empty (feeds) |
-| `duration_min` | how long the feed took, if timed |
+| `duration_min` | how long the feed took, start to finish |
+| `left_min`, `right_min` | minutes on each side |
+| `last_side` | side the feed ended on (drives "start on the ... next") |
 | `in_progress` | true while a feeding timer is running |
 | `by` | who logged it |
 | `note` | free text |

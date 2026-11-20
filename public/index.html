@@ -20,141 +20,190 @@
   @font-face { font-family: "Isabella Text"; src: url(/text-600.woff2) format("woff2"); font-weight: 600; font-display: swap; }
 
   :root {
-    /* palm, shell, hibiscus, pineapple, rattan, lagoon, brass */
-    --palm: #1d4a3a; --palm-deep: #143629; --on-palm: #f8f4ea; --on-palm-soft: #c9dcd0;
     --bg: #f8f4ea; --card: #fffdf8; --ink: #17352a; --muted: #55695f; --line: #e2dccb; --brass: #a8833f;
-    --feed: #f5c6c9; --pee: #f4dd8b; --poop: #e2c7a6; --both: #bfe3d3; --on-act: #17352a;
-    --feed-dot: #d9667a; --pee-dot: #cfa51f; --poop-dot: #9a6f43; --both-dot: #3f8f74;
-    --danger: #a1322a; --focus: #0b6fd6; --primary: #1d4a3a; --on-primary: #f8f4ea; --frond: #e3ead9;
+    --primary: #1d4a3a; --on-primary: #f8f4ea; --frond: #e6ecdc; --danger: #a1322a; --focus: #0b6fd6; --bar: #fffdf8;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --palm: #0f2a21; --palm-deep: #0a1d17; --on-palm: #f1ecdf; --on-palm-soft: #a9c2b5;
       --bg: #0b1f18; --card: #12291f; --ink: #f1ecdf; --muted: #a3b8ac; --line: #24402f; --brass: #c9a765;
-      --feed: #7c3246; --pee: #74600f; --poop: #654a2f; --both: #25604d; --on-act: #fbf7ec;
-      --feed-dot: #e58a9a; --pee-dot: #e0be4a; --poop-dot: #c79a6b; --both-dot: #6cc0a4;
-      --danger: #f08a7c; --focus: #8ec5ff; --primary: #2a6651; --on-primary: #f8f4ea; --frond: #12301f;
+      --primary: #2a6651; --on-primary: #f8f4ea; --frond: #102a20; --danger: #f08a7c; --focus: #8ec5ff; --bar: #0f251c;
     }
   }
+  /* Night: chosen with the moon button. Dimmer than dark mode, warm text, no bright fills. */
+  :root[data-theme="night"] {
+    --bg: #07140f; --card: #0c1c15; --ink: #d8cfba; --muted: #8b9a8d; --line: #1a2e23; --brass: #a98c52;
+    --primary: #0c1c15; --on-primary: #d8cfba; --frond: #0a1a13; --danger: #c9796d; --focus: #6f9fd0; --bar: #0a1812;
+  }
+  :root[data-theme="night"] .act.feed, :root[data-theme="night"] .btn:not(.ghost):not(.danger), :root[data-theme="night"] .finish,
+  :root[data-theme="night"] .side.on, :root[data-theme="night"] .tile.on, :root[data-theme="night"] .act.done { border: 2px solid var(--brass); }
+
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; background: var(--bg); color: var(--ink); }
   body { font: 400 19px/1.4 "Isabella Text", "Avenir Next", "Century Gothic", system-ui, sans-serif; touch-action: manipulation; -webkit-text-size-adjust: 100%; }
   button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
   [hidden] { display: none !important; }
   :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-  .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px; }
-  .display { font-family: "Isabella Display", "Cormorant Garamond", Didot, Georgia, serif; font-style: italic; font-weight: 600; }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 0 18px; }
+  .display, h2, h3 { font-family: "Isabella Display", "Cormorant Garamond", Didot, Georgia, serif; font-style: italic; font-weight: 600; }
 
-  /* ----- header: her name and the two answers you need at 3am ----- */
-  .top { position: relative; overflow: hidden; padding: calc(env(safe-area-inset-top) + 20px) 0 0; }
-  .frond { position: absolute; right: -46px; top: -30px; width: 250px; height: 250px; color: var(--frond); pointer-events: none; }
-  .top .wrap { position: relative; }
-  .name { font-size: 50px; line-height: 1; margin: 0 0 18px; }
-  .rule { width: 44px; height: 2px; background: var(--brass); margin: -8px 0 18px; border-radius: 2px; }
-  .status { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .stat { background: var(--card); border: 1.5px solid var(--line); border-radius: 22px; padding: 14px 16px; }
-  .stat .label { font-size: 17px; color: var(--muted); }
-  .stat .ago { font-size: 29px; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
-  .stat .sub { font-size: 16px; color: var(--muted); min-height: 22px; }
+  /* ----- header ----- */
+  .top { position: relative; overflow: hidden; padding: calc(env(safe-area-inset-top) + 16px) 0 0; }
+  .frond { position: absolute; right: -30px; top: -34px; width: 170px; height: 170px; color: var(--frond); pointer-events: none; }
+  .top .wrap { position: relative; display: flex; justify-content: space-between; align-items: flex-start; }
+  .name { font-size: 36px; line-height: 1; margin: 0; }
+  .rule { width: 40px; height: 2px; background: var(--brass); margin: 10px 0 0; border-radius: 2px; }
+  .moon { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); margin: -6px -8px 0 0; }
+  .moon svg { width: 24px; height: 24px; }
+  .moon[aria-pressed="true"] { color: var(--brass); }
 
-  /* ----- the four buttons ----- */
-  .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
-  .act { border-radius: 26px; background: var(--card); color: var(--ink); border: 1.5px solid var(--muted); font-weight: 600; font-size: 23px; min-height: 120px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transition: transform .08s; }
+  main { padding-bottom: calc(env(safe-area-inset-bottom) + 100px); }
+  .tab { padding-top: 18px; }
+
+  /* ----- Today: status is plain type, only tappable things get an outline ----- */
+  .status .big { font-size: 34px; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .status .next { font-size: 19px; margin-top: 4px; }
+  .status .next b { font-weight: 600; }
+  .status .slim { font-size: 18px; color: var(--muted); margin-top: 10px; }
+
+  .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 22px; }
+  .act { border-radius: 24px; background: var(--card); color: var(--ink); border: 1.5px solid var(--muted); font-weight: 600; font-size: 21px; min-height: 96px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; transition: transform .08s; }
   .act:active { transform: scale(.97); }
-  .act svg { width: 40px; height: 40px; }
-  .act.feed.running { background: var(--card); color: var(--ink); border: 3px solid var(--primary); }
-  .act.feed { grid-column: 1 / -1; background: var(--primary); color: var(--on-primary); border-color: var(--primary); min-height: 136px; font-size: 32px; flex-direction: row; gap: 14px; }
-  .act.feed svg { width: 48px; height: 48px; }
-  .act.done { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-  .act.feed.done { box-shadow: inset 0 0 0 4px var(--brass); }
+  .act svg { width: 34px; height: 34px; }
+  .act.feed { grid-column: 1 / -1; background: var(--primary); color: var(--on-primary); border-color: var(--primary); min-height: 136px; font-size: 30px; flex-direction: row; gap: 14px; }
+  .act.feed svg { width: 46px; height: 46px; }
+  .act.done { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
   @media (prefers-reduced-motion: reduce) { .act { transition: none; } }
+  .counts { margin: 20px 2px 0; color: var(--muted); font-size: 18px; }
+  .strip { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; text-align: left; margin-top: 16px; padding: 14px 16px; border-radius: 24px; border: 1.5px solid var(--brass); background: var(--card); font-size: 18px; min-height: 60px; }
+  .strip b { font-weight: 600; }
+  .strip .stop { font-weight: 600; text-decoration: underline; flex: none; padding: 8px 4px; }
 
-  .detail { background: var(--card); border: 1.5px solid var(--line); border-radius: 22px; padding: 16px; margin-top: 12px; }
-  .detail .q { font-size: 18px; margin-bottom: 12px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
-  .chip { border: 1.5px solid var(--muted); background: var(--card); border-radius: 999px; padding: 12px 20px; font-size: 19px; min-height: 54px; }
-  .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 600; }
+  /* ----- feeding takes over Today ----- */
+  .feeding { text-align: center; }
+  .feeding .clock { font-size: 84px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; margin-top: 6px; }
+  .feeding .since { color: var(--muted); font-size: 18px; margin-top: 6px; }
+  .sides { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
+  .side { position: relative; border-radius: 24px; min-height: 96px; border: 1.5px solid var(--muted); background: var(--card); font-weight: 600; font-size: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .side small { font-weight: 400; font-size: 18px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .side.on { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+  .side.on small { color: var(--on-primary); }
+  .side.suggest::after { content: ""; position: absolute; top: 12px; right: 14px; width: 12px; height: 12px; border-radius: 50%; background: var(--brass); }
+  .sidehint { color: var(--muted); font-size: 17px; margin-top: 10px; min-height: 24px; }
+  .finish { width: 100%; margin-top: 16px; min-height: 112px; border-radius: 24px; background: var(--primary); color: var(--on-primary); font-weight: 600; font-size: 28px; }
+  .quiet { color: var(--muted); text-decoration: underline; font-size: 16px; padding: 12px 4px; }
 
-  .timer { font-size: 58px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
-  .stepper { display: flex; align-items: center; gap: 14px; }
-  .stepper button { width: 58px; height: 58px; border-radius: 50%; border: 1.5px solid var(--muted); background: var(--card); font-size: 28px; line-height: 1; }
-  .stepper .val { font-size: 22px; font-weight: 600; min-width: 110px; text-align: center; font-variant-numeric: tabular-nums; }
-  .today { display: flex; gap: 8px; margin: 22px 0 0; }
-  .today .tile { flex: 1; background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; padding: 10px 8px; text-align: center; }
-  .today b { display: block; font-size: 28px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
-  .today span { font-size: 16px; color: var(--muted); }
-
-  h2 { font-family: "Isabella Display", "Cormorant Garamond", Didot, Georgia, serif; font-style: italic; font-weight: 600; font-size: 28px; margin: 24px 2px 8px; }
-  .list { background: var(--card); border: 1.5px solid var(--line); border-radius: 22px; overflow: hidden; }
+  /* ----- shared pieces ----- */
+  h2 { font-size: 30px; margin: 6px 2px 10px; }
+  h2.sub, .daytotal + .list + h2 { margin-top: 30px; }
+  .list { background: var(--card); border-radius: 24px; overflow: hidden; }
   .row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; width: 100%; text-align: left; border-top: 1.5px solid var(--line); min-height: 64px; }
   .row:first-child { border-top: 0; }
-  .dot { width: 14px; height: 14px; border-radius: 50%; flex: none; }
-  .row .t { font-variant-numeric: tabular-nums; width: 92px; flex: none; color: var(--muted); font-size: 18px; }
+  .row .ico { width: 24px; height: 24px; flex: none; color: var(--primary); }
+  @media (prefers-color-scheme: dark) { .row .ico { color: var(--muted); } }
+  :root[data-theme="night"] .row .ico { color: var(--muted); }
+  .row .ico.poop, :root[data-theme="night"] .row .ico.poop { color: var(--brass); }
+  .row .t { font-variant-numeric: tabular-nums; width: 88px; flex: none; color: var(--muted); font-size: 18px; }
   .row .what { flex: 1; font-weight: 600; }
+  .row .what small { display: block; font-weight: 400; color: var(--muted); font-size: 16px; }
   .row .by { color: var(--muted); font-size: 16px; }
+  .row .chev { color: var(--muted); flex: none; width: 10px; height: 16px; }
   .row.pending .what::after { content: " (saving)"; color: var(--muted); font-weight: 400; font-size: 16px; }
+  .daytotal { color: var(--muted); font-size: 17px; margin: -6px 2px 10px; }
   .empty { padding: 22px 16px; color: var(--muted); }
-  .appt .when { flex: none; width: 118px; color: var(--muted); font-size: 17px; line-height: 1.25; }
+  .appt .when { flex: none; width: 112px; color: var(--muted); font-size: 17px; line-height: 1.25; }
   .appt .when b { display: block; color: var(--ink); font-weight: 600; font-size: 19px; }
-  .appt .what small { display: block; font-weight: 400; color: var(--muted); font-size: 16px; }
-  .addappt { width: 100%; margin-top: 10px; min-height: 60px; border-radius: 18px; border: 1.5px solid var(--muted); background: var(--card); font-weight: 600; font-size: 20px; }
-  .pastbtn { color: var(--muted); text-decoration: underline; font-size: 16px; padding: 12px 4px; }
-  textarea { width: 100%; font: inherit; color: var(--ink); background: var(--card); border: 1.5px solid var(--muted); border-radius: 16px; padding: 14px; min-height: 110px; resize: vertical; }
-  .hint { color: var(--muted); font-size: 16px; margin: 10px 4px 0; }
+  .wide { width: 100%; margin-top: 12px; min-height: 60px; border-radius: 24px; border: 1.5px solid var(--muted); background: var(--card); font-weight: 600; font-size: 20px; }
 
-  footer { margin: 30px 0 calc(env(safe-area-inset-bottom) + 110px); display: flex; gap: 8px 22px; justify-content: center; flex-wrap: wrap; }
-  footer a, footer button { color: var(--muted); text-decoration: underline; font-size: 16px; padding: 12px 4px; }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .seg.two { grid-template-columns: repeat(2, 1fr); }
+  .chip { border: 1.5px solid var(--muted); background: var(--card); border-radius: 999px; padding: 8px 10px; font-size: 18px; line-height: 1.2; min-height: 54px; text-align: center; }
+  .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 600; }
+  .stepper { display: flex; align-items: center; gap: 14px; }
+  .stepper button { width: 56px; height: 56px; border-radius: 50%; border: 1.5px solid var(--muted); background: var(--card); font-size: 28px; line-height: 1; }
+  .stepper .val { font-size: 21px; font-weight: 600; min-width: 96px; text-align: center; font-variant-numeric: tabular-nums; }
 
-  .toast { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 14px); max-width: 496px; margin: 0 auto;
-    background: var(--palm-deep); color: var(--on-palm); border: 1.5px solid var(--brass); border-radius: 22px; padding: 12px 12px 12px 20px;
-    display: flex; justify-content: space-between; align-items: center; gap: 12px; z-index: 5; font-size: 20px; box-shadow: 0 8px 28px rgba(10, 29, 23, .35); }
-  .toast button { background: var(--on-palm); color: var(--palm-deep); font-weight: 600; border-radius: 16px; min-height: 56px; padding: 0 22px; font-size: 20px; flex: none; }
+  /* ----- sleep sounds ----- */
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tile { border-radius: 24px; border: 1.5px solid var(--muted); background: var(--card); min-height: 104px; font-weight: 600; font-size: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+  .tile svg { width: 32px; height: 32px; }
+  .tile small { font-weight: 400; font-size: 15px; }
+  .tile.on { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+  .label { font-size: 17px; color: var(--muted); margin: 18px 2px 8px; }
+  .note { color: var(--muted); font-size: 16px; margin: 12px 2px 0; }
+  .account { margin-top: 28px; }
+  .account a, .account button.link { display: block; color: var(--ink); text-decoration: underline; font-size: 18px; padding: 12px 2px; text-align: left; }
+  .credits { color: var(--muted); font-size: 15px; margin: 10px 2px 0; }
+
+  /* ----- tab bar ----- */
+  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--bar); border-top: 1.5px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+  nav.tabs .in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
+  nav.tabs button { height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; color: var(--muted); border-top: 2px solid transparent; margin-top: -1.5px; }
+  nav.tabs button svg { width: 26px; height: 26px; }
+  nav.tabs button[aria-current="page"] { color: var(--ink); border-top-color: var(--brass); font-weight: 600; }
+
+  .toast { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 78px); max-width: 496px; margin: 0 auto;
+    background: var(--ink); color: var(--bg); border-radius: 24px; padding: 10px 10px 10px 20px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px; z-index: 7; font-size: 19px; box-shadow: 0 8px 28px rgba(10, 29, 23, .3); }
+  .toast button { background: var(--bg); color: var(--ink); font-weight: 600; border-radius: 999px; min-height: 52px; padding: 0 22px; font-size: 19px; flex: none; }
 
   .scrim { position: fixed; inset: 0; background: rgba(8, 24, 18, .6); z-index: 10; display: flex; align-items: flex-end; justify-content: center; }
-  .sheet { background: var(--bg); width: 100%; max-width: 520px; border-radius: 28px 28px 0 0; padding: 22px 16px calc(env(safe-area-inset-bottom) + 20px); max-height: 94vh; overflow: auto; }
-  .sheet h3 { font-family: "Isabella Display", "Cormorant Garamond", Didot, Georgia, serif; font-style: italic; font-weight: 600; margin: 0 0 14px; font-size: 32px; }
+  .sheet { background: var(--bg); width: 100%; max-width: 520px; border-radius: 28px 28px 0 0; padding: 22px 18px 0; max-height: 94vh; overflow: auto; }
+  .sheet h3 { margin: 0 0 14px; font-size: 32px; }
   .field { margin-bottom: 18px; }
-  .field > label { display: block; font-size: 17px; color: var(--muted); margin-bottom: 8px; }
-  input[type=text], input[type=password], input[type=datetime-local] {
+  .field > label, .lab { display: block; font-size: 17px; color: var(--muted); margin-bottom: 8px; }
+  input[type=text], input[type=password], input[type=datetime-local], input[type=date], input[type=time], textarea {
     width: 100%; font: inherit; color: var(--ink); background: var(--card); border: 1.5px solid var(--muted); border-radius: 16px; padding: 14px; min-height: 58px; }
-  .btns { display: flex; gap: 10px; margin-top: 8px; }
-  .btn { flex: 1; border-radius: 18px; min-height: 60px; font-weight: 600; font-size: 20px; background: var(--primary); color: var(--on-primary); }
+  textarea { min-height: 110px; resize: vertical; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btns { display: flex; gap: 10px; position: sticky; bottom: 0; background: var(--bg); padding: 10px 0 calc(env(safe-area-inset-bottom) + 18px); }
+  .btn { flex: 1; border-radius: 999px; min-height: 60px; font-weight: 600; font-size: 20px; background: var(--primary); color: var(--on-primary); }
   .btn.ghost { background: none; color: var(--ink); border: 1.5px solid var(--muted); }
   .btn.danger { background: none; color: var(--danger); border: 1.5px solid var(--danger); flex: none; padding: 0 20px; }
 
   .login { padding-top: 26px; }
   .login p { margin: 0 0 22px; font-size: 20px; }
   .err { color: var(--danger); font-size: 18px; min-height: 26px; margin-top: 10px; font-weight: 600; }
-  .offline { background: var(--card); color: var(--ink); border: 1.5px solid var(--brass); border-radius: 18px; padding: 12px 16px; font-size: 17px; margin-top: 14px; }
+  .offline { background: var(--card); border: 1.5px solid var(--brass); border-radius: 24px; padding: 12px 16px; font-size: 17px; margin-top: 14px; }
 </style>
 </head>
 <body>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="i-heart" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.3S3.5 15 3.5 9.2A4.5 4.5 0 0 1 12 7.1a4.5 4.5 0 0 1 8.5 2.1c0 5.800-8.500 11.100-8.500 11.100Z"/></g>
+    <g id="i-drop" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2S5.5 10.4 5.5 15a6.5 6.5 0 0 0 13 0c0-4.600-6.500-11.800-6.500-11.800Z"/><path d="M9 15.2a3 3 0 0 0 2.4 2.9"/></g>
+    <g id="i-poop" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.2 20.5h13.6a3.1 3.1 0 0 0-1-6 2.9 2.9 0 0 0-2-4.700c0-2.800-2-4.800-4.600-5.600.7 2-.3 3.400-1.700 4.300a2.900 2.900 0 0 0-2.900 4.400c-.4.400-.9.900-1.200 1.600a3.100 3.100 0 0 0-.2 6Z"/><path d="M8.2 14.5h7.6M9.7 9.8h5"/></g>
+    <g id="i-both" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 4S2.8 8.2 2.8 11a3.7 3.7 0 0 0 7.4 0C10.2 8.2 6.5 4 6.5 4Z"/><path d="M11 20.5h9.2a2.3 2.3 0 0 0-.7-4.400 2.200 2.200 0 0 0-1.500-3.600c0-2-1.400-3.500-3.300-4.100.5 1.500-.2 2.500-1.300 3.200a2.200 2.200 0 0 0-2.100 3.300 2.300 2.300 0 0 0-.3 5.600Z"/></g>
+    <g id="i-page" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4.5"/></g>
+    <g id="i-leaf" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5C4.5 10 10 4.5 19.5 4.5c0 9.500-5.500 15-15 15Z"/><path d="M4.5 19.5 14 10"/></g>
+    <g id="i-moon" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 14.2A8 8 0 0 1 9.8 4.5a8 8 0 1 0 9.7 9.7Z"/></g>
+    <g id="i-rain" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14.5a4 4 0 0 1 .6-7.950 5 5 0 0 1 9.600 1.300A3.400 3.400 0 0 1 17 14.500Z"/><path d="M8.5 17.5l-1 2.500M12.500 17.500l-1 2.500M16.500 17.500l-1 2.500"/></g>
+    <g id="i-waves" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 13c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 17.500c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></g>
+    <g id="i-stream" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4c0 4 5 4 5 8s-5 4-5 8M12.500 4c0 4 5 4 5 8s-5 4-5 8"/></g>
+    <g id="i-noise" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4.500v15M16 7v10M20 10v4"/></g>
+    <g id="i-soft" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 11v2M8 9v6M12 7v10M16 9v6M20 11v2"/></g>
+  </defs>
+</svg>
+
 <div class="top">
   <svg class="frond" viewBox="-130 -130 260 260" aria-hidden="true" fill="currentColor">
     <g transform="translate(110 -110)">
-      <path d="M0 0C30-13 110-16 190 0 110 16 30 13 0 0Z" transform="rotate(92)"/>
-      <path d="M0 0C30-13 120-16 205 0 120 16 30 13 0 0Z" transform="rotate(108)"/>
-      <path d="M0 0C30-13 125-16 215 0 125 16 30 13 0 0Z" transform="rotate(124)"/>
-      <path d="M0 0C30-13 125-16 220 0 125 16 30 13 0 0Z" transform="rotate(140)"/>
-      <path d="M0 0C30-13 125-16 215 0 125 16 30 13 0 0Z" transform="rotate(156)"/>
-      <path d="M0 0C30-13 120-16 205 0 120 16 30 13 0 0Z" transform="rotate(172)"/>
-      <path d="M0 0C30-13 110-16 190 0 110 16 30 13 0 0Z" transform="rotate(188)"/>
+      <path d="M0 0C30-10 110-12 190 0 110 12 30 10 0 0Z" transform="rotate(96)"/>
+      <path d="M0 0C30-10 120-12 210 0 120 12 30 10 0 0Z" transform="rotate(116)"/>
+      <path d="M0 0C30-10 125-12 220 0 125 12 30 10 0 0Z" transform="rotate(136)"/>
+      <path d="M0 0C30-10 120-12 210 0 120 12 30 10 0 0Z" transform="rotate(156)"/>
+      <path d="M0 0C30-10 110-12 190 0 110 12 30 10 0 0Z" transform="rotate(176)"/>
     </g>
   </svg>
   <div class="wrap">
-    <h1 class="name display">Isabella</h1>
-    <div class="rule"></div>
-    <div class="status" id="statusBox" hidden>
-      <div class="stat"><div class="label">Last fed</div><div class="ago" id="feedAgo">–</div><div class="sub" id="feedSub"></div></div>
-      <div class="stat"><div class="label">Last diaper</div><div class="ago" id="diaperAgo">–</div><div class="sub" id="diaperSub"></div></div>
-    </div>
+    <div><h1 class="name display">Isabella</h1><div class="rule"></div></div>
+    <button class="moon" id="moon" type="button" aria-pressed="false" aria-label="Night mode" hidden><svg viewBox="0 0 24 24"><use href="#i-moon"/></svg></button>
   </div>
 </div>
 
 <section id="login" class="login wrap" hidden>
-  <p>Sign in once. This phone will remember you.</p>
+  <p>Welcome. Sign in once and this phone remembers you.</p>
   <form id="loginForm">
     <div class="field"><label for="name">Your name</label><input id="name" type="text" autocomplete="given-name" maxlength="40" required></div>
     <div class="field"><label for="pass">Family passcode</label><input id="pass" type="password" autocomplete="current-password" required></div>
@@ -166,89 +215,120 @@
 <main id="app" class="wrap" hidden>
   <div class="offline" id="offline" role="status" hidden>No connection right now. Keep tapping. Everything is saved on this phone and will send by itself.</div>
 
-  <div class="actions">
-    <button class="act feed" data-log="feed">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.300S3.500 15 3.500 9.200A4.500 4.500 0 0 1 12 7.100a4.500 4.500 0 0 1 8.500 2.100c0 5.800-8.500 11.100-8.500 11.100Z"/></svg>
-      <span class="lbl">Start feeding</span>
-    </button>
-    <button class="act pee" data-log="pee">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.200S5.500 10.400 5.500 15a6.500 6.500 0 0 0 13 0c0-4.600-6.500-11.800-6.500-11.800Z"/><path d="M9 15.200a3 3 0 0 0 2.400 2.900"/></svg>
-      <span class="lbl">Pee</span>
-    </button>
-    <button class="act poop" data-log="poop">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.200 20.500h13.600a3.100 3.100 0 0 0-1-6 2.900 2.900 0 0 0-2-4.700c0-2.800-2-4.800-4.600-5.600.7 2-.3 3.400-1.700 4.300a2.900 2.900 0 0 0-2.900 4.400c-.4.400-.9.900-1.200 1.600a3.100 3.100 0 0 0-.2 6Z"/><path d="M8.200 14.500h7.600M9.700 9.800h5"/></svg>
-      <span class="lbl">Poop</span>
-    </button>
-    <button class="act both" data-log="both">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.500 4S2.800 8.200 2.800 11a3.700 3.700 0 0 0 7.400 0C10.200 8.200 6.500 4 6.500 4Z"/><path d="M11 20.500h9.200a2.300 2.300 0 0 0-.7-4.400 2.200 2.200 0 0 0-1.500-3.600c0-2-1.400-3.500-3.300-4.100.5 1.500-.2 2.500-1.300 3.200a2.200 2.200 0 0 0-2.100 3.300 2.300 2.300 0 0 0-.3 5.600Z"/></svg>
-      <span class="lbl">Both</span>
-    </button>
-  </div>
+  <!-- TODAY -->
+  <section class="tab" id="tabToday">
+    <div id="idle">
+      <div class="status">
+        <div class="big" id="fedBig">No feeds yet</div>
+        <div class="next" id="fedNext"></div>
+        <div class="slim" id="diaperLine"></div>
+      </div>
+    </div>
 
-  <div class="detail" id="feedDetail" hidden>
-    <div class="timer" id="feedTimer">0:00</div>
-    <div class="q" id="feedQ">Feeding now. Which side?</div>
-    <div class="chips" id="quickMethods"></div>
-    <button class="pastbtn" type="button" id="feedCancel">Cancel this feeding</button>
-  </div>
+    <div class="feeding" id="feedingBox" hidden>
+      <div class="clock" id="feedClock">0:00</div>
+      <div class="since" id="feedSince"></div>
+      <div class="sides">
+        <button class="side" type="button" data-side="left"><span>Left</span><small id="leftTime">0:00</small></button>
+        <button class="side" type="button" data-side="right"><span>Right</span><small id="rightTime">0:00</small></button>
+      </div>
+      <div class="sidehint" id="sideHint"></div>
+      <button class="finish" type="button" id="finishBtn">Finish feeding</button>
+      <button class="quiet" type="button" id="feedCancel">Started by mistake?</button>
+    </div>
 
-  <div class="today" id="today" aria-label="Today so far"></div>
+    <div class="actions">
+      <button class="act feed" data-log="feed" id="startBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg><span class="lbl">Start feeding</span></button>
+      <button class="act" data-log="pee"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-drop"/></svg><span class="lbl">Pee</span></button>
+      <button class="act" data-log="poop"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-poop"/></svg><span class="lbl">Poop</span></button>
+      <button class="act" data-log="both"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-both"/></svg><span class="lbl">Both</span></button>
+    </div>
 
-  <h2>Appointments</h2>
-  <div class="list" id="apptList"></div>
-  <button class="addappt" type="button" id="apptAdd">Add an appointment</button>
-  <button class="pastbtn" type="button" id="apptPastBtn" hidden></button>
-  <div class="list" id="apptPast" hidden></div>
+    <div class="counts" id="counts"></div>
+    <button class="strip" type="button" id="apptStrip" hidden></button>
+    <div class="strip" id="soundStrip" hidden><span id="soundStripText"></span><button class="stop" type="button" id="soundStripStop">Stop</button></div>
+  </section>
 
-  <h2>Sleep sounds</h2>
-  <div class="detail" style="margin-top:0">
-    <div class="chips" id="soundChips"></div>
-    <div class="q" style="margin:16px 0 10px">Stop by itself after</div>
-    <div class="chips" id="soundStop"></div>
-    <p class="hint" style="margin:14px 0 0">Keep the volume low and the phone away from where she sleeps.</p>
-  </div>
-  <audio id="player" loop preload="auto"></audio>
+  <!-- JOURNAL -->
+  <section class="tab" id="tabJournal" hidden>
+    <div id="lists"></div>
+  </section>
 
-  <div id="lists"></div>
-  <p class="hint" id="hint" hidden>Tap any line to fix the time or remove it.</p>
+  <!-- MORE -->
+  <section class="tab" id="tabMore" hidden>
+    <h2>Appointments</h2>
+    <div class="list" id="apptList"></div>
+    <button class="wide" type="button" id="apptAdd">Add an appointment</button>
+    <button class="quiet" type="button" id="apptPastBtn" hidden></button>
+    <div class="list" id="apptPast" hidden></div>
 
-  <footer>
-    <a href="/api/export.csv">Download feeds and diapers</a>
-    <a href="/api/appointments.csv">Download appointments</a>
-    <button id="signout">Sign out</button>
-  </footer>
+    <h2 class="sub">Sleep sounds</h2>
+    <div class="tiles" id="soundTiles"></div>
+    <div class="label">Turn off after</div>
+    <div class="seg" id="soundStop"></div>
+    <p class="note">Keep the volume low and the phone away from where she sleeps.</p>
+    <audio id="player" loop preload="none"></audio>
+
+    <div class="account">
+      <button class="quiet" type="button" id="accountBtn" aria-expanded="false">Export and account</button>
+      <div id="accountBox" hidden>
+        <a href="/api/export.csv">Download feeds and diapers (spreadsheet)</a>
+        <a href="/api/appointments.csv">Download appointments (spreadsheet)</a>
+        <button class="link" type="button" id="signout">Sign out of this phone</button>
+        <p class="credits">Sounds: Rain by alex36917 (CC BY), Waves by Luftrum (CC BY), Stream by gluckose (CC0), White noise by Jorge Stolfi (CC BY-SA), Pink noise by Omegatron (CC BY-SA), via the Blanket project. Trimmed, looped and levelled for this app.</p>
+      </div>
+    </div>
+  </section>
 </main>
+
+<nav class="tabs" id="tabs" hidden>
+  <div class="in">
+    <button type="button" data-tab="Today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg>Today</button>
+    <button type="button" data-tab="Journal"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-page"/></svg>Journal</button>
+    <button type="button" data-tab="More"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-leaf"/></svg>More</button>
+  </div>
+</nav>
 
 <div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo">Undo</button></div>
 
+<!-- edit a feed or diaper -->
 <div class="scrim" id="scrim" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <h3 id="sheetTitle">Edit</h3>
     <div class="field">
       <label for="editAt">When</label>
       <input id="editAt" type="datetime-local">
-      <div class="chips" style="margin-top:10px">
+      <div class="seg" style="margin-top:10px">
         <button class="chip" type="button" data-shift="-5">5 min earlier</button>
         <button class="chip" type="button" data-shift="-15">15 min earlier</button>
         <button class="chip" type="button" data-shift="-30">30 min earlier</button>
       </div>
     </div>
     <div class="field" id="editDiaper">
-      <label>What was in the diaper</label>
-      <div class="chips">
+      <div class="lab">What was in the diaper</div>
+      <div class="seg two">
         <button class="chip" type="button" data-diaper="pee">Pee</button>
         <button class="chip" type="button" data-diaper="poop">Poop</button>
       </div>
     </div>
-    <div class="field" id="editFeed">
-      <label>Which side</label>
-      <div class="chips" id="editMethods"></div>
-      <div id="editDur">
-        <label style="display:block;font-size:17px;color:var(--muted);margin:16px 0 8px">How long</label>
-        <div class="stepper"><button type="button" data-dur="-1" aria-label="One minute less">−</button><span class="val" id="editDurVal"></span><button type="button" data-dur="1" aria-label="One minute more">+</button></div>
+    <div id="editFeed">
+      <div class="field">
+        <div class="lab">Left side</div>
+        <div class="stepper"><button type="button" data-min="left:-1" aria-label="One minute less on the left">−</button><span class="val" id="editLeft"></span><button type="button" data-min="left:1" aria-label="One minute more on the left">+</button></div>
+      </div>
+      <div class="field">
+        <div class="lab">Right side</div>
+        <div class="stepper"><button type="button" data-min="right:-1" aria-label="One minute less on the right">−</button><span class="val" id="editRight"></span><button type="button" data-min="right:1" aria-label="One minute more on the right">+</button></div>
+      </div>
+      <div class="field">
+        <div class="lab">Finished on</div>
+        <div class="seg two">
+          <button class="chip" type="button" data-last="left">Left</button>
+          <button class="chip" type="button" data-last="right">Right</button>
+        </div>
       </div>
     </div>
-    <div class="field"><label for="editNote">Note (optional)</label><input id="editNote" type="text" maxlength="500"></div>
+    <div class="field"><label for="editNote">Note</label><input id="editNote" type="text" maxlength="500"></div>
     <div class="btns">
       <button class="btn danger" type="button" id="editDelete">Remove</button>
       <button class="btn ghost" type="button" id="editCancel">Cancel</button>
@@ -257,22 +337,26 @@
   </div>
 </div>
 
+<!-- add or change an appointment -->
 <div class="scrim" id="apptScrim" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="apptTitle">
     <h3 id="apptTitle">Appointment</h3>
     <div class="field">
       <label for="apptWhat">What is it</label>
-      <input id="apptWhat" type="text" maxlength="80" placeholder="Pediatrician">
-      <div class="chips" style="margin-top:10px" id="apptChips">
+      <input id="apptWhat" type="text" maxlength="80">
+      <div class="seg two" style="margin-top:10px" id="apptChips">
         <button class="chip" type="button">Pediatrician</button>
         <button class="chip" type="button">Weight check</button>
         <button class="chip" type="button">Vaccines</button>
-        <button class="chip" type="button">Lactation consultant</button>
+        <button class="chip" type="button">Lactation</button>
       </div>
     </div>
-    <div class="field"><label for="apptAt">When</label><input id="apptAt" type="datetime-local"></div>
-    <div class="field"><label for="apptWhere">Where (optional)</label><input id="apptWhere" type="text" maxlength="120"></div>
-    <div class="field"><label for="apptNote">Notes (optional): questions to ask, what the doctor said</label><textarea id="apptNote" maxlength="2000"></textarea></div>
+    <div class="field two-col">
+      <div><label class="lab" for="apptDate">Date</label><input id="apptDate" type="date"></div>
+      <div><label class="lab" for="apptTime">Time</label><input id="apptTime" type="time"></div>
+    </div>
+    <div class="field"><label for="apptWhere">Where</label><input id="apptWhere" type="text" maxlength="120"></div>
+    <div class="field"><label for="apptNote">Notes</label><textarea id="apptNote" maxlength="2000"></textarea></div>
     <div class="err" id="apptErr" role="alert"></div>
     <div class="btns">
       <button class="btn danger" type="button" id="apptDelete">Remove</button>
@@ -286,21 +370,21 @@
 (() => {
   'use strict';
   const $ = (id) => document.getElementById(id);
+  const el = (tag, props, ...kids) => { const n = Object.assign(document.createElement(tag), props || {}); n.append(...kids); return n; };
+  const SVG = 'http://www.w3.org/2000/svg';
+  const icon = (name, cls) => { const s = document.createElementNS(SVG, 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('aria-hidden', 'true'); if (cls) s.setAttribute('class', cls); const u = document.createElementNS(SVG, 'use'); u.setAttribute('href', '#i-' + name); s.append(u); return s; };
   const ls = {
     get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
   };
-  const METHODS = [['breast_left', 'Left side'], ['breast_right', 'Right side'], ['breast_both', 'Both sides']];
-  const METHOD_LABEL = Object.fromEntries(METHODS);
 
   let who = ls.get('who', '');
   let server = [];                  // events as the server last reported them
   let queue = ls.get('queue', []);  // changes not yet confirmed by the server
-  let undoTimer = null, editing = null, flushing = false;
+  let undoTimer = null, undoFn = null, editing = null, flushing = false;
 
   // ----- data -----
   const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, '0')).join(''));
-
   function events() {
     const map = new Map(server.map((e) => [e.id, e]));
     for (const q of queue) {
@@ -310,13 +394,13 @@
     return [...map.values()].sort((a, b) => (a.at < b.at ? 1 : -1));
   }
   const find = (id) => events().find((e) => e.id === id);
+  const plain = (e) => { const c = { ...e }; delete c._pending; return c; };
 
   async function api(path, opts = {}) {
     const res = await fetch(path, { credentials: 'same-origin', headers: opts.body ? { 'Content-Type': 'application/json' } : {}, ...opts });
     if (res.status === 401 && path !== '/api/login') { showLogin(); throw new Error('auth'); }
     return res;
   }
-
   function enqueue(item) {
     // A newer change to the same event replaces an older unsent one.
     const id = item.op === 'del' ? item.id : item.ev.id;
@@ -326,7 +410,6 @@
     render();
     flush();
   }
-
   async function flush() {
     if (flushing) return;
     flushing = true;
@@ -354,10 +437,9 @@
       }
     } finally { flushing = false; }
   }
-
   async function refresh() {
     try {
-      const res = await api('/api/events?days=3');
+      const res = await api('/api/events?days=7');
       if (!res.ok) return;
       server = (await res.json()).events;
       setOffline(false);
@@ -366,7 +448,6 @@
       flush();
     } catch (e) { if (e.message !== 'auth') setOffline(true); }
   }
-
   function setOffline(v) { $('offline').hidden = !v; }
 
   // ----- formatting -----
@@ -375,221 +456,170 @@
     if (mins < 1) return 'just now';
     if (mins < 60) return mins + 'm ago';
     const h = Math.floor(mins / 60), m = mins % 60;
-    if (h < 24) return h + 'h ' + m + 'm ago';
+    if (h < 24) return h + 'h ' + String(m).padStart(2, '0') + 'm ago';
     return Math.floor(h / 24) + 'd ' + (h % 24) + 'h ago';
   }
   const clock = (iso) => new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   const dayKey = (d) => { const x = new Date(d); return x.getFullYear() + '-' + (x.getMonth() + 1) + '-' + x.getDate(); };
-  function describe(e) {
-    if (e.kind === 'diaper') return e.pee && e.poop ? 'Pee + poop' : e.poop ? 'Poop' : 'Pee';
-    let s = e.in_progress ? 'Feeding now' : 'Fed';
-    if (!e.in_progress && e.duration_min) s += ' ' + e.duration_min + ' min';
-    if (e.method) s += ', ' + METHOD_LABEL[e.method].toLowerCase();
-    return s;
+  const mmss = (ms) => { const s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s % 60).padStart(2, '0'); };
+  const diaperWord = (e) => (e.pee && e.poop ? 'Pee + poop' : e.poop ? 'Poop' : 'Pee');
+  function feedDetail(e) {
+    const l = e.left_min || 0, r = e.right_min || 0;
+    if (l && r) return 'Left ' + l + ' min, right ' + r + ' min';
+    if (l || e.method === 'breast_left') return 'Left side';
+    if (r || e.method === 'breast_right') return 'Right side';
+    if (e.method === 'breast_both') return 'Both sides';
+    return '';
   }
-  const color = (e) => e.kind === 'feed' ? 'var(--feed-dot)' : e.pee && e.poop ? 'var(--both-dot)' : e.poop ? 'var(--poop-dot)' : 'var(--pee-dot)';
+  const describe = (e) => (e.kind === 'diaper' ? diaperWord(e) : e.in_progress ? 'Feeding now' : 'Fed' + (e.duration_min ? ' ' + e.duration_min + ' min' : ''));
+  const lastSide = (e) => e.last_side || (e.method === 'breast_left' ? 'left' : e.method === 'breast_right' ? 'right' : null);
+  const other = (s) => (s === 'left' ? 'right' : 'left');
+  const tally = (list) => { const f = list.filter((e) => e.kind === 'feed').length, w = list.filter((e) => e.pee).length, d = list.filter((e) => e.poop).length; return f + (f === 1 ? ' feed, ' : ' feeds, ') + w + ' wet, ' + d + ' dirty'; };
+
+  // ----- feeding timer -----
+  const feeding = () => events().find((e) => e.kind === 'feed' && e.in_progress);
+  const sideMs = (e, side) => (e[side + '_ms'] || 0) + (e.side === side && e.side_since ? Math.max(0, Date.now() - new Date(e.side_since)) : 0);
+  // Which side to start on: the opposite of the one the last finished feed ended on.
+  function nextSide() { const last = events().find((e) => e.kind === 'feed' && !e.in_progress); const s = last && lastSide(last); return s ? other(s) : null; }
+  const buzz = () => { if (navigator.vibrate) navigator.vibrate(30); };
+
+  function startFeed() {
+    const ev = { id: uuid(), at: new Date().toISOString(), by: who, note: '', kind: 'feed', in_progress: true, side: null, side_since: null, left_ms: 0, right_ms: 0, last_side: null };
+    enqueue({ op: 'put', ev });
+    toast('Feeding started', () => enqueue({ op: 'del', id: ev.id }));
+  }
+  function bank(ev) { // move the running side's time into its total
+    if (ev.side && ev.side_since) ev[ev.side + '_ms'] = sideMs(ev, ev.side);
+    ev.side_since = null;
+  }
+  function tapSide(side) {
+    const cur = feeding(); if (!cur) return;
+    const ev = plain(cur), was = ev.side;
+    bank(ev);
+    if (was === side) ev.side = null;                                     // tap the active side again to pause
+    else { ev.side = side; ev.side_since = new Date().toISOString(); ev.last_side = side; }
+    enqueue({ op: 'put', ev });
+  }
+  function finishFeed() {
+    const cur = feeding(); if (!cur) return;
+    const before = plain(cur), ev = plain(cur);
+    bank(ev);
+    ev.side = null; ev.in_progress = false;
+    ev.duration_min = Math.max(1, Math.round((Date.now() - new Date(ev.at)) / 60000));
+    ev.left_min = Math.round((ev.left_ms || 0) / 60000); ev.right_min = Math.round((ev.right_ms || 0) / 60000);
+    if (ev.left_ms > 0 && !ev.left_min) ev.left_min = 1;
+    if (ev.right_ms > 0 && !ev.right_min) ev.right_min = 1;
+    ev.method = ev.left_min && ev.right_min ? 'breast_both' : ev.left_min ? 'breast_left' : ev.right_min ? 'breast_right' : null;
+    enqueue({ op: 'put', ev });
+    toast('Saved: fed ' + ev.duration_min + ' min', () => enqueue({ op: 'put', ev: before }));
+  }
+  $('finishBtn').onclick = () => { buzz(); finishFeed(); };
+  $('feedCancel').onclick = () => { const cur = feeding(); if (cur) { const keep = plain(cur); enqueue({ op: 'del', id: cur.id }); toast('Feeding removed', () => enqueue({ op: 'put', ev: keep })); } };
+  for (const b of document.querySelectorAll('[data-side]')) b.onclick = () => { buzz(); tapSide(b.dataset.side); };
+
+  function paintFeeding() {
+    const cur = feeding();
+    $('feedingBox').hidden = !cur; $('idle').hidden = !!cur; $('startBtn').hidden = !!cur;
+    if (!cur) return;
+    $('feedClock').textContent = mmss(Date.now() - new Date(cur.at));
+    $('feedSince').textContent = 'started ' + clock(cur.at) + (cur.by && cur.by !== who ? ' by ' + cur.by : '');
+    $('leftTime').textContent = mmss(sideMs(cur, 'left')); $('rightTime').textContent = mmss(sideMs(cur, 'right'));
+    const untouched = !cur.side && !cur.left_ms && !cur.right_ms, hintSide = untouched ? nextSide() : null;
+    for (const b of document.querySelectorAll('[data-side]')) {
+      b.classList.toggle('on', cur.side === b.dataset.side);
+      b.classList.toggle('suggest', hintSide === b.dataset.side);
+      b.setAttribute('aria-pressed', cur.side === b.dataset.side);
+    }
+    $('sideHint').textContent = Date.now() - new Date(cur.at) > 90 * 60000 ? 'Timer left running? Finish it, then fix the minutes in the Journal.'
+      : hintSide ? 'Tap the side she is on. Last feed ended on the ' + other(hintSide) + '.'
+      : untouched ? 'Tap the side she is on.'
+      : cur.side ? 'Tap the other side when she switches.' : 'Paused. Tap a side to carry on.';
+  }
 
   // ----- render -----
   function render() {
     const all = events();
-    const lastFeed = all.find((e) => e.kind === 'feed');
+    const lastFeed = all.find((e) => e.kind === 'feed' && !e.in_progress);
     const lastDiaper = all.find((e) => e.kind === 'diaper');
-    $('feedAgo').textContent = lastFeed ? (lastFeed.in_progress ? 'feeding now' : ago(lastFeed.at)) : '–';
-    $('feedSub').textContent = lastFeed ? (lastFeed.in_progress ? 'started ' : 'started at ') + clock(lastFeed.at) + (lastFeed.method ? ', ' + METHOD_LABEL[lastFeed.method].toLowerCase() : '') : 'Nothing yet';
-    paintFeed(true);
-    $('diaperAgo').textContent = lastDiaper ? ago(lastDiaper.at) : '–';
-    $('diaperSub').textContent = lastDiaper ? 'at ' + clock(lastDiaper.at) + ', ' + describe(lastDiaper).toLowerCase() : 'Nothing yet';
+    $('fedBig').textContent = lastFeed ? 'Fed ' + ago(lastFeed.at) : 'No feeds yet';
+    const nx = $('fedNext'); nx.textContent = '';
+    const ns = nextSide();
+    if (ns) nx.append('Start on the ', el('b', { textContent: ns }), ' next');
+    else if (lastFeed) nx.textContent = 'at ' + clock(lastFeed.at);
+    $('diaperLine').textContent = lastDiaper ? 'Diaper ' + ago(lastDiaper.at) + ', ' + diaperWord(lastDiaper).toLowerCase() : 'No diapers yet';
+    paintFeeding();
 
-    const today = dayKey(Date.now());
-    const t = all.filter((e) => dayKey(e.at) === today);
-    const today$ = $('today');
-    today$.textContent = '';
-    for (const [label, n] of [['feeds today', t.filter((e) => e.kind === 'feed').length], ['wet diapers', t.filter((e) => e.pee).length], ['dirty diapers', t.filter((e) => e.poop).length]]) {
-      const tile = document.createElement('div'); tile.className = 'tile';
-      tile.append(Object.assign(document.createElement('b'), { textContent: n }), Object.assign(document.createElement('span'), { textContent: label }));
-      today$.append(tile);
-    }
-    $('hint').hidden = !all.length;
+    const today = dayKey(Date.now()), yesterday = dayKey(Date.now() - 864e5);
+    $('counts').textContent = 'Today: ' + tally(all.filter((e) => dayKey(e.at) === today));
 
-    const lists = $('lists');
-    lists.textContent = '';
+    const lists = $('lists'); lists.textContent = '';
     const groups = new Map();
     for (const e of all) { const k = dayKey(e.at); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(e); }
-    const yesterday = dayKey(Date.now() - 864e5);
-    if (!all.length) {
-      const d = document.createElement('div'); d.className = 'list';
-      d.append(Object.assign(document.createElement('div'), { className: 'empty', textContent: 'Nothing yet. Tap a big button above when she feeds or needs a change.' }));
-      lists.append(d);
-    }
+    if (!all.length) lists.append(el('h2', { textContent: 'Journal' }), el('div', { className: 'list' }, el('div', { className: 'empty', textContent: 'Nothing yet. Feeds and diapers you log on Today show up here.' })));
     for (const [k, items] of groups) {
-      const h = document.createElement('h2');
-      h.textContent = k === today ? 'Today' : k === yesterday ? 'Yesterday' : new Date(items[0].at).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
-      const list = document.createElement('div'); list.className = 'list';
+      const title = k === today ? 'Today' : k === yesterday ? 'Yesterday' : new Date(items[0].at).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+      const list = el('div', { className: 'list' });
       for (const e of items) {
-        const row = document.createElement('button');
-        row.className = 'row' + (e._pending ? ' pending' : ''); row.type = 'button'; row.dataset.id = e.id;
-        const dot = document.createElement('span'); dot.className = 'dot'; dot.style.background = color(e);
-        const tm = Object.assign(document.createElement('span'), { className: 't', textContent: clock(e.at) });
-        const what = Object.assign(document.createElement('span'), { className: 'what', textContent: describe(e) + (e.note ? ' (' + e.note + ')' : '') });
-        const by = Object.assign(document.createElement('span'), { className: 'by', textContent: e.by || '' });
-        row.append(dot, tm, what, by); list.append(row);
+        const row = el('button', { className: 'row' + (e._pending ? ' pending' : ''), type: 'button' }); row.dataset.id = e.id;
+        const what = el('span', { className: 'what', textContent: describe(e) });
+        const detail = [e.kind === 'feed' ? feedDetail(e) : '', e.note].filter(Boolean).join('. ');
+        if (detail) what.append(el('small', { textContent: detail }));
+        row.append(icon(e.kind === 'feed' ? 'heart' : e.pee && e.poop ? 'both' : e.poop ? 'poop' : 'drop', 'ico' + (e.poop ? ' poop' : '')),
+          el('span', { className: 't', textContent: clock(e.at) }), what);
+        if (e.by && e.by !== who) row.append(el('span', { className: 'by', textContent: e.by }));
+        const ch = document.createElementNS(SVG, 'svg'); ch.setAttribute('viewBox', '0 0 10 16'); ch.setAttribute('class', 'chev'); ch.setAttribute('aria-hidden', 'true');
+        const p = document.createElementNS(SVG, 'path'); p.setAttribute('d', 'M2 2l6 6-6 6'); p.setAttribute('fill', 'none'); p.setAttribute('stroke', 'currentColor'); p.setAttribute('stroke-width', '1.8'); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round');
+        ch.append(p); row.append(ch); list.append(row);
       }
-      lists.append(h, list);
+      lists.append(el('h2', { textContent: title }), el('div', { className: 'daytotal', textContent: tally(items) }), list);
     }
+    paintStrips();
   }
 
-  // ----- method chips (shared by quick panel and edit sheet) -----
-  function drawMethods(container, ev, onChange) {
-    container.textContent = '';
-    for (const [key, label] of METHODS) {
-      const b = Object.assign(document.createElement('button'), { className: 'chip' + (ev.method === key ? ' on' : ''), type: 'button', textContent: label });
-      b.setAttribute('aria-pressed', ev.method === key);
-      b.onclick = () => { ev.method = ev.method === key ? null : key; onChange(); };
-      container.append(b);
-    }
-  }
-
-  // ----- logging -----
-  const feeding = () => events().find((e) => e.kind === 'feed' && e.in_progress);
-  const plain = (e) => { const c = { ...e }; delete c._pending; return c; };
-  function timerText(e) {
-    const s = Math.max(0, Math.floor((Date.now() - new Date(e.at)) / 1000)), hh = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
-    return (hh ? hh + ':' + String(m).padStart(2, '0') : m) + ':' + String(s % 60).padStart(2, '0');
-  }
-  const feedBtn = document.querySelector('[data-log="feed"]');
-
-  // The Fed button and the panel under it follow whether a feeding timer is running (on either phone).
-  function paintFeed(redrawChips) {
-    const cur = feeding();
-    $('feedDetail').hidden = !cur;
-    feedBtn.classList.toggle('running', !!cur);
-    if (!feedBtn.classList.contains('done')) feedBtn.querySelector('.lbl').textContent = cur ? 'Finish feeding' : 'Start feeding';
-    if (!cur) return;
-    $('feedTimer').textContent = timerText(cur);
-    $('feedQ').textContent = Date.now() - new Date(cur.at) > 90 * 60000
-      ? 'Still feeding? If the timer was left running, tap Finish feeding, then tap that line below to fix how long.'
-      : 'Feeding now. Which side?';
-    if (redrawChips) {
-      const copy = plain(cur);
-      drawMethods($('quickMethods'), copy, () => enqueue({ op: 'put', ev: copy }));
-    }
-  }
-
+  // ----- logging diapers, starting a feed -----
   function log(type) {
-    if (navigator.vibrate) navigator.vibrate(30);
-    if (type === 'feed') return feeding() ? finishFeed() : startFeed();
+    buzz();
+    if (type === 'feed') return startFeed();
     const ev = { id: uuid(), at: new Date().toISOString(), by: who, note: '', kind: 'diaper', pee: type !== 'poop', poop: type !== 'pee' };
     enqueue({ op: 'put', ev });
-    confirmTap(type);
-    toast('Saved: ' + describe(ev).toLowerCase() + ', ' + clock(ev.at), () => enqueue({ op: 'del', id: ev.id }));
-  }
-  function startFeed() {
-    const ev = { id: uuid(), at: new Date().toISOString(), by: who, note: '', kind: 'feed', method: null, in_progress: true, duration_min: null };
-    enqueue({ op: 'put', ev });
-    toast('Feeding timer started, ' + clock(ev.at), () => enqueue({ op: 'del', id: ev.id }));
-  }
-  function finishFeed() {
-    const cur = plain(feeding());
-    const done = { ...cur, in_progress: false, duration_min: Math.max(1, Math.round((Date.now() - new Date(cur.at)) / 60000)) };
-    enqueue({ op: 'put', ev: done });
-    confirmTap('feed');
-    toast('Saved: fed ' + done.duration_min + ' min', () => enqueue({ op: 'put', ev: { ...done, in_progress: true, duration_min: null } }));
-  }
-  $('feedCancel').onclick = () => { const cur = feeding(); if (cur) { enqueue({ op: 'del', id: cur.id }); toast('Feeding cancelled', () => enqueue({ op: 'put', ev: plain(cur) })); } };
-
-  function confirmTap(type) {
     const b = document.querySelector('[data-log="' + type + '"]'), lbl = b.querySelector('.lbl');
     if (!b.dataset.name) b.dataset.name = lbl.textContent;
     lbl.textContent = 'Saved ✓'; b.classList.add('done');
-    clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('done'); if (type === 'feed') paintFeed(false); else lbl.textContent = b.dataset.name; }, 1800);
+    clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('done'); lbl.textContent = b.dataset.name; }, 1500);
+    toast(diaperWord(ev) + ' logged', () => enqueue({ op: 'del', id: ev.id }));
   }
+  for (const b of document.querySelectorAll('[data-log]')) b.onclick = () => log(b.dataset.log);
 
-  let undoFn = null;
   function toast(msg, undo) {
-    undoFn = undo; $('toastMsg').textContent = msg; $('toast').hidden = false;
-    clearTimeout(undoTimer); undoTimer = setTimeout(() => { $('toast').hidden = true; }, 10000);
+    undoFn = undo; $('toastMsg').textContent = msg; $('toastUndo').hidden = !undo; $('toast').hidden = false;
+    clearTimeout(undoTimer); undoTimer = setTimeout(() => { $('toast').hidden = true; }, 6000);
   }
   $('toastUndo').onclick = () => { if (undoFn) undoFn(); undoFn = null; $('toast').hidden = true; };
 
-  for (const b of document.querySelectorAll('[data-log]')) b.onclick = () => log(b.dataset.log);
-  let feedTicks = 0;
-  setInterval(() => {
-    if (document.hidden || !feeding()) return;
-    paintFeed(false);
-    if (++feedTicks % 10 === 0 && !editing && !apptEditing) refresh(); // pick up a finish from the other phone quickly
-  }, 1000);
+  // ----- tabs -----
+  function showTab(name) {
+    for (const t of ['Today', 'Journal', 'More']) $('tab' + t).hidden = t !== name;
+    for (const b of document.querySelectorAll('[data-tab]')) { if (b.dataset.tab === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
+    window.scrollTo(0, 0);
+  }
+  for (const b of document.querySelectorAll('[data-tab]')) b.onclick = () => showTab(b.dataset.tab);
 
-  // ----- sleep sounds: made on the phone, nothing is downloaded -----
-  const SOUNDS = [['white', 'White noise'], ['rumble', 'Deep rumble'], ['womb', 'Heartbeat'], ['shush', 'Shushing']];
-  const STOPS = [[0, 'Keep playing'], [30, '30 min'], [60, '1 hour']];
-  const player = $('player'), soundUrls = {};
-  let playing = null, stopMin = 0, stopAt = 0;
-  function makeSound(kind) {
-    const RATE = 22050, n = RATE * 30, f = RATE, total = n + f, src = new Float32Array(total), out = new Float32Array(n);
-    let b = 0, lp = 0;
-    for (let i = 0; i < total; i++) {
-      const w = Math.random() * 2 - 1;
-      if (kind === 'rumble' || kind === 'womb') { b = (b + 0.02 * w) / 1.02; src[i] = b * 3.5; }
-      else if (kind === 'shush') { lp += 0.25 * (w - lp); src[i] = w - lp; }
-      else src[i] = w;
-    }
-    // Blend the extra second at the end into the start so the loop has no click at the seam.
-    for (let i = 0; i < n; i++) out[i] = i < f ? src[i] * Math.sqrt(i / f) + src[n + i] * Math.sqrt(1 - i / f) : src[i];
-    const thump = (x) => (x < 0 ? 0 : Math.sin(2 * Math.PI * 65 * x) * Math.exp(-x * 16) + 0.4 * Math.sin(2 * Math.PI * 130 * x) * Math.exp(-x * 22));
-    let peak = 0;
-    for (let i = 0; i < n; i++) {
-      const t = i / RATE;
-      if (kind === 'womb') { const x = t % (60 / 72); out[i] = out[i] * 0.6 + 0.9 * thump(x) + 0.6 * thump(x - 0.28); }
-      if (kind === 'shush') { const ph = (t % 1.5) / 1.5; out[i] *= 0.06 + (ph < 0.7 ? Math.pow(Math.sin((Math.PI * ph) / 0.7), 1.5) : 0); }
-      peak = Math.max(peak, Math.abs(out[i]));
-    }
-    const wav = new DataView(new ArrayBuffer(44 + n * 2)), str = (o, t) => { for (let i = 0; i < t.length; i++) wav.setUint8(o + i, t.charCodeAt(i)); };
-    str(0, 'RIFF'); wav.setUint32(4, 36 + n * 2, true); str(8, 'WAVEfmt '); wav.setUint32(16, 16, true); wav.setUint16(20, 1, true); wav.setUint16(22, 1, true);
-    wav.setUint32(24, RATE, true); wav.setUint32(28, RATE * 2, true); wav.setUint16(32, 2, true); wav.setUint16(34, 16, true); str(36, 'data'); wav.setUint32(40, n * 2, true);
-    for (let i = 0; i < n; i++) wav.setInt16(44 + i * 2, Math.round((out[i] / peak) * 0.85 * 32767), true);
-    return URL.createObjectURL(new Blob([wav], { type: 'audio/wav' }));
-  }
-  function stopSound() { player.pause(); playing = null; stopAt = 0; drawSounds(); }
-  function playSound(key) {
-    if (playing === key) return stopSound();
-    try {
-      player.src = soundUrls[key] || (soundUrls[key] = makeSound(key));
-      player.loop = true;
-      const p = player.play(); if (p && p.catch) p.catch(() => { playing = null; drawSounds(); });
-      playing = key; stopAt = stopMin ? Date.now() + stopMin * 60000 : 0;
-      if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: SOUNDS.find((x) => x[0] === key)[1], artist: 'Isabella' });
-    } catch { playing = null; }
-    drawSounds();
-  }
-  player.addEventListener('timeupdate', () => { if (stopAt && Date.now() >= stopAt) stopSound(); });
-  player.addEventListener('pause', () => { if (playing && !player.ended) { playing = null; drawSounds(); } });
-  function drawSounds() {
-    const c = $('soundChips'); c.textContent = '';
-    for (const [key, label] of SOUNDS) {
-      const on = playing === key;
-      const bt = Object.assign(document.createElement('button'), { className: 'chip' + (on ? ' on' : ''), type: 'button', textContent: on ? 'Stop ' + label.toLowerCase() : label });
-      bt.setAttribute('aria-pressed', on); bt.onclick = () => playSound(key); c.append(bt);
-    }
-    const st = $('soundStop'); st.textContent = '';
-    for (const [min, label] of STOPS) {
-      const bt = Object.assign(document.createElement('button'), { className: 'chip' + (stopMin === min ? ' on' : ''), type: 'button', textContent: label });
-      bt.setAttribute('aria-pressed', stopMin === min);
-      bt.onclick = () => { stopMin = min; stopAt = playing && min ? Date.now() + min * 60000 : 0; drawSounds(); };
-      st.append(bt);
-    }
-  }
-  drawSounds();
+  // ----- night mode -----
+  function setNight(on) { if (on) document.documentElement.dataset.theme = 'night'; else delete document.documentElement.dataset.theme; $('moon').setAttribute('aria-pressed', on); ls.set('night', on); }
+  $('moon').onclick = () => setNight(document.documentElement.dataset.theme !== 'night');
+  setNight(ls.get('night', false));
 
   // ----- edit sheet -----
   const toLocalInput = (iso) => { const d = new Date(iso); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
   function openEdit(id) {
     const ev = find(id); if (!ev) return;
-    editing = { ...ev }; delete editing._pending;
+    if (ev.kind === 'feed' && ev.in_progress) return showTab('Today'); // a running feed is managed on Today
+    editing = plain(ev);
     $('toast').hidden = true;
     drawEdit(); $('scrim').hidden = false;
   }
   function drawEdit() {
-    $('sheetTitle').textContent = editing.kind === 'feed' ? 'Change this feeding' : 'Change this diaper';
+    $('sheetTitle').textContent = editing.kind === 'feed' ? 'Change this feed' : 'Change this diaper';
     $('editAt').value = toLocalInput(editing.at);
     $('editAt').max = toLocalInput(new Date().toISOString());
     $('editNote').value = editing.note || '';
@@ -597,9 +627,8 @@
     $('editFeed').hidden = editing.kind !== 'feed';
     if (editing.kind === 'diaper') for (const c of document.querySelectorAll('[data-diaper]')) c.classList.toggle('on', !!editing[c.dataset.diaper]);
     else {
-      drawMethods($('editMethods'), editing, () => { editing.note = $('editNote').value; drawEdit(); });
-      $('editDur').hidden = !!editing.in_progress;
-      $('editDurVal').textContent = editing.duration_min ? editing.duration_min + ' min' : 'Not timed';
+      $('editLeft').textContent = (editing.left_min || 0) + ' min'; $('editRight').textContent = (editing.right_min || 0) + ' min';
+      for (const c of document.querySelectorAll('[data-last]')) c.classList.toggle('on', lastSide(editing) === c.dataset.last);
     }
   }
   $('editAt').onchange = () => { const d = new Date($('editAt').value); if (!isNaN(d)) editing.at = d.toISOString(); };
@@ -608,14 +637,20 @@
     $('editAt').value = toLocalInput(editing.at);
   };
   for (const c of document.querySelectorAll('[data-diaper]')) c.onclick = () => {
-    const k = c.dataset.diaper, other = k === 'pee' ? 'poop' : 'pee';
-    if (editing[k] && !editing[other]) return; // a diaper is always at least one of the two
+    const k = c.dataset.diaper, o = k === 'pee' ? 'poop' : 'pee';
+    if (editing[k] && !editing[o]) return; // a diaper is always at least one of the two
     editing[k] = !editing[k]; drawEdit();
   };
-  for (const c of document.querySelectorAll('[data-dur]')) c.onclick = () => {
-    editing.duration_min = Math.min(240, Math.max(0, (editing.duration_min || 0) + Number(c.dataset.dur))) || null;
+  for (const c of document.querySelectorAll('[data-min]')) c.onclick = () => {
+    const [side, d] = c.dataset.min.split(':'), key = side + '_min';
+    editing[key] = Math.min(180, Math.max(0, (editing[key] || 0) + Number(d)));
+    editing[side + '_ms'] = editing[key] * 60000;
+    const l = editing.left_min || 0, r = editing.right_min || 0;
+    if (l + r) editing.duration_min = l + r;
+    editing.method = l && r ? 'breast_both' : l ? 'breast_left' : r ? 'breast_right' : null;
     editing.note = $('editNote').value; drawEdit();
   };
+  for (const c of document.querySelectorAll('[data-last]')) c.onclick = () => { editing.last_side = c.dataset.last; editing.note = $('editNote').value; drawEdit(); };
   const closeEdit = () => { $('scrim').hidden = true; editing = null; };
   $('editCancel').onclick = closeEdit;
   $('scrim').onclick = (e) => { if (e.target === $('scrim')) closeEdit(); };
@@ -624,10 +659,7 @@
     if (new Date(editing.at) > new Date()) editing.at = new Date().toISOString();
     enqueue({ op: 'put', ev: editing }); closeEdit();
   };
-  $('editDelete').onclick = () => {
-    const id = editing.id;
-    closeEdit(); enqueue({ op: 'del', id });
-  };
+  $('editDelete').onclick = () => { const keep = editing; closeEdit(); enqueue({ op: 'del', id: keep.id }); toast('Removed', () => enqueue({ op: 'put', ev: keep })); };
   $('lists').onclick = (e) => { const row = e.target.closest('.row'); if (row) openEdit(row.dataset.id); };
 
   // ----- appointments -----
@@ -635,36 +667,37 @@
   async function loadAppts() {
     try { const res = await api('/api/appointments'); if (res.ok) { appointments = (await res.json()).appointments; renderAppts(); } } catch {}
   }
+  const dayWord = (d) => (dayKey(d) === dayKey(Date.now()) ? 'Today' : dayKey(d) === dayKey(Date.now() + 864e5) ? 'Tomorrow' : null);
   function apptRow(a) {
-    const row = document.createElement('button'); row.className = 'row appt'; row.type = 'button';
     const d = new Date(a.at);
-    const when = document.createElement('span'); when.className = 'when';
-    const isToday = dayKey(d) === dayKey(Date.now()), isTomorrow = dayKey(d) === dayKey(Date.now() + 864e5);
-    when.append(Object.assign(document.createElement('b'), { textContent: isToday ? 'Today' : isTomorrow ? 'Tomorrow' : d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) }), clock(a.at));
-    const what = document.createElement('span'); what.className = 'what'; what.textContent = a.title;
-    const extra = [a.where, a.note].filter(Boolean).join(' | ');
-    if (extra) what.append(Object.assign(document.createElement('small'), { textContent: extra.length > 90 ? extra.slice(0, 90) + '…' : extra }));
-    row.append(when, what); row.onclick = () => openAppt(a);
+    const what = el('span', { className: 'what', textContent: a.title });
+    if (a.where) what.append(el('small', { textContent: a.where }));
+    if (a.note) what.append(el('small', { textContent: a.note.length > 80 ? a.note.slice(0, 80) + '…' : a.note }));
+    const row = el('button', { className: 'row appt', type: 'button' },
+      el('span', { className: 'when' }, el('b', { textContent: dayWord(d) || d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) }), clock(a.at)), what);
+    row.onclick = () => openAppt(a);
     return row;
   }
+  const upcomingAppts = () => appointments.filter((a) => new Date(a.at) >= Date.now() - 2 * 3600e3).sort((a, b) => (a.at < b.at ? -1 : 1)); // stays "upcoming" until two hours after it starts
   function renderAppts() {
-    const cutoff = Date.now() - 2 * 3600e3; // stays under "upcoming" until two hours after it starts
-    const upcoming = appointments.filter((a) => new Date(a.at) >= cutoff).sort((a, b) => (a.at < b.at ? -1 : 1));
-    const past = appointments.filter((a) => new Date(a.at) < cutoff).sort((a, b) => (a.at < b.at ? 1 : -1));
+    const upcoming = upcomingAppts();
+    const past = appointments.filter((a) => !upcoming.includes(a)).sort((a, b) => (a.at < b.at ? 1 : -1));
     const list = $('apptList'); list.textContent = '';
-    if (!upcoming.length) list.append(Object.assign(document.createElement('div'), { className: 'empty', textContent: 'Nothing coming up.' }));
+    if (!upcoming.length) list.append(el('div', { className: 'empty', textContent: 'Nothing coming up.' }));
     for (const a of upcoming) list.append(apptRow(a));
     $('apptPastBtn').hidden = !past.length;
-    $('apptPastBtn').textContent = showPast ? 'Hide past appointments' : 'Show past appointments (' + past.length + ')';
+    $('apptPastBtn').textContent = showPast ? 'Hide past appointments' : 'Past appointments (' + past.length + ')';
     const pl = $('apptPast'); pl.hidden = !showPast || !past.length; pl.textContent = '';
     for (const a of past) pl.append(apptRow(a));
+    paintStrips();
   }
   $('apptPastBtn').onclick = () => { showPast = !showPast; renderAppts(); };
   function openAppt(a) {
-    apptEditing = a ? { ...a } : { id: uuid(), at: '', title: '', where: '', note: '', by: who, _new: true };
+    apptEditing = a ? { ...a } : { id: uuid(), at: '', title: '', where: '', note: '', by: who };
     $('apptTitle').textContent = a ? 'Change appointment' : 'New appointment';
     $('apptWhat').value = apptEditing.title; $('apptWhere').value = apptEditing.where || ''; $('apptNote').value = apptEditing.note || '';
-    $('apptAt').value = apptEditing.at ? toLocalInput(apptEditing.at) : '';
+    const loc = apptEditing.at ? toLocalInput(apptEditing.at) : '';
+    $('apptDate').value = loc.slice(0, 10); $('apptTime').value = loc.slice(11, 16);
     $('apptDelete').hidden = !a; $('apptErr').textContent = '';
     $('apptScrim').hidden = false;
   }
@@ -672,11 +705,12 @@
   $('apptAdd').onclick = () => openAppt(null);
   $('apptCancel').onclick = closeAppt;
   $('apptScrim').onclick = (e) => { if (e.target === $('apptScrim')) closeAppt(); };
-  for (const c of $('apptChips').children) c.onclick = () => { $('apptWhat').value = c.textContent; };
+  for (const c of $('apptChips').children) c.onclick = () => { $('apptWhat').value = c.textContent === 'Lactation' ? 'Lactation consultant' : c.textContent; };
   $('apptSave').onclick = async () => {
-    const d = new Date($('apptAt').value);
     if (!$('apptWhat').value.trim()) { $('apptErr').textContent = 'Say what the appointment is.'; return; }
-    if (isNaN(d)) { $('apptErr').textContent = 'Pick a date and time.'; return; }
+    if (!$('apptDate').value || !$('apptTime').value) { $('apptErr').textContent = 'Pick a date and a time.'; return; }
+    const d = new Date($('apptDate').value + 'T' + $('apptTime').value);
+    if (isNaN(d)) { $('apptErr').textContent = 'Pick a date and a time.'; return; }
     const body = { id: apptEditing.id, at: d.toISOString(), title: $('apptWhat').value, where: $('apptWhere').value, note: $('apptNote').value, by: apptEditing.by || who };
     try {
       const res = await api('/api/appointments', { method: 'POST', body: JSON.stringify(body) });
@@ -695,9 +729,54 @@
     } catch { $('apptErr').textContent = 'Could not remove it. Try again in a moment.'; }
   };
 
-  // ----- sign in / out -----
-  function showLogin() { $('app').hidden = true; $('statusBox').hidden = true; $('login').hidden = false; $('name').value = who; }
-  function showApp() { $('login').hidden = true; $('app').hidden = false; $('statusBox').hidden = false; render(); renderAppts(); }
+  // ----- sleep sounds: loops of real recordings served from this site -----
+  const SOUNDS = [['rain', 'Rain', 'rain'], ['waves', 'Ocean waves', 'waves'], ['stream', 'Stream', 'stream'], ['white-noise', 'White noise', 'noise'], ['pink-noise', 'Soft noise', 'soft']];
+  const STOPS = [[0, 'Off'], [30, '30 min'], [60, '1 hour']];
+  const player = $('player');
+  let playing = null, stopMin = 0, stopAt = 0;
+  const soundName = (key) => SOUNDS.find((x) => x[0] === key)[1];
+  function stopSound() { playing = null; stopAt = 0; player.pause(); drawSounds(); }
+  function playSound(key) {
+    if (playing === key) return stopSound();
+    playing = key; stopAt = stopMin ? Date.now() + stopMin * 60000 : 0;
+    player.src = '/sound-' + key + '.flac'; player.loop = true;
+    const p = player.play(); if (p && p.catch) p.catch(() => { if (playing === key) { playing = null; drawSounds(); toast('Could not play that sound', null); } });
+    if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: soundName(key), artist: 'Isabella' });
+    drawSounds();
+  }
+  player.addEventListener('timeupdate', () => { if (stopAt && Date.now() >= stopAt) stopSound(); });
+  player.addEventListener('pause', () => { if (playing) { playing = null; drawSounds(); } }); // paused from the lock screen or by a call
+  function drawSounds() {
+    const c = $('soundTiles'); c.textContent = '';
+    for (const [key, label, ic] of SOUNDS) {
+      const on = playing === key;
+      const bt = el('button', { className: 'tile' + (on ? ' on' : ''), type: 'button' }, icon(ic), label, ...(on ? [el('small', { textContent: 'Playing. Tap to stop' })] : []));
+      bt.setAttribute('aria-pressed', on); bt.setAttribute('aria-label', on ? 'Stop ' + label : 'Play ' + label); bt.onclick = () => playSound(key); c.append(bt);
+    }
+    const st = $('soundStop'); st.textContent = '';
+    for (const [min, label] of STOPS) {
+      const bt = el('button', { className: 'chip' + (stopMin === min ? ' on' : ''), type: 'button', textContent: label });
+      bt.setAttribute('aria-pressed', stopMin === min);
+      bt.onclick = () => { stopMin = min; stopAt = playing && min ? Date.now() + min * 60000 : 0; drawSounds(); };
+      st.append(bt);
+    }
+    paintStrips();
+  }
+  $('soundStripStop').onclick = stopSound;
+
+  // ----- strips on Today: only when there is something to say -----
+  function paintStrips() {
+    const next = upcomingAppts().find((a) => dayWord(a.at));
+    const s = $('apptStrip'); s.hidden = !next; s.textContent = '';
+    if (next) { s.append(el('span', {}, el('b', { textContent: next.title }), ' ' + dayWord(next.at).toLowerCase() + ' at ' + clock(next.at))); s.onclick = () => showTab('More'); }
+    $('soundStrip').hidden = !playing;
+    if (playing) $('soundStripText').textContent = 'Playing ' + soundName(playing).toLowerCase() + (stopAt ? ', off at ' + clock(new Date(stopAt).toISOString()) : '');
+  }
+
+  // ----- account -----
+  $('accountBtn').onclick = () => { const b = $('accountBox'); b.hidden = !b.hidden; $('accountBtn').setAttribute('aria-expanded', !b.hidden); };
+  function showLogin() { for (const id of ['app', 'tabs', 'moon']) $(id).hidden = true; $('login').hidden = false; $('name').value = who; }
+  function showApp() { $('login').hidden = true; for (const id of ['app', 'tabs', 'moon']) $(id).hidden = false; showTab('Today'); render(); renderAppts(); drawSounds(); }
   $('loginForm').onsubmit = async (e) => {
     e.preventDefault(); $('loginErr').textContent = '';
     try {
@@ -707,13 +786,19 @@
       showApp(); refresh();
     } catch { $('loginErr').textContent = 'No connection. Try again.'; }
   };
-  $('signout').onclick = async () => { try { await api('/api/logout', { method: 'POST' }); } catch {} showLogin(); };
+  $('signout').onclick = async () => { stopSound(); try { await api('/api/logout', { method: 'POST' }); } catch {} showLogin(); };
 
   // ----- start -----
-  if (who) showApp(); else showLogin();
-  if (who) refresh();
-  setInterval(() => { if (!document.hidden && !$('app').hidden) { render(); } }, 20000);
-  setInterval(() => { if (!document.hidden && !$('app').hidden && !editing && !apptEditing) refresh(); }, 30000);
+  if (who) { showApp(); refresh(); } else showLogin();
+  let ticks = 0;
+  setInterval(() => {
+    if (document.hidden || $('app').hidden) return;
+    ticks++;
+    const busy = editing || apptEditing;
+    if (feeding()) { paintFeeding(); if (ticks % 10 === 0 && !busy) refresh(); } // pick up a switch or finish from the other phone quickly
+    else if (ticks % 30 === 0 && !busy) refresh();
+    else if (ticks % 20 === 0 && !busy) render();
+  }, 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('app').hidden) refresh(); });
   window.addEventListener('online', () => refresh());
 })();

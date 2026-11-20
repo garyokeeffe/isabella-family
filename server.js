@@ -150,11 +150,25 @@ function cleanEvent(input, existing) {
     if (!out.pee && !out.poop) throw new Error('diaper needs pee or poop');
   } else {
     out.method = METHODS.includes(src.method) ? src.method : null;
-    // A feed can be a running timer: `at` is when it started, duration_min is filled in when it finishes.
+    // A feed can be a running timer: `at` is when it started. While it runs, `side` is the breast in use,
+    // `side_since` when she went onto it, and left_ms/right_ms the time already banked on each side.
+    const num = (v, max) => {
+      if (v === '' || v == null) return null;
+      const n = Number(v);
+      if (!isFinite(n) || n < 0 || n > max) throw new Error('bad number');
+      return n;
+    };
+    const side = (v) => (v === 'left' || v === 'right' ? v : null);
     out.in_progress = !!src.in_progress;
-    const dur = src.duration_min === '' || src.duration_min == null ? null : Number(src.duration_min);
-    if (dur !== null && (!isFinite(dur) || dur < 0 || dur > 600)) throw new Error('bad duration');
-    out.duration_min = out.in_progress ? null : dur;
+    out.side = out.in_progress ? side(src.side) : null;
+    const since = out.side && src.side_since ? new Date(src.side_since) : null;
+    out.side_since = since && !isNaN(since) ? since.toISOString() : null;
+    out.left_ms = num(src.left_ms, 864e5) || 0;
+    out.right_ms = num(src.right_ms, 864e5) || 0;
+    out.last_side = side(src.last_side);
+    out.duration_min = out.in_progress ? null : num(src.duration_min, 600);
+    out.left_min = out.in_progress ? null : num(src.left_min, 600);
+    out.right_min = out.in_progress ? null : num(src.right_min, 600);
   }
   out.created_at = (existing && existing.created_at) || new Date().toISOString();
   out.updated_at = new Date().toISOString();
@@ -180,7 +194,7 @@ function cleanAppointment(input, existing) {
 
 // ---------- export ----------
 
-const CSV_COLS = ['id', 'at_utc', 'at_local', 'kind', 'pee', 'poop', 'method', 'duration_min', 'in_progress', 'by', 'note', 'created_at', 'updated_at'];
+const CSV_COLS = ['id', 'at_utc', 'at_local', 'kind', 'pee', 'poop', 'duration_min', 'left_min', 'right_min', 'last_side', 'in_progress', 'by', 'note', 'created_at', 'updated_at'];
 
 function localStamp(iso) {
   return new Date(iso).toLocaleString('sv-SE', { timeZone: TZ_NAME }); // YYYY-MM-DD HH:MM:SS
@@ -210,6 +224,7 @@ const TYPES = {
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.woff2': 'font/woff2',
+  '.flac': 'audio/flac',
   '.webmanifest': 'application/manifest+json',
 };
 
@@ -246,17 +261,33 @@ function readJson(req) {
   });
 }
 
-function serveStatic(res, urlPath) {
+function serveStatic(req, res, urlPath) {
   const name = urlPath === '/' ? 'index.html' : urlPath.slice(1);
   if (!/^[A-Za-z0-9._-]+$/.test(name)) return send(res, 404, 'Not found');
   const file = path.join(PUBLIC_DIR, name);
   if (!fs.existsSync(file)) return send(res, 404, 'Not found');
-  send(res, 200, fs.readFileSync(file), {
+  const size = fs.statSync(file).size;
+  const headers = {
     'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream',
     'Cache-Control': name === 'index.html' ? 'no-cache' : 'public, max-age=86400',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'no-referrer',
+    'Accept-Ranges': 'bytes',
     'Content-Security-Policy':
-      "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; frame-ancestors 'none'",
-  });
+      "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; frame-ancestors 'none'",
+  };
+  // Phones ask for audio in byte ranges; iPhones will not play a sound without this.
+  const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+  if (m && (m[1] || m[2])) {
+    let start = m[1] ? Number(m[1]) : Math.max(0, size - Number(m[2]));
+    let end = m[1] && m[2] ? Math.min(Number(m[2]), size - 1) : size - 1;
+    if (start >= size || start > end) { res.writeHead(416, { 'Content-Range': `bytes */${size}` }); return res.end(); }
+    res.writeHead(206, { ...headers, 'Content-Range': `bytes ${start}-${end}/${size}`, 'Content-Length': end - start + 1 });
+    return fs.createReadStream(file, { start, end }).pipe(res);
+  }
+  res.writeHead(200, { ...headers, 'Content-Length': size });
+  if (req.method === 'HEAD') return res.end();
+  fs.createReadStream(file).pipe(res);
 }
 
 async function handle(req, res) {
@@ -267,8 +298,8 @@ async function handle(req, res) {
 
   if (p === '/healthz') return send(res, 200, 'ok');
   if (!p.startsWith('/api/')) {
-    if (req.method !== 'GET') return send(res, 405, 'Method not allowed');
-    return serveStatic(res, p);
+    if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
+    return serveStatic(req, res, p);
   }
 
   // Block cross-site form posts: API writes must be JSON from our own page.
