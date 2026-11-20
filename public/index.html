@@ -5,11 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Isabella</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#1d4a3a" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0f2a21" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f8f4ea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1f18" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Isabella">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
@@ -26,7 +25,7 @@
     --bg: #f8f4ea; --card: #fffdf8; --ink: #17352a; --muted: #55695f; --line: #e2dccb; --brass: #a8833f;
     --feed: #f5c6c9; --pee: #f4dd8b; --poop: #e2c7a6; --both: #bfe3d3; --on-act: #17352a;
     --feed-dot: #d9667a; --pee-dot: #cfa51f; --poop-dot: #9a6f43; --both-dot: #3f8f74;
-    --danger: #a1322a; --focus: #0b6fd6;
+    --danger: #a1322a; --focus: #0b6fd6; --primary: #1d4a3a; --on-primary: #f8f4ea; --frond: #e3ead9;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -34,7 +33,7 @@
       --bg: #0b1f18; --card: #12291f; --ink: #f1ecdf; --muted: #a3b8ac; --line: #24402f; --brass: #c9a765;
       --feed: #7c3246; --pee: #74600f; --poop: #654a2f; --both: #25604d; --on-act: #fbf7ec;
       --feed-dot: #e58a9a; --pee-dot: #e0be4a; --poop-dot: #c79a6b; --both-dot: #6cc0a4;
-      --danger: #f08a7c; --focus: #8ec5ff;
+      --danger: #f08a7c; --focus: #8ec5ff; --primary: #2a6651; --on-primary: #f8f4ea; --frond: #12301f;
     }
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -46,32 +45,28 @@
   .wrap { max-width: 520px; margin: 0 auto; padding: 0 16px; }
   .display { font-family: "Isabella Display", "Cormorant Garamond", Didot, Georgia, serif; font-style: italic; font-weight: 600; }
 
-  /* ----- palm header: her name and the two answers you need at 3am ----- */
-  .top { background: var(--palm); color: var(--on-palm); position: relative; overflow: hidden;
-    padding: calc(env(safe-area-inset-top) + 18px) 0 26px; border-radius: 0 0 28px 28px; }
-  .frond { position: absolute; right: -46px; top: -30px; width: 250px; height: 250px; color: #2c6a54; opacity: .55; pointer-events: none; }
-  @media (prefers-color-scheme: dark) { .frond { color: #1c4a3a; } }
+  /* ----- header: her name and the two answers you need at 3am ----- */
+  .top { position: relative; overflow: hidden; padding: calc(env(safe-area-inset-top) + 20px) 0 0; }
+  .frond { position: absolute; right: -46px; top: -30px; width: 250px; height: 250px; color: var(--frond); pointer-events: none; }
   .top .wrap { position: relative; }
-  .name { font-size: 46px; line-height: 1; margin: 0 0 18px; letter-spacing: .005em; }
-  .rule { width: 44px; height: 2px; background: var(--brass); margin: -8px 0 16px; border-radius: 2px; }
-  .status { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .stat .label { font-size: 17px; color: var(--on-palm-soft); }
-  .stat .ago { font-size: 31px; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
-  .stat .sub { font-size: 16px; color: var(--on-palm-soft); min-height: 22px; }
+  .name { font-size: 50px; line-height: 1; margin: 0 0 18px; }
+  .rule { width: 44px; height: 2px; background: var(--brass); margin: -8px 0 18px; border-radius: 2px; }
+  .status { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat { background: var(--card); border: 1.5px solid var(--line); border-radius: 22px; padding: 14px 16px; }
+  .stat .label { font-size: 17px; color: var(--muted); }
+  .stat .ago { font-size: 29px; font-weight: 600; line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .stat .sub { font-size: 16px; color: var(--muted); min-height: 22px; }
 
   /* ----- the four buttons ----- */
-  .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
-  .act { border-radius: 24px; color: var(--on-act); font-weight: 600; font-size: 23px; min-height: 118px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-    box-shadow: inset 0 0 0 1.5px rgba(23, 53, 42, .14); transition: transform .08s; }
+  .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+  .act { border-radius: 26px; background: var(--card); color: var(--ink); border: 1.5px solid var(--muted); font-weight: 600; font-size: 23px; min-height: 120px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transition: transform .08s; }
   .act:active { transform: scale(.97); }
   .act svg { width: 40px; height: 40px; }
-  .act.feed { grid-column: 1 / -1; background: var(--feed); min-height: 132px; font-size: 30px; flex-direction: row; gap: 14px; }
+  .act.feed { grid-column: 1 / -1; background: var(--primary); color: var(--on-primary); border-color: var(--primary); min-height: 136px; font-size: 32px; flex-direction: row; gap: 14px; }
   .act.feed svg { width: 48px; height: 48px; }
-  .act.pee { background: var(--pee); }
-  .act.poop { background: var(--poop); }
-  .act.both { background: var(--both); }
-  .act.done { box-shadow: inset 0 0 0 4px var(--ink); }
+  .act.done { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .act.feed.done { box-shadow: inset 0 0 0 4px var(--brass); }
   @media (prefers-reduced-motion: reduce) { .act { transition: none; } }
 
   .detail { background: var(--card); border: 1.5px solid var(--line); border-radius: 22px; padding: 16px; margin-top: 12px; }
@@ -79,9 +74,6 @@
   .chips { display: flex; flex-wrap: wrap; gap: 10px; }
   .chip { border: 1.5px solid var(--muted); background: var(--card); border-radius: 999px; padding: 12px 20px; font-size: 19px; min-height: 54px; }
   .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 600; }
-  .oz { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
-  .oz button { width: 58px; height: 58px; border-radius: 50%; border: 1.5px solid var(--muted); background: var(--card); font-size: 28px; line-height: 1; }
-  .oz .val { font-size: 24px; font-weight: 600; min-width: 86px; text-align: center; font-variant-numeric: tabular-nums; }
 
   .today { display: flex; gap: 8px; margin: 22px 0 0; }
   .today .tile { flex: 1; background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; padding: 10px 8px; text-align: center; }
@@ -116,15 +108,14 @@
   input[type=text], input[type=password], input[type=datetime-local] {
     width: 100%; font: inherit; color: var(--ink); background: var(--card); border: 1.5px solid var(--muted); border-radius: 16px; padding: 14px; min-height: 58px; }
   .btns { display: flex; gap: 10px; margin-top: 8px; }
-  .btn { flex: 1; border-radius: 18px; min-height: 60px; font-weight: 600; font-size: 20px; background: var(--palm); color: var(--on-palm); }
-  @media (prefers-color-scheme: dark) { .btn { background: var(--on-palm); color: var(--palm-deep); } }
+  .btn { flex: 1; border-radius: 18px; min-height: 60px; font-weight: 600; font-size: 20px; background: var(--primary); color: var(--on-primary); }
   .btn.ghost { background: none; color: var(--ink); border: 1.5px solid var(--muted); }
   .btn.danger { background: none; color: var(--danger); border: 1.5px solid var(--danger); flex: none; padding: 0 20px; }
 
   .login { padding-top: 26px; }
   .login p { margin: 0 0 22px; font-size: 20px; }
   .err { color: var(--danger); font-size: 18px; min-height: 26px; margin-top: 10px; font-weight: 600; }
-  .offline { background: var(--pee); color: var(--on-act); border-radius: 18px; padding: 12px 16px; font-size: 17px; margin-top: 14px; }
+  .offline { background: var(--card); color: var(--ink); border: 1.5px solid var(--brass); border-radius: 18px; padding: 12px 16px; font-size: 17px; margin-top: 14px; }
 </style>
 </head>
 <body>
@@ -166,7 +157,7 @@
 
   <div class="actions">
     <button class="act feed" data-log="feed">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6.2c0-2 .9-3.4 2-3.4s2 1.400 2 3.400"/><rect x="8.300" y="6.200" width="7.400" height="2.600" rx=".8"/><path d="M8.800 8.800c-1 1.200-1.500 2.400-1.500 3.900V19a2.200 2.200 0 0 0 2.200 2.200h5A2.200 2.200 0 0 0 16.700 19v-6.300c0-1.500-.5-2.700-1.500-3.900M7.300 13.500h3M7.300 16.500h3"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.300S3.500 15 3.500 9.200A4.500 4.500 0 0 1 12 7.100a4.500 4.500 0 0 1 8.500 2.100c0 5.800-8.500 11.100-8.500 11.100Z"/></svg>
       <span class="lbl">Fed</span>
     </button>
     <button class="act pee" data-log="pee">
@@ -184,11 +175,8 @@
   </div>
 
   <div class="detail" id="feedDetail" hidden>
-    <div class="q">Saved. How did she feed? You can skip this.</div>
+    <div class="q">Saved. Which side? You can skip this.</div>
     <div class="chips" id="quickMethods"></div>
-    <div class="oz" id="quickOz" hidden>
-      <button type="button" data-oz="-0.5" aria-label="Half an ounce less">−</button><span class="val" id="quickOzVal"></span><button type="button" data-oz="0.5" aria-label="Half an ounce more">+</button>
-    </div>
   </div>
 
   <div class="today" id="today" aria-label="Today so far"></div>
@@ -198,7 +186,6 @@
 
   <footer>
     <a href="/api/export.csv">Download all as spreadsheet</a>
-    <a href="/api/export.json">Download as JSON</a>
     <button id="signout">Sign out</button>
   </footer>
 </main>
@@ -225,11 +212,8 @@
       </div>
     </div>
     <div class="field" id="editFeed">
-      <label>How she fed</label>
+      <label>Which side</label>
       <div class="chips" id="editMethods"></div>
-      <div class="oz" id="editOz" hidden>
-        <button type="button" data-oz="-0.5" aria-label="Half an ounce less">−</button><span class="val" id="editOzVal"></span><button type="button" data-oz="0.5" aria-label="Half an ounce more">+</button>
-      </div>
     </div>
     <div class="field"><label for="editNote">Note (optional)</label><input id="editNote" type="text" maxlength="500"></div>
     <div class="btns">
@@ -248,7 +232,7 @@
     get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
   };
-  const METHODS = [['breast_left', 'Left side'], ['breast_right', 'Right side'], ['breast_both', 'Both sides'], ['bottle', 'Bottle']];
+  const METHODS = [['breast_left', 'Left side'], ['breast_right', 'Right side'], ['breast_both', 'Both sides']];
   const METHOD_LABEL = Object.fromEntries(METHODS);
 
   let who = ls.get('who', '');
@@ -341,7 +325,6 @@
     if (e.kind === 'diaper') return e.pee && e.poop ? 'Pee + poop' : e.poop ? 'Poop' : 'Pee';
     let s = 'Fed';
     if (e.method) s += ', ' + METHOD_LABEL[e.method].toLowerCase();
-    if (e.method === 'bottle' && e.amount_oz != null) s += ' ' + e.amount_oz + ' oz';
     return s;
   }
   const color = (e) => e.kind === 'feed' ? 'var(--feed-dot)' : e.pee && e.poop ? 'var(--both-dot)' : e.poop ? 'var(--poop-dot)' : 'var(--pee-dot)';
@@ -395,33 +378,20 @@
   }
 
   // ----- method chips (shared by quick panel and edit sheet) -----
-  function drawMethods(container, ozBox, ozVal, ev, onChange) {
+  function drawMethods(container, ev, onChange) {
     container.textContent = '';
     for (const [key, label] of METHODS) {
       const b = Object.assign(document.createElement('button'), { className: 'chip' + (ev.method === key ? ' on' : ''), type: 'button', textContent: label });
-      b.onclick = () => {
-        ev.method = ev.method === key ? null : key;
-        if (ev.method === 'bottle' && ev.amount_oz == null) ev.amount_oz = ls.get('lastOz', 2);
-        if (ev.method !== 'bottle') ev.amount_oz = null;
-        onChange();
-      };
+      b.setAttribute('aria-pressed', ev.method === key);
+      b.onclick = () => { ev.method = ev.method === key ? null : key; onChange(); };
       container.append(b);
-    }
-    ozBox.hidden = ev.method !== 'bottle';
-    ozVal.textContent = (ev.amount_oz ?? 0) + ' oz';
-    for (const btn of ozBox.querySelectorAll('[data-oz]')) {
-      btn.onclick = () => {
-        ev.amount_oz = Math.min(20, Math.max(0, (ev.amount_oz ?? 0) + Number(btn.dataset.oz)));
-        ls.set('lastOz', ev.amount_oz);
-        onChange();
-      };
     }
   }
 
   // ----- logging -----
   function log(type) {
     const ev = { id: uuid(), at: new Date().toISOString(), by: who, note: '' };
-    if (type === 'feed') Object.assign(ev, { kind: 'feed', method: null, amount_oz: null });
+    if (type === 'feed') Object.assign(ev, { kind: 'feed', method: null });
     else Object.assign(ev, { kind: 'diaper', pee: type !== 'poop', poop: type !== 'pee' });
     enqueue({ op: 'put', ev });
     if (navigator.vibrate) navigator.vibrate(30);
@@ -442,7 +412,7 @@
     const draw = () => {
       const ev = find(quickId); if (!ev) return closeQuick();
       const copy = { ...ev }; delete copy._pending;
-      drawMethods($('quickMethods'), $('quickOz'), $('quickOzVal'), copy, () => { enqueue({ op: 'put', ev: copy }); draw(); armQuick(); });
+      drawMethods($('quickMethods'), copy, () => { enqueue({ op: 'put', ev: copy }); draw(); armQuick(); });
     };
     $('feedDetail').hidden = false; draw(); armQuick();
   }
@@ -476,7 +446,7 @@
     $('editDiaper').hidden = editing.kind !== 'diaper';
     $('editFeed').hidden = editing.kind !== 'feed';
     if (editing.kind === 'diaper') for (const c of document.querySelectorAll('[data-diaper]')) c.classList.toggle('on', !!editing[c.dataset.diaper]);
-    else drawMethods($('editMethods'), $('editOz'), $('editOzVal'), editing, () => { editing.note = $('editNote').value; drawEdit(); });
+    else drawMethods($('editMethods'), editing, () => { editing.note = $('editNote').value; drawEdit(); });
   }
   $('editAt').onchange = () => { const d = new Date($('editAt').value); if (!isNaN(d)) editing.at = d.toISOString(); };
   for (const c of document.querySelectorAll('[data-shift]')) c.onclick = () => {

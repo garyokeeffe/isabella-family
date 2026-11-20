@@ -4,10 +4,10 @@ One-tap log of feedings and diaper changes for two phones. Runs in your own
 Google Cloud project; the data lives in your own Firestore database.
 
 - **Fed / Pee / Poop / Both**: one tap logs it with the time and who tapped.
-- After **Fed**, optional chips for Left / Right / Both sides / Bottle (+ oz). Ignore them and the feed is still logged.
+- After **Fed**, optional chips for Left side / Right side / Both sides. Ignore them and the feed is still logged.
 - Tap any row to fix the time ("15 min earlier"), change it, add a note, or delete it.
 - Works with a flaky connection: taps are kept on the phone and sent when it reconnects.
-- **Download CSV / JSON** at the bottom of the page gives you every row.
+- **Download all as spreadsheet** at the bottom of the page gives you every row as a CSV file.
 
 ## Deploy
 
@@ -45,7 +45,7 @@ Each person signs in once with their name and the passcode; the phone stays sign
 
 ## Raw data
 
-- Page footer: Download CSV or JSON.
+- Page footer: Download all as spreadsheet (CSV).
 - Direct: Firestore console, collection `events`. One document per event:
 
 | field | meaning |
@@ -54,8 +54,7 @@ Each person signs in once with their name and the passcode; the phone stays sign
 | `at` | when it happened, UTC ISO timestamp |
 | `kind` | `feed` or `diaper` |
 | `pee`, `poop` | true/false (diapers) |
-| `method` | `breast_left`, `breast_right`, `breast_both`, `bottle` or empty (feeds) |
-| `amount_oz` | bottle amount (feeds) |
+| `method` | `breast_left`, `breast_right`, `breast_both` or empty (feeds) |
 | `by` | who logged it |
 | `note` | free text |
 | `created_at`, `updated_at` | when the row was written / last edited |

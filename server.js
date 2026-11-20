@@ -1,6 +1,6 @@
 'use strict';
 // Isabella's log: feedings and diaper changes.
-// One small Node server: static page + JSON API + CSV/JSON export.
+// One small Node server: static page + JSON API + CSV export.
 // Storage: Firestore in production, a local JSON file when LOCAL_DATA_FILE is set.
 
 const http = require('http');
@@ -124,7 +124,7 @@ function noteFail(ip) {
 
 // ---------- validation ----------
 
-const METHODS = ['breast_left', 'breast_right', 'breast_both', 'bottle'];
+const METHODS = ['breast_left', 'breast_right', 'breast_both'];
 const ID_RE = /^[A-Za-z0-9_-]{8,64}$/;
 
 function cleanEvent(input, existing) {
@@ -147,9 +147,6 @@ function cleanEvent(input, existing) {
     if (!out.pee && !out.poop) throw new Error('diaper needs pee or poop');
   } else {
     out.method = METHODS.includes(src.method) ? src.method : null;
-    const oz = src.amount_oz === '' || src.amount_oz == null ? null : Number(src.amount_oz);
-    if (oz !== null && (!isFinite(oz) || oz < 0 || oz > 20)) throw new Error('bad amount');
-    out.amount_oz = out.method === 'bottle' ? oz : null;
   }
   out.created_at = (existing && existing.created_at) || new Date().toISOString();
   out.updated_at = new Date().toISOString();
@@ -158,7 +155,7 @@ function cleanEvent(input, existing) {
 
 // ---------- export ----------
 
-const CSV_COLS = ['id', 'at_utc', 'at_local', 'kind', 'pee', 'poop', 'method', 'amount_oz', 'by', 'note', 'created_at', 'updated_at'];
+const CSV_COLS = ['id', 'at_utc', 'at_local', 'kind', 'pee', 'poop', 'method', 'by', 'note', 'created_at', 'updated_at'];
 
 function localStamp(iso) {
   return new Date(iso).toLocaleString('sv-SE', { timeZone: TZ_NAME }); // YYYY-MM-DD HH:MM:SS
@@ -299,12 +296,6 @@ async function handle(req, res) {
     return send(res, 200, toCsv(await store.all()), {
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': 'attachment; filename="isabella-log.csv"',
-    });
-  }
-  if (p === '/api/export.json' && req.method === 'GET') {
-    return send(res, 200, JSON.stringify(await store.all(), null, 2), {
-      'Content-Type': 'application/json',
-      'Content-Disposition': 'attachment; filename="isabella-log.json"',
     });
   }
   return send(res, 404, { error: 'Not found' });
