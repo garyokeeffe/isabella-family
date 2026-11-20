@@ -51,10 +51,10 @@ function fileStore(file) {
   };
 }
 
-function firestoreStore() {
+function firestoreStore(name) {
   const { Firestore } = require('@google-cloud/firestore');
   const db = new Firestore({ ignoreUndefinedProperties: true });
-  const col = db.collection('events');
+  const col = db.collection(name);
   const rows = (snap) => snap.docs.map((d) => d.data());
   return {
     async list(sinceIso) {
@@ -76,9 +76,12 @@ function firestoreStore() {
   };
 }
 
-const store = process.env.LOCAL_DATA_FILE
-  ? fileStore(process.env.LOCAL_DATA_FILE)
-  : firestoreStore();
+const makeStore = (name) =>
+  process.env.LOCAL_DATA_FILE
+    ? fileStore(name === 'events' ? process.env.LOCAL_DATA_FILE : process.env.LOCAL_DATA_FILE + '.' + name)
+    : firestoreStore(name);
+const store = makeStore('events');
+const appts = makeStore('appointments');
 
 // ---------- auth ----------
 
@@ -153,6 +156,23 @@ function cleanEvent(input, existing) {
   return out;
 }
 
+function cleanAppointment(input, existing) {
+  const src = { ...(existing || {}), ...input };
+  const out = { id: src.id };
+  if (!ID_RE.test(String(out.id || ''))) throw new Error('bad id');
+  const at = new Date(src.at);
+  if (isNaN(at)) throw new Error('Pick a date and time');
+  out.at = at.toISOString();
+  out.title = String(src.title || '').trim().slice(0, 80);
+  if (!out.title) throw new Error('Say what the appointment is');
+  out.where = String(src.where || '').trim().slice(0, 120);
+  out.note = String(src.note || '').slice(0, 2000);
+  out.by = String(src.by || '').trim().slice(0, 40);
+  out.created_at = (existing && existing.created_at) || new Date().toISOString();
+  out.updated_at = new Date().toISOString();
+  return out;
+}
+
 // ---------- export ----------
 
 const CSV_COLS = ['id', 'at_utc', 'at_local', 'kind', 'pee', 'poop', 'method', 'by', 'note', 'created_at', 'updated_at'];
@@ -161,17 +181,17 @@ function localStamp(iso) {
   return new Date(iso).toLocaleString('sv-SE', { timeZone: TZ_NAME }); // YYYY-MM-DD HH:MM:SS
 }
 
-function toCsv(events) {
+function toCsv(events, cols = CSV_COLS) {
   const esc = (v) => {
     if (v === null || v === undefined) return '';
     let s = String(v);
     if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; // keep spreadsheets from reading notes as formulas
     return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
-  const lines = [CSV_COLS.join(',')];
+  const lines = [cols.join(',')];
   for (const e of events) {
     const row = { ...e, at_utc: e.at, at_local: localStamp(e.at) };
-    lines.push(CSV_COLS.map((c) => esc(row[c])).join(','));
+    lines.push(cols.map((c) => esc(row[c])).join(','));
   }
   return lines.join('\n') + '\n';
 }
@@ -296,6 +316,32 @@ async function handle(req, res) {
     return send(res, 200, toCsv(await store.all()), {
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': 'attachment; filename="isabella-log.csv"',
+    });
+  }
+  if (p === '/api/appointments' && req.method === 'GET') {
+    return send(res, 200, { appointments: await appts.all() });
+  }
+  if (p === '/api/appointments' && req.method === 'POST') {
+    const body = await readJson(req);
+    let a;
+    try {
+      a = cleanAppointment(body, ID_RE.test(String(body.id || '')) ? await appts.get(body.id) : null);
+    } catch (e) {
+      return send(res, 400, { error: e.message });
+    }
+    await appts.put(a);
+    return send(res, 200, { appointment: a });
+  }
+  const am = p.match(/^\/api\/appointments\/([A-Za-z0-9_-]{8,64})$/);
+  if (am && req.method === 'DELETE') {
+    await appts.remove(am[1]);
+    return send(res, 200, { ok: true });
+  }
+  if (p === '/api/appointments.csv' && req.method === 'GET') {
+    const cols = ['id', 'at_utc', 'at_local', 'title', 'where', 'note', 'by', 'created_at', 'updated_at'];
+    return send(res, 200, toCsv(await appts.all(), cols), {
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': 'attachment; filename="isabella-appointments.csv"',
     });
   }
   return send(res, 404, { error: 'Not found' });

@@ -90,6 +90,12 @@
   .row .by { color: var(--muted); font-size: 16px; }
   .row.pending .what::after { content: " (saving)"; color: var(--muted); font-weight: 400; font-size: 16px; }
   .empty { padding: 22px 16px; color: var(--muted); }
+  .appt .when { flex: none; width: 118px; color: var(--muted); font-size: 17px; line-height: 1.25; }
+  .appt .when b { display: block; color: var(--ink); font-weight: 600; font-size: 19px; }
+  .appt .what small { display: block; font-weight: 400; color: var(--muted); font-size: 16px; }
+  .addappt { width: 100%; margin-top: 10px; min-height: 60px; border-radius: 18px; border: 1.5px solid var(--muted); background: var(--card); font-weight: 600; font-size: 20px; }
+  .pastbtn { color: var(--muted); text-decoration: underline; font-size: 16px; padding: 12px 4px; }
+  textarea { width: 100%; font: inherit; color: var(--ink); background: var(--card); border: 1.5px solid var(--muted); border-radius: 16px; padding: 14px; min-height: 110px; resize: vertical; }
   .hint { color: var(--muted); font-size: 16px; margin: 10px 4px 0; }
 
   footer { margin: 30px 0 calc(env(safe-area-inset-bottom) + 110px); display: flex; gap: 8px 22px; justify-content: center; flex-wrap: wrap; }
@@ -181,11 +187,18 @@
 
   <div class="today" id="today" aria-label="Today so far"></div>
 
+  <h2>Appointments</h2>
+  <div class="list" id="apptList"></div>
+  <button class="addappt" type="button" id="apptAdd">Add an appointment</button>
+  <button class="pastbtn" type="button" id="apptPastBtn" hidden></button>
+  <div class="list" id="apptPast" hidden></div>
+
   <div id="lists"></div>
   <p class="hint" id="hint" hidden>Tap any line to fix the time or remove it.</p>
 
   <footer>
-    <a href="/api/export.csv">Download all as spreadsheet</a>
+    <a href="/api/export.csv">Download feeds and diapers</a>
+    <a href="/api/appointments.csv">Download appointments</a>
     <button id="signout">Sign out</button>
   </footer>
 </main>
@@ -220,6 +233,31 @@
       <button class="btn danger" type="button" id="editDelete">Remove</button>
       <button class="btn ghost" type="button" id="editCancel">Cancel</button>
       <button class="btn" type="button" id="editSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="apptScrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="apptTitle">
+    <h3 id="apptTitle">Appointment</h3>
+    <div class="field">
+      <label for="apptWhat">What is it</label>
+      <input id="apptWhat" type="text" maxlength="80" placeholder="Pediatrician">
+      <div class="chips" style="margin-top:10px" id="apptChips">
+        <button class="chip" type="button">Pediatrician</button>
+        <button class="chip" type="button">Weight check</button>
+        <button class="chip" type="button">Vaccines</button>
+        <button class="chip" type="button">Lactation consultant</button>
+      </div>
+    </div>
+    <div class="field"><label for="apptAt">When</label><input id="apptAt" type="datetime-local"></div>
+    <div class="field"><label for="apptWhere">Where (optional)</label><input id="apptWhere" type="text" maxlength="120"></div>
+    <div class="field"><label for="apptNote">Notes (optional): questions to ask, what the doctor said</label><textarea id="apptNote" maxlength="2000"></textarea></div>
+    <div class="err" id="apptErr" role="alert"></div>
+    <div class="btns">
+      <button class="btn danger" type="button" id="apptDelete">Remove</button>
+      <button class="btn ghost" type="button" id="apptCancel">Cancel</button>
+      <button class="btn" type="button" id="apptSave">Save</button>
     </div>
   </div>
 </div>
@@ -304,6 +342,7 @@
       server = (await res.json()).events;
       setOffline(false);
       render();
+      loadAppts();
       flush();
     } catch (e) { if (e.message !== 'auth') setOffline(true); }
   }
@@ -472,9 +511,74 @@
   };
   $('lists').onclick = (e) => { const row = e.target.closest('.row'); if (row) openEdit(row.dataset.id); };
 
+  // ----- appointments -----
+  let appointments = [], apptEditing = null, showPast = false;
+  async function loadAppts() {
+    try { const res = await api('/api/appointments'); if (res.ok) { appointments = (await res.json()).appointments; renderAppts(); } } catch {}
+  }
+  function apptRow(a) {
+    const row = document.createElement('button'); row.className = 'row appt'; row.type = 'button';
+    const d = new Date(a.at);
+    const when = document.createElement('span'); when.className = 'when';
+    const isToday = dayKey(d) === dayKey(Date.now()), isTomorrow = dayKey(d) === dayKey(Date.now() + 864e5);
+    when.append(Object.assign(document.createElement('b'), { textContent: isToday ? 'Today' : isTomorrow ? 'Tomorrow' : d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) }), clock(a.at));
+    const what = document.createElement('span'); what.className = 'what'; what.textContent = a.title;
+    const extra = [a.where, a.note].filter(Boolean).join(' | ');
+    if (extra) what.append(Object.assign(document.createElement('small'), { textContent: extra.length > 90 ? extra.slice(0, 90) + '…' : extra }));
+    row.append(when, what); row.onclick = () => openAppt(a);
+    return row;
+  }
+  function renderAppts() {
+    const cutoff = Date.now() - 2 * 3600e3; // stays under "upcoming" until two hours after it starts
+    const upcoming = appointments.filter((a) => new Date(a.at) >= cutoff).sort((a, b) => (a.at < b.at ? -1 : 1));
+    const past = appointments.filter((a) => new Date(a.at) < cutoff).sort((a, b) => (a.at < b.at ? 1 : -1));
+    const list = $('apptList'); list.textContent = '';
+    if (!upcoming.length) list.append(Object.assign(document.createElement('div'), { className: 'empty', textContent: 'Nothing coming up.' }));
+    for (const a of upcoming) list.append(apptRow(a));
+    $('apptPastBtn').hidden = !past.length;
+    $('apptPastBtn').textContent = showPast ? 'Hide past appointments' : 'Show past appointments (' + past.length + ')';
+    const pl = $('apptPast'); pl.hidden = !showPast || !past.length; pl.textContent = '';
+    for (const a of past) pl.append(apptRow(a));
+  }
+  $('apptPastBtn').onclick = () => { showPast = !showPast; renderAppts(); };
+  function openAppt(a) {
+    apptEditing = a ? { ...a } : { id: uuid(), at: '', title: '', where: '', note: '', by: who, _new: true };
+    $('apptTitle').textContent = a ? 'Change appointment' : 'New appointment';
+    $('apptWhat').value = apptEditing.title; $('apptWhere').value = apptEditing.where || ''; $('apptNote').value = apptEditing.note || '';
+    $('apptAt').value = apptEditing.at ? toLocalInput(apptEditing.at) : '';
+    $('apptDelete').hidden = !a; $('apptErr').textContent = '';
+    $('apptScrim').hidden = false;
+  }
+  const closeAppt = () => { $('apptScrim').hidden = true; apptEditing = null; };
+  $('apptAdd').onclick = () => openAppt(null);
+  $('apptCancel').onclick = closeAppt;
+  $('apptScrim').onclick = (e) => { if (e.target === $('apptScrim')) closeAppt(); };
+  for (const c of $('apptChips').children) c.onclick = () => { $('apptWhat').value = c.textContent; };
+  $('apptSave').onclick = async () => {
+    const d = new Date($('apptAt').value);
+    if (!$('apptWhat').value.trim()) { $('apptErr').textContent = 'Say what the appointment is.'; return; }
+    if (isNaN(d)) { $('apptErr').textContent = 'Pick a date and time.'; return; }
+    const body = { id: apptEditing.id, at: d.toISOString(), title: $('apptWhat').value, where: $('apptWhere').value, note: $('apptNote').value, by: apptEditing.by || who };
+    try {
+      const res = await api('/api/appointments', { method: 'POST', body: JSON.stringify(body) });
+      if (!res.ok) { $('apptErr').textContent = (await res.json()).error || 'Could not save. Try again.'; return; }
+      const { appointment } = await res.json();
+      appointments = appointments.filter((x) => x.id !== appointment.id).concat(appointment);
+      closeAppt(); renderAppts();
+    } catch { $('apptErr').textContent = 'No connection. Try again in a moment.'; }
+  };
+  $('apptDelete').onclick = async () => {
+    const id = apptEditing.id;
+    try {
+      const res = await api('/api/appointments/' + id, { method: 'DELETE' });
+      if (!res.ok) throw 0;
+      appointments = appointments.filter((x) => x.id !== id); closeAppt(); renderAppts();
+    } catch { $('apptErr').textContent = 'Could not remove it. Try again in a moment.'; }
+  };
+
   // ----- sign in / out -----
   function showLogin() { $('app').hidden = true; $('statusBox').hidden = true; $('login').hidden = false; $('name').value = who; }
-  function showApp() { $('login').hidden = true; $('app').hidden = false; $('statusBox').hidden = false; render(); }
+  function showApp() { $('login').hidden = true; $('app').hidden = false; $('statusBox').hidden = false; render(); renderAppts(); }
   $('loginForm').onsubmit = async (e) => {
     e.preventDefault(); $('loginErr').textContent = '';
     try {
@@ -490,7 +594,7 @@
   if (who) showApp(); else showLogin();
   if (who) refresh();
   setInterval(() => { if (!document.hidden && !$('app').hidden) { render(); } }, 20000);
-  setInterval(() => { if (!document.hidden && !$('app').hidden && !editing) refresh(); }, 30000);
+  setInterval(() => { if (!document.hidden && !$('app').hidden && !editing && !apptEditing) refresh(); }, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('app').hidden) refresh(); });
   window.addEventListener('online', () => refresh());
 })();

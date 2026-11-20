@@ -6,6 +6,7 @@ Google Cloud project; the data lives in your own Firestore database.
 - **Fed / Pee / Poop / Both**: one tap logs it with the time and who tapped.
 - After **Fed**, optional chips for Left side / Right side / Both sides. Ignore them and the feed is still logged.
 - Tap any row to fix the time ("15 min earlier"), change it, add a note, or delete it.
+- **Appointments**: add doctor visits and other appointments with a date, place and notes; past ones stay on record.
 - Works with a flaky connection: taps are kept on the phone and sent when it reconnects.
 - **Download all as spreadsheet** at the bottom of the page gives you every row as a CSV file.
 
@@ -46,6 +47,7 @@ Each person signs in once with their name and the passcode; the phone stays sign
 ## Raw data
 
 - Page footer: Download all as spreadsheet (CSV).
+- Appointments: "Download appointments" in the footer, or Firestore collection `appointments` (`at`, `title`, `where`, `note`, `by`).
 - Direct: Firestore console, collection `events`. One document per event:
 
 | field | meaning |
