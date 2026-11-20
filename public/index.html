@@ -21,18 +21,18 @@
 
   :root {
     --bg: #f8f4ea; --card: #fffdf8; --ink: #17352a; --muted: #55695f; --line: #e2dccb; --brass: #a8833f;
-    --primary: #1d4a3a; --on-primary: #f8f4ea; --frond: #e6ecdc; --danger: #a1322a; --focus: #0b6fd6; --bar: #fffdf8;
+    --primary: #1d4a3a; --on-primary: #f8f4ea; --s1: #168a64; --s2: #c2820f; --frond: #e6ecdc; --danger: #a1322a; --focus: #0b6fd6; --bar: #fffdf8;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #0b1f18; --card: #12291f; --ink: #f1ecdf; --muted: #a3b8ac; --line: #24402f; --brass: #c9a765;
-      --primary: #2a6651; --on-primary: #f8f4ea; --frond: #102a20; --danger: #f08a7c; --focus: #8ec5ff; --bar: #0f251c;
+      --primary: #2a6651; --on-primary: #f8f4ea; --s1: #36a882; --s2: #c4871a; --frond: #102a20; --danger: #f08a7c; --focus: #8ec5ff; --bar: #0f251c;
     }
   }
   /* Night: chosen with the moon button. Dimmer than dark mode, warm text, no bright fills. */
   :root[data-theme="night"] {
     --bg: #07140f; --card: #0c1c15; --ink: #d8cfba; --muted: #8b9a8d; --line: #1a2e23; --brass: #a98c52;
-    --primary: #0c1c15; --on-primary: #d8cfba; --frond: #0a1a13; --danger: #c9796d; --focus: #6f9fd0; --bar: #0a1812;
+    --primary: #0c1c15; --on-primary: #d8cfba; --s1: #36a882; --s2: #c4871a; --frond: #0a1a13; --danger: #c9796d; --focus: #6f9fd0; --bar: #0a1812;
   }
   :root[data-theme="night"] .act.feed, :root[data-theme="night"] .btn:not(.ghost):not(.danger), :root[data-theme="night"] .finish,
   :root[data-theme="night"] .side.on, :root[data-theme="night"] .tile.on, :root[data-theme="night"] .act.done { border: 2px solid var(--brass); }
@@ -135,9 +135,29 @@
   .account a, .account button.link { display: block; color: var(--ink); text-decoration: underline; font-size: 18px; padding: 12px 2px; text-align: left; }
   .credits { color: var(--muted); font-size: 15px; margin: 10px 2px 0; }
 
+  /* ----- trends ----- */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 14px; margin: 4px 2px 0; }
+  .stat-t .v { font-size: 30px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stat-t .l { font-size: 17px; }
+  .stat-t .s { font-size: 15px; color: var(--muted); }
+  .chart { background: var(--card); border-radius: 24px; padding: 16px 14px 12px; margin-top: 14px; }
+  .chart h4 { margin: 0 2px; font: 600 19px/1.3 "Isabella Text", system-ui, sans-serif; }
+  .chart .read { margin: 2px 2px 8px; font-size: 16px; color: var(--muted); min-height: 22px; }
+  .chart svg { display: block; width: 100%; height: auto; }
+  .chart .grid { stroke: var(--line); stroke-width: 1; }
+  .chart text { fill: var(--muted); font: 400 11px "Isabella Text", system-ui, sans-serif; }
+  .chart text.sel { fill: var(--ink); font-weight: 600; }
+  .legend { display: flex; gap: 16px; margin: 8px 2px 0; font-size: 15px; color: var(--muted); }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  table.days { width: 100%; border-collapse: collapse; font-size: 16px; font-variant-numeric: tabular-nums; }
+  table.days th { text-align: right; font-weight: 400; color: var(--muted); font-size: 14px; padding: 10px 8px; }
+  table.days td { text-align: right; padding: 11px 8px; border-top: 1.5px solid var(--line); }
+  table.days th:first-child, table.days td:first-child { text-align: left; padding-left: 16px; }
+  table.days th:last-child, table.days td:last-child { padding-right: 16px; }
+
   /* ----- tab bar ----- */
   nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--bar); border-top: 1.5px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
-  nav.tabs .in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
+  nav.tabs .in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
   nav.tabs button { height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; color: var(--muted); border-top: 2px solid transparent; margin-top: -1.5px; }
   nav.tabs button svg { width: 26px; height: 26px; }
   nav.tabs button[aria-current="page"] { color: var(--ink); border-top-color: var(--brass); font-weight: 600; }
@@ -176,6 +196,7 @@
     <g id="i-poop" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.2 20.5h13.6a3.1 3.1 0 0 0-1-6 2.9 2.9 0 0 0-2-4.700c0-2.800-2-4.800-4.600-5.600.7 2-.3 3.400-1.700 4.300a2.900 2.900 0 0 0-2.900 4.400c-.4.400-.9.900-1.200 1.600a3.100 3.100 0 0 0-.2 6Z"/><path d="M8.2 14.5h7.6M9.7 9.8h5"/></g>
     <g id="i-both" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 4S2.8 8.2 2.8 11a3.7 3.7 0 0 0 7.4 0C10.2 8.2 6.5 4 6.5 4Z"/><path d="M11 20.5h9.2a2.3 2.3 0 0 0-.7-4.400 2.200 2.200 0 0 0-1.500-3.600c0-2-1.400-3.500-3.300-4.100.5 1.500-.2 2.500-1.300 3.200a2.200 2.200 0 0 0-2.100 3.300 2.300 2.300 0 0 0-.3 5.600Z"/></g>
     <g id="i-page" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4.5"/></g>
+    <g id="i-bars" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11M12 20V5M19 20v-6M3.5 20h17"/></g>
     <g id="i-leaf" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5C4.5 10 10 4.5 19.5 4.5c0 9.500-5.500 15-15 15Z"/><path d="M4.5 19.5 14 10"/></g>
     <g id="i-moon" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 14.2A8 8 0 0 1 9.8 4.5a8 8 0 1 0 9.7 9.7Z"/></g>
     <g id="i-rain" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 14.5a4 4 0 0 1 .6-7.950 5 5 0 0 1 9.600 1.300A3.400 3.400 0 0 1 17 14.500Z"/><path d="M8.5 17.5l-1 2.500M12.500 17.500l-1 2.500M16.500 17.500l-1 2.500"/></g>
@@ -254,6 +275,20 @@
     <div id="lists"></div>
   </section>
 
+  <!-- TRENDS -->
+  <section class="tab" id="tabTrends" hidden>
+    <h2>Trends</h2>
+    <div class="seg two" id="trendRange" style="margin-bottom:18px">
+      <button class="chip" type="button" data-range="7">Last 7 days</button>
+      <button class="chip" type="button" data-range="14">Last 14 days</button>
+    </div>
+    <div class="stats" id="trendStats"></div>
+    <p class="note" id="trendNote"></p>
+    <div id="trendCharts"></div>
+    <h2 class="sub">Day by day</h2>
+    <div class="list"><table class="days" id="trendTable"></table></div>
+  </section>
+
   <!-- MORE -->
   <section class="tab" id="tabMore" hidden>
     <h2>Appointments</h2>
@@ -292,6 +327,7 @@
   <div class="in">
     <button type="button" data-tab="Today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg>Today</button>
     <button type="button" data-tab="Journal"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-page"/></svg>Journal</button>
+    <button type="button" data-tab="Trends"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bars"/></svg>Trends</button>
     <button type="button" data-tab="More"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-leaf"/></svg>More</button>
   </div>
 </nav>
@@ -611,15 +647,127 @@
 
   // ----- tabs -----
   function showTab(name) {
-    for (const t of ['Today', 'Journal', 'More']) $('tab' + t).hidden = t !== name;
+    for (const t of ['Today', 'Journal', 'Trends', 'More']) $('tab' + t).hidden = t !== name;
+    if (name === 'Trends') loadTrends();
     for (const b of document.querySelectorAll('[data-tab]')) { if (b.dataset.tab === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
     window.scrollTo(0, 0);
   }
   for (const b of document.querySelectorAll('[data-tab]')) b.onclick = () => showTab(b.dataset.tab);
 
+  // ----- trends -----
+  let trendDays = 7, trendEvents = null;
+  async function loadTrends() {
+    drawTrends();
+    try { const r = await api('/api/events?days=15'); if (r.ok) { trendEvents = (await r.json()).events; drawTrends(); } } catch {}
+  }
+  function dayStats(n) {
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const days = [];
+    for (let i = n - 1; i >= 0; i--) { const d = new Date(start); d.setDate(d.getDate() - i); days.push({ date: d, key: dayKey(d), feeds: 0, mins: 0, left: 0, right: 0, wet: 0, dirty: 0, diapers: 0, gaps: [] }); }
+    const by = new Map(days.map((d) => [d.key, d]));
+    let prev = null;
+    for (const e of (trendEvents || events()).slice().sort((a, b) => (a.at < b.at ? -1 : 1))) {
+      const d = by.get(dayKey(e.at));
+      if (e.kind === 'feed') {
+        if (prev && d) d.gaps.push((new Date(e.at) - new Date(prev.at)) / 60000); // start to start
+        prev = e;
+        if (d) { const l = e.left_min || 0, r = e.right_min || 0; d.feeds++; d.left += l; d.right += r; d.mins += l + r || e.duration_min || 0; }
+      } else if (d) { d.diapers++; if (e.pee) d.wet++; if (e.poop) d.dirty++; }
+    }
+    return days;
+  }
+  const hm = (mins) => { mins = Math.round(mins); return Math.floor(mins / 60) + 'h ' + String(mins % 60).padStart(2, '0') + 'm'; };
+  const one = (x) => (Math.round(x * 10) / 10).toString();
+  const dayName = (d, long) => d.toLocaleDateString([], long ? { weekday: 'short', month: 'short', day: 'numeric' } : { weekday: 'short' });
+
+  // Column chart: one column per day; `series` are stacked or side by side. Tap a day to read its numbers.
+  function drawChart(host, title, days, series, opts) {
+    const W = 340, H = 150, L = 26, B = 22, T = 8, n = days.length, slot = (W - L) / n;
+    const total = (d) => series.reduce((s, x) => s + d[x.key], 0);
+    const max = Math.max(1, ...days.map((d) => (opts.stacked ? total(d) : Math.max(...series.map((x) => d[x.key])))));
+    const step = [1, 2, 5, 10, 20, 25, 50, 100, 200, 500].find((s) => max / s <= 4) || 1000, top = Math.ceil(max / step) * step;
+    const y = (v) => T + (H - T - B) * (1 - v / top);
+    const svg = document.createElementNS(SVG, 'svg'); svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', title);
+    const add = (tag, attrs, text) => { const e = document.createElementNS(SVG, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text !== undefined) e.textContent = text; svg.append(e); return e; };
+    for (let v = 0; v <= top; v += step) { add('line', { class: 'grid', x1: L, x2: W, y1: y(v), y2: y(v) }); add('text', { x: L - 6, y: y(v) + 4, 'text-anchor': 'end' }, v); }
+    const col = (x, w, v0, v1, color, round) => { // a column from value v0 up to v1, rounded on top when it is the top piece
+      const y1 = y(v1), y0 = y(v0) - (v0 > 0 ? 2 : 0), r = round ? Math.min(4, w / 2, Math.max(0, y0 - y1)) : 0;
+      if (y0 - y1 < 0.5) return;
+      add('path', { d: `M${x} ${y0}V${y1 + r}Q${x} ${y1} ${x + r} ${y1}H${x + w - r}Q${x + w} ${y1} ${x + w} ${y1 + r}V${y0}Z`, fill: color });
+    };
+    const labels = [];
+    days.forEach((d, i) => {
+      const cx = L + slot * i + slot / 2;
+      if (opts.stacked) {
+        const w = Math.min(24, slot * 0.62); let acc = 0; const live = series.filter((x) => d[x.key] > 0);
+        live.forEach((x, j) => { col(cx - w / 2, w, acc, acc + d[x.key], x.color, j === live.length - 1); acc += d[x.key]; });
+      } else {
+        const w = Math.min(series.length > 1 ? 13 : 24, (slot * 0.7 - 2 * (series.length - 1)) / series.length), span = w * series.length + 2 * (series.length - 1);
+        series.forEach((x, j) => col(cx - span / 2 + j * (w + 2), w, 0, d[x.key], x.color, true));
+      }
+      const show = n <= 7 || i % 2 === (n - 1) % 2;
+      labels.push(add('text', { x: cx, y: H - 6, 'text-anchor': 'middle' }, show ? (n <= 7 ? dayName(d.date) : d.date.getDate()) : ''));
+    });
+    const read = el('div', { className: 'read' });
+    const say = (i) => {
+      labels.forEach((l, j) => l.setAttribute('class', j === i ? 'sel' : ''));
+      if (i == null) { read.textContent = opts.summary; return; }
+      const d = days[i];
+      read.textContent = dayName(d.date, true) + ': ' + (opts.stacked && series.length > 1 ? total(d) + ' ' + opts.unit + ' (' + series.filter((x) => d[x.key]).map((x) => x.label.toLowerCase() + ' ' + d[x.key]).join(', ') + ')'
+        : series.map((x) => d[x.key] + ' ' + (series.length > 1 ? x.label.toLowerCase() : opts.unit)).join(', '));
+    };
+    days.forEach((d, i) => { const hit = add('rect', { x: L + slot * i, y: 0, width: slot, height: H, fill: 'transparent' }); hit.addEventListener('pointerenter', () => say(i)); hit.addEventListener('click', () => say(i)); });
+    svg.addEventListener('pointerleave', () => say(null));
+    say(null);
+    const box = el('div', { className: 'chart' }, el('h4', { textContent: title }), read, svg);
+    if (series.length > 1) box.append(el('div', { className: 'legend' }, ...series.map((x) => { const s = el('span', {}); const sw = el('i', {}); sw.style.background = x.color; s.append(sw, x.label); return s; })));
+    host.append(box);
+  }
+
+  function drawTrends() {
+    for (const b of document.querySelectorAll('[data-range]')) b.classList.toggle('on', Number(b.dataset.range) === trendDays);
+    let days = dayStats(trendDays);
+    const firstUsed = days.findIndex((d) => d.feeds || d.diapers); // do not chart the days before she was born
+    if (firstUsed > 0) days = days.slice(firstUsed);
+    const today = days[days.length - 1];
+    // Averages use whole days only (today is still filling up), and only days that have something logged.
+    let full = days.slice(0, -1).filter((d) => d.feeds || d.diapers);
+    const partial = !full.length; if (partial) full = [today];
+    const avg = (f) => full.reduce((s, d) => s + f(d), 0) / full.length;
+    const feeds = avg((d) => d.feeds), mins = avg((d) => d.mins), diapers = avg((d) => d.diapers);
+    const gaps = full.flatMap((d) => d.gaps), L = full.reduce((s, d) => s + d.left, 0), R = full.reduce((s, d) => s + d.right, 0);
+    const tiles = [
+      [one(feeds), 'feeds a day', 'today so far: ' + today.feeds],
+      [Math.round(mins) + ' min', 'feeding a day', 'today so far: ' + today.mins + ' min'],
+      [feeds ? Math.round(mins / feeds) + ' min' : '–', 'average feed', ''],
+      [gaps.length ? hm(gaps.reduce((a, b) => a + b, 0) / gaps.length) : '–', 'between feeds', 'start to start'],
+      [gaps.length ? hm(Math.max(...gaps)) : '–', 'longest stretch', 'between two feeds'],
+      [L + R ? Math.round((100 * L) / (L + R)) + ' / ' + Math.round((100 * R) / (L + R)) : '–', 'left / right %', 'share of feeding time'],
+      [one(avg((d) => d.wet)), 'wet diapers a day', 'today so far: ' + today.wet],
+      [one(avg((d) => d.dirty)), 'dirty diapers a day', 'today so far: ' + today.dirty],
+      [diapers ? Math.round(mins / diapers) + ' min' : '–', 'feeding per diaper', one(diapers) + ' diapers a day'],
+    ];
+    const st = $('trendStats'); st.textContent = '';
+    for (const [v, l, s] of tiles) st.append(el('div', { className: 'stat-t' }, el('div', { className: 'v', textContent: v }), el('div', { className: 'l', textContent: l }), el('div', { className: 's', textContent: s })));
+    $('trendNote').textContent = partial ? 'Averages will settle once there is a full day logged.' : 'Averages over ' + full.length + (full.length === 1 ? ' full day' : ' full days') + ' with entries. Today is left out until it is over.';
+    const host = $('trendCharts'); host.textContent = '';
+    const css = getComputedStyle(document.documentElement), s1 = css.getPropertyValue('--s1').trim(), s2 = css.getPropertyValue('--s2').trim();
+    drawChart(host, 'Feeds per day', days, [{ key: 'feeds', label: 'Feeds', color: s1 }], { unit: 'feeds', summary: 'Average ' + one(feeds) + ' a day' });
+    days.forEach((d) => { d.unsided = Math.max(0, d.mins - d.left - d.right); });
+    const sides = [{ key: 'left', label: 'Left', color: s1 }, { key: 'right', label: 'Right', color: s2 }];
+    if (days.some((d) => d.unsided)) sides.push({ key: 'unsided', label: 'Side not recorded', color: css.getPropertyValue('--muted').trim() });
+    drawChart(host, 'Minutes feeding per day', days, sides, { stacked: true, unit: 'min', summary: 'Average ' + Math.round(mins) + ' min a day' });
+    drawChart(host, 'Diapers per day', days, [{ key: 'wet', label: 'Wet', color: s1 }, { key: 'dirty', label: 'Dirty', color: s2 }], { unit: '', summary: 'A diaper with both counts once in each' });
+    const tb = $('trendTable'); tb.textContent = '';
+    const tr = (cells, tag) => { const r = document.createElement('tr'); for (const c of cells) r.append(el(tag, { textContent: c })); return r; };
+    tb.append(tr(['Day', 'Feeds', 'Min', 'Wet', 'Dirty'], 'th'));
+    for (const d of days.slice().reverse()) if (d.feeds || d.diapers) tb.append(tr([d.key === today.key ? 'Today' : dayName(d.date, true), d.feeds, d.mins, d.wet, d.dirty], 'td'));
+  }
+  for (const b of document.querySelectorAll('[data-range]')) b.onclick = () => { trendDays = Number(b.dataset.range); drawTrends(); };
+
   // ----- night mode -----
   function setNight(on) { if (on) document.documentElement.dataset.theme = 'night'; else delete document.documentElement.dataset.theme; $('moon').setAttribute('aria-pressed', on); ls.set('night', on); }
-  $('moon').onclick = () => setNight(document.documentElement.dataset.theme !== 'night');
+  $('moon').onclick = () => { setNight(document.documentElement.dataset.theme !== 'night'); if (!$('tabTrends').hidden) drawTrends(); };
   setNight(ls.get('night', false));
 
   // ----- edit sheet -----
