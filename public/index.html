@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Isabella</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f6f1ea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Isabella">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<style>
+  :root {
+    --bg: #f6f1ea; --card: #fffdf9; --ink: #2b2620; --muted: #7d7468; --line: #e6ddd0;
+    --feed: #b8552f; --feed-ink: #fff; --pee: #c99a1e; --poop: #7a5237; --both: #4e6b5a;
+    --danger: #a63a2b; --radius: 18px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16130f; --card: #211d17; --ink: #efe8dc; --muted: #9c9284; --line: #342e25;
+      --feed: #c8643c; --pee: #b88a17; --poop: #8a6044; --both: #57776a; --danger: #d2604f;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font: 17px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 28px);
+    max-width: 520px; margin: 0 auto; touch-action: manipulation;
+  }
+  h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+  header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+  header .who { color: var(--muted); font-size: 14px; }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+  [hidden] { display: none !important; }
+
+  .status { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+  .stat .label { font-size: 13px; color: var(--muted); }
+  .stat .ago { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .stat .sub { font-size: 13px; color: var(--muted); min-height: 18px; }
+
+  .actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .act { border-radius: var(--radius); color: #fff; font-weight: 700; font-size: 20px; min-height: 84px; transition: transform .06s; }
+  .act:active { transform: scale(.97); }
+  .act.feed { grid-column: 1 / -1; background: var(--feed); min-height: 96px; font-size: 24px; }
+  .act.pee { background: var(--pee); }
+  .act.poop { background: var(--poop); }
+  .act.both { background: var(--both); }
+
+  .detail { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin-top: 10px; }
+  .detail .q { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 10px 16px; font-size: 16px; min-height: 44px; }
+  .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .oz { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+  .oz button { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); font-size: 22px; }
+  .oz .val { font-size: 20px; font-weight: 700; min-width: 70px; text-align: center; font-variant-numeric: tabular-nums; }
+
+  .today { display: flex; gap: 18px; margin: 18px 2px 6px; font-size: 15px; color: var(--muted); flex-wrap: wrap; }
+  .today b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 18px 2px 6px; font-weight: 600; }
+  .list { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; width: 100%; text-align: left; border-top: 1px solid var(--line); min-height: 52px; }
+  .row:first-child { border-top: 0; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .row .t { font-variant-numeric: tabular-nums; width: 76px; flex: none; color: var(--muted); font-size: 15px; }
+  .row .what { flex: 1; font-weight: 600; }
+  .row .by { color: var(--muted); font-size: 13px; }
+  .row.pending .what::after { content: " · saving"; color: var(--muted); font-weight: 400; font-size: 13px; }
+  .empty { padding: 18px 14px; color: var(--muted); }
+
+  footer { margin-top: 22px; display: flex; gap: 18px; justify-content: center; font-size: 14px; flex-wrap: wrap; }
+  footer a, footer button { color: var(--muted); text-decoration: underline; font-size: 14px; }
+
+  .toast { position: fixed; left: 16px; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 16px); max-width: 488px; margin: 0 auto;
+    background: var(--ink); color: var(--bg); border-radius: 14px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
+  .toast button { color: var(--bg); font-weight: 700; text-decoration: underline; padding: 6px 4px; }
+
+  .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 10; display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { background: var(--card); width: 100%; max-width: 520px; border-radius: 22px 22px 0 0; padding: 18px 16px calc(env(safe-area-inset-bottom) + 18px); max-height: 92vh; overflow: auto; }
+  .sheet h3 { margin: 0 0 12px; font-size: 19px; }
+  .field { margin-bottom: 14px; }
+  .field > label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  input[type=text], input[type=password], input[type=datetime-local] {
+    width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px; min-height: 48px; }
+  .btns { display: flex; gap: 10px; margin-top: 6px; }
+  .btn { flex: 1; border-radius: 14px; min-height: 50px; font-weight: 700; background: var(--ink); color: var(--bg); }
+  .btn.ghost { background: none; color: var(--ink); border: 1px solid var(--line); }
+  .btn.danger { background: none; color: var(--danger); border: 1px solid var(--line); flex: none; padding: 0 18px; }
+
+  .login { max-width: 360px; margin: 14vh auto 0; }
+  .login p { color: var(--muted); margin: 6px 0 20px; }
+  .err { color: var(--danger); font-size: 14px; min-height: 20px; margin-top: 8px; }
+  .offline { background: var(--pee); color: #fff; border-radius: 12px; padding: 8px 12px; font-size: 14px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<section id="login" class="login" hidden>
+  <h1>Isabella</h1>
+  <p>Feedings and diapers.</p>
+  <form id="loginForm">
+    <div class="field"><label for="name">Your name</label><input id="name" type="text" autocomplete="given-name" maxlength="40" required></div>
+    <div class="field"><label for="pass">Family passcode</label><input id="pass" type="password" autocomplete="current-password" required></div>
+    <button class="btn" style="width:100%" type="submit">Sign in</button>
+    <div class="err" id="loginErr" role="alert"></div>
+  </form>
+</section>
+
+<main id="app" hidden>
+  <header><h1>Isabella</h1><span class="who" id="who"></span></header>
+  <div class="offline" id="offline" hidden>Not connected. Taps are kept on this phone and sent when you're back online.</div>
+
+  <div class="status">
+    <div class="stat"><div class="label">Last fed</div><div class="ago" id="feedAgo">–</div><div class="sub" id="feedSub"></div></div>
+    <div class="stat"><div class="label">Last diaper</div><div class="ago" id="diaperAgo">–</div><div class="sub" id="diaperSub"></div></div>
+  </div>
+
+  <div class="actions">
+    <button class="act feed" data-log="feed">Fed</button>
+    <button class="act pee" data-log="pee">Pee</button>
+    <button class="act poop" data-log="poop">Poop</button>
+    <button class="act both" data-log="both">Both</button>
+  </div>
+
+  <div class="detail" id="feedDetail" hidden>
+    <div class="q">Logged. Add how, if you like:</div>
+    <div class="chips" id="quickMethods"></div>
+    <div class="oz" id="quickOz" hidden>
+      <button type="button" data-oz="-0.5" aria-label="Less">−</button><span class="val" id="quickOzVal"></span><button type="button" data-oz="0.5" aria-label="More">+</button>
+    </div>
+  </div>
+
+  <div class="today" id="today"></div>
+
+  <div id="lists"></div>
+
+  <footer>
+    <a href="/api/export.csv">Download CSV</a>
+    <a href="/api/export.json">Download JSON</a>
+    <button id="signout">Sign out</button>
+  </footer>
+</main>
+
+<div class="toast" id="toast" hidden><span id="toastMsg"></span><button id="toastUndo">Undo</button></div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h3 id="sheetTitle">Edit</h3>
+    <div class="field">
+      <label for="editAt">When</label>
+      <input id="editAt" type="datetime-local">
+      <div class="chips" style="margin-top:8px">
+        <button class="chip" type="button" data-shift="-5">5 min earlier</button>
+        <button class="chip" type="button" data-shift="-15">15 min earlier</button>
+        <button class="chip" type="button" data-shift="-30">30 min earlier</button>
+      </div>
+    </div>
+    <div class="field" id="editDiaper">
+      <label>What</label>
+      <div class="chips">
+        <button class="chip" type="button" data-diaper="pee">Pee</button>
+        <button class="chip" type="button" data-diaper="poop">Poop</button>
+      </div>
+    </div>
+    <div class="field" id="editFeed">
+      <label>How</label>
+      <div class="chips" id="editMethods"></div>
+      <div class="oz" id="editOz" hidden>
+        <button type="button" data-oz="-0.5" aria-label="Less">−</button><span class="val" id="editOzVal"></span><button type="button" data-oz="0.5" aria-label="More">+</button>
+      </div>
+    </div>
+    <div class="field"><label for="editNote">Note</label><input id="editNote" type="text" maxlength="500" placeholder="Optional"></div>
+    <div class="btns">
+      <button class="btn danger" type="button" id="editDelete">Delete</button>
+      <button class="btn ghost" type="button" id="editCancel">Cancel</button>
+      <button class="btn" type="button" id="editSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const ls = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+  const METHODS = [['breast_left', 'Left'], ['breast_right', 'Right'], ['breast_both', 'Both sides'], ['bottle', 'Bottle']];
+  const METHOD_LABEL = Object.fromEntries(METHODS);
+
+  let who = ls.get('who', '');
+  let server = [];                  // events as the server last reported them
+  let queue = ls.get('queue', []);  // changes not yet confirmed by the server
+  let quickId = null, quickTimer = null, undoTimer = null, undoId = null, editing = null, flushing = false;
+
+  // ----- data -----
+  const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, '0')).join(''));
+
+  function events() {
+    const map = new Map(server.map((e) => [e.id, e]));
+    for (const q of queue) {
+      if (q.op === 'del') map.delete(q.id);
+      else map.set(q.ev.id, { ...q.ev, _pending: true });
+    }
+    return [...map.values()].sort((a, b) => (a.at < b.at ? 1 : -1));
+  }
+  const find = (id) => events().find((e) => e.id === id);
+
+  async function api(path, opts = {}) {
+    const res = await fetch(path, { credentials: 'same-origin', headers: opts.body ? { 'Content-Type': 'application/json' } : {}, ...opts });
+    if (res.status === 401 && path !== '/api/login') { showLogin(); throw new Error('auth'); }
+    return res;
+  }
+
+  function enqueue(item) {
+    // A newer change to the same event replaces an older unsent one.
+    const id = item.op === 'del' ? item.id : item.ev.id;
+    queue = queue.filter((q) => (q.op === 'del' ? q.id : q.ev.id) !== id);
+    queue.push(item);
+    ls.set('queue', queue);
+    render();
+    flush();
+  }
+
+  async function flush() {
+    if (flushing) return;
+    flushing = true;
+    try {
+      while (queue.length) {
+        const item = queue[0];
+        let res;
+        try {
+          res = item.op === 'del'
+            ? await api('/api/events/' + item.id, { method: 'DELETE' })
+            : await api('/api/events', { method: 'POST', body: JSON.stringify(item.ev) });
+        } catch (e) { if (e.message !== 'auth') setOffline(true); return; }
+        if (res.status >= 500 || res.status === 429) { setOffline(true); return; }
+        setOffline(false);
+        if (res.ok && item.op !== 'del') {
+          const { event } = await res.json();
+          server = server.filter((e) => e.id !== event.id).concat(event);
+        } else if (res.ok) {
+          server = server.filter((e) => e.id !== item.id);
+        }
+        // Drop it if it is still the same queued change (it may have been replaced while sending).
+        if (queue[0] === item) queue.shift();
+        ls.set('queue', queue);
+        render();
+      }
+    } finally { flushing = false; }
+  }
+
+  async function refresh() {
+    try {
+      const res = await api('/api/events?days=3');
+      if (!res.ok) return;
+      server = (await res.json()).events;
+      setOffline(false);
+      render();
+      flush();
+    } catch (e) { if (e.message !== 'auth') setOffline(true); }
+  }
+
+  function setOffline(v) { $('offline').hidden = !v; }
+
+  // ----- formatting -----
+  function ago(iso) {
+    const mins = Math.max(0, Math.floor((Date.now() - new Date(iso)) / 60000));
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const h = Math.floor(mins / 60), m = mins % 60;
+    if (h < 24) return h + 'h ' + m + 'm ago';
+    return Math.floor(h / 24) + 'd ' + (h % 24) + 'h ago';
+  }
+  const clock = (iso) => new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const dayKey = (d) => { const x = new Date(d); return x.getFullYear() + '-' + (x.getMonth() + 1) + '-' + x.getDate(); };
+  function describe(e) {
+    if (e.kind === 'diaper') return e.pee && e.poop ? 'Pee + poop' : e.poop ? 'Poop' : 'Pee';
+    let s = 'Fed';
+    if (e.method) s += ' · ' + METHOD_LABEL[e.method];
+    if (e.method === 'bottle' && e.amount_oz != null) s += ' ' + e.amount_oz + ' oz';
+    return s;
+  }
+  const color = (e) => e.kind === 'feed' ? 'var(--feed)' : e.pee && e.poop ? 'var(--both)' : e.poop ? 'var(--poop)' : 'var(--pee)';
+
+  // ----- render -----
+  function render() {
+    const all = events();
+    const lastFeed = all.find((e) => e.kind === 'feed');
+    const lastDiaper = all.find((e) => e.kind === 'diaper');
+    $('feedAgo').textContent = lastFeed ? ago(lastFeed.at) : '–';
+    $('feedSub').textContent = lastFeed ? clock(lastFeed.at) + describe(lastFeed).replace(/^Fed/, '') : 'Nothing logged yet';
+    $('diaperAgo').textContent = lastDiaper ? ago(lastDiaper.at) : '–';
+    $('diaperSub').textContent = lastDiaper ? clock(lastDiaper.at) + ' · ' + describe(lastDiaper) : 'Nothing logged yet';
+
+    const today = dayKey(Date.now());
+    const t = all.filter((e) => dayKey(e.at) === today);
+    const today$ = $('today');
+    today$.textContent = '';
+    for (const [label, n] of [['feeds', t.filter((e) => e.kind === 'feed').length], ['wet', t.filter((e) => e.pee).length], ['dirty', t.filter((e) => e.poop).length]]) {
+      const span = document.createElement('span'); const b = document.createElement('b');
+      b.textContent = n; span.append(b, ' ' + label); today$.append(span);
+    }
+    today$.prepend(Object.assign(document.createElement('span'), { textContent: 'Today:' }));
+
+    const lists = $('lists');
+    lists.textContent = '';
+    const groups = new Map();
+    for (const e of all) { const k = dayKey(e.at); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(e); }
+    const yesterday = dayKey(Date.now() - 864e5);
+    if (!all.length) {
+      const d = document.createElement('div'); d.className = 'list';
+      d.append(Object.assign(document.createElement('div'), { className: 'empty', textContent: 'Tap a button above to log the first one.' }));
+      lists.append(d);
+    }
+    for (const [k, items] of groups) {
+      const h = document.createElement('h2');
+      h.textContent = k === today ? 'Today' : k === yesterday ? 'Yesterday' : new Date(items[0].at).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+      const list = document.createElement('div'); list.className = 'list';
+      for (const e of items) {
+        const row = document.createElement('button');
+        row.className = 'row' + (e._pending ? ' pending' : ''); row.type = 'button'; row.dataset.id = e.id;
+        const dot = document.createElement('span'); dot.className = 'dot'; dot.style.background = color(e);
+        const tm = Object.assign(document.createElement('span'), { className: 't', textContent: clock(e.at) });
+        const what = Object.assign(document.createElement('span'), { className: 'what', textContent: describe(e) + (e.note ? ' · ' + e.note : '') });
+        const by = Object.assign(document.createElement('span'), { className: 'by', textContent: e.by || '' });
+        row.append(dot, tm, what, by); list.append(row);
+      }
+      lists.append(h, list);
+    }
+  }
+
+  // ----- method chips (shared by quick panel and edit sheet) -----
+  function drawMethods(container, ozBox, ozVal, ev, onChange) {
+    container.textContent = '';
+    for (const [key, label] of METHODS) {
+      const b = Object.assign(document.createElement('button'), { className: 'chip' + (ev.method === key ? ' on' : ''), type: 'button', textContent: label });
+      b.onclick = () => {
+        ev.method = ev.method === key ? null : key;
+        if (ev.method === 'bottle' && ev.amount_oz == null) ev.amount_oz = ls.get('lastOz', 2);
+        if (ev.method !== 'bottle') ev.amount_oz = null;
+        onChange();
+      };
+      container.append(b);
+    }
+    ozBox.hidden = ev.method !== 'bottle';
+    ozVal.textContent = (ev.amount_oz ?? 0) + ' oz';
+    for (const btn of ozBox.querySelectorAll('[data-oz]')) {
+      btn.onclick = () => {
+        ev.amount_oz = Math.min(20, Math.max(0, (ev.amount_oz ?? 0) + Number(btn.dataset.oz)));
+        ls.set('lastOz', ev.amount_oz);
+        onChange();
+      };
+    }
+  }
+
+  // ----- logging -----
+  function log(type) {
+    const ev = { id: uuid(), at: new Date().toISOString(), by: who, note: '' };
+    if (type === 'feed') Object.assign(ev, { kind: 'feed', method: null, amount_oz: null });
+    else Object.assign(ev, { kind: 'diaper', pee: type !== 'poop', poop: type !== 'pee' });
+    enqueue({ op: 'put', ev });
+    if (navigator.vibrate) navigator.vibrate(15);
+    toast('Logged: ' + describe(ev), ev.id);
+    if (type === 'feed') openQuick(ev.id); else closeQuick();
+  }
+
+  function openQuick(id) {
+    quickId = id;
+    const draw = () => {
+      const ev = find(quickId); if (!ev) return closeQuick();
+      const copy = { ...ev }; delete copy._pending;
+      drawMethods($('quickMethods'), $('quickOz'), $('quickOzVal'), copy, () => { enqueue({ op: 'put', ev: copy }); draw(); armQuick(); });
+    };
+    $('feedDetail').hidden = false; draw(); armQuick();
+  }
+  function armQuick() { clearTimeout(quickTimer); quickTimer = setTimeout(closeQuick, 45000); }
+  function closeQuick() { quickId = null; clearTimeout(quickTimer); $('feedDetail').hidden = true; }
+
+  function toast(msg, id) {
+    undoId = id; $('toastMsg').textContent = msg; $('toast').hidden = false;
+    clearTimeout(undoTimer); undoTimer = setTimeout(() => { $('toast').hidden = true; }, 6000);
+  }
+  $('toastUndo').onclick = () => {
+    if (undoId) { if (undoId === quickId) closeQuick(); enqueue({ op: 'del', id: undoId }); }
+    $('toast').hidden = true;
+  };
+
+  for (const b of document.querySelectorAll('[data-log]')) b.onclick = () => log(b.dataset.log);
+
+  // ----- edit sheet -----
+  const toLocalInput = (iso) => { const d = new Date(iso); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
+  function openEdit(id) {
+    const ev = find(id); if (!ev) return;
+    editing = { ...ev }; delete editing._pending;
+    $('toast').hidden = true;
+    drawEdit(); $('scrim').hidden = false;
+  }
+  function drawEdit() {
+    $('sheetTitle').textContent = editing.kind === 'feed' ? 'Edit feeding' : 'Edit diaper';
+    $('editAt').value = toLocalInput(editing.at);
+    $('editAt').max = toLocalInput(new Date().toISOString());
+    $('editNote').value = editing.note || '';
+    $('editDiaper').hidden = editing.kind !== 'diaper';
+    $('editFeed').hidden = editing.kind !== 'feed';
+    if (editing.kind === 'diaper') for (const c of document.querySelectorAll('[data-diaper]')) c.classList.toggle('on', !!editing[c.dataset.diaper]);
+    else drawMethods($('editMethods'), $('editOz'), $('editOzVal'), editing, () => { editing.note = $('editNote').value; drawEdit(); });
+  }
+  $('editAt').onchange = () => { const d = new Date($('editAt').value); if (!isNaN(d)) editing.at = d.toISOString(); };
+  for (const c of document.querySelectorAll('[data-shift]')) c.onclick = () => {
+    editing.at = new Date(new Date(editing.at).getTime() + Number(c.dataset.shift) * 60000).toISOString();
+    $('editAt').value = toLocalInput(editing.at);
+  };
+  for (const c of document.querySelectorAll('[data-diaper]')) c.onclick = () => {
+    const k = c.dataset.diaper, other = k === 'pee' ? 'poop' : 'pee';
+    if (editing[k] && !editing[other]) return; // a diaper is always at least one of the two
+    editing[k] = !editing[k]; drawEdit();
+  };
+  const closeEdit = () => { $('scrim').hidden = true; editing = null; };
+  $('editCancel').onclick = closeEdit;
+  $('scrim').onclick = (e) => { if (e.target === $('scrim')) closeEdit(); };
+  $('editSave').onclick = () => {
+    editing.note = $('editNote').value.trim();
+    if (new Date(editing.at) > new Date()) editing.at = new Date().toISOString();
+    enqueue({ op: 'put', ev: editing }); closeEdit();
+  };
+  $('editDelete').onclick = () => {
+    const id = editing.id; if (id === quickId) closeQuick();
+    closeEdit(); enqueue({ op: 'del', id });
+  };
+  $('lists').onclick = (e) => { const row = e.target.closest('.row'); if (row) openEdit(row.dataset.id); };
+
+  // ----- sign in / out -----
+  function showLogin() { $('app').hidden = true; $('login').hidden = false; $('name').value = who; }
+  function showApp() { $('login').hidden = true; $('app').hidden = false; $('who').textContent = who; render(); }
+  $('loginForm').onsubmit = async (e) => {
+    e.preventDefault(); $('loginErr').textContent = '';
+    try {
+      const res = await api('/api/login', { method: 'POST', body: JSON.stringify({ passcode: $('pass').value }) });
+      if (!res.ok) { $('loginErr').textContent = (await res.json()).error || 'Could not sign in'; return; }
+      who = $('name').value.trim(); ls.set('who', who); $('pass').value = '';
+      showApp(); refresh();
+    } catch { $('loginErr').textContent = 'No connection. Try again.'; }
+  };
+  $('signout').onclick = async () => { try { await api('/api/logout', { method: 'POST' }); } catch {} showLogin(); };
+
+  // ----- start -----
+  if (who) showApp(); else showLogin();
+  if (who) refresh();
+  setInterval(() => { if (!document.hidden && !$('app').hidden) { render(); } }, 20000);
+  setInterval(() => { if (!document.hidden && !$('app').hidden && !editing) refresh(); }, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('app').hidden) refresh(); });
+  window.addEventListener('online', () => refresh());
+})();
+</script>
+</body>
+</html>
