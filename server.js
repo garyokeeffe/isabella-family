@@ -293,16 +293,6 @@ function cleanNote(input, existing) {
   return out;
 }
 
-// Notes used to be one text box on each appointment. Copy those across once, each attached to its visit.
-async function migrateAppointmentNotes() {
-  if (await settings.get('notes_migrated')) return;
-  for (const a of await appts.all()) {
-    if (a.note && a.note.trim() && !(await notes.get('fromappt-' + a.id.slice(0, 50))))
-      await notes.put(cleanNote({ id: 'fromappt-' + a.id.slice(0, 50), text: a.note, appt_id: a.id, by: a.by, at: a.created_at }));
-  }
-  await settings.put({ id: 'notes_migrated', at: new Date().toISOString() });
-}
-
 // ---------- export ----------
 
 const CSV_COLS = ['id', 'at_utc', 'at_local', 'kind', 'pee', 'poop', 'duration_min', 'left_min', 'right_min', 'last_side', 'in_progress', 'by', 'note', 'created_at', 'updated_at'];
@@ -519,7 +509,6 @@ async function handle(req, res) {
     return send(res, 200, { ok: true });
   }
   if (p === '/api/notes' && req.method === 'GET') {
-    await migrateAppointmentNotes();
     return send(res, 200, { notes: await notes.all() });
   }
   if (p === '/api/notes' && req.method === 'POST') {
