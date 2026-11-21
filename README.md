@@ -7,7 +7,7 @@ Google Cloud project; the data lives in your own Firestore database.
 - **Feeding timer**: shared between both phones. Tap Left or Right when she switches; each side keeps its own time. Finish saves the feed.
 - **Pee / Poop / Both**: one tap logs it with the time and who tapped.
 - **Journal**: the last 7 days by day, with totals. Tap a line to fix the time, minutes per side, note, or remove it.
-- **Trends**: 7 or 14 day averages (feeds, feeding minutes, time between feeds, left/right split, wet and dirty diapers, feeding minutes per diaper), three charts and a day-by-day table.
+- **Trends** (under More): a short view first, with the rest behind "Show all the numbers". 7 or 14 day averages (feeds, feeding minutes, time between feeds, left/right split, wet and dirty diapers, feeding minutes per diaper), three charts and a day-by-day table.
 - **Notes**: quick notes and questions for the doctor. Questions gather under the next visit as a checklist, each with room for what was said; every visit keeps "What the doctor said". Appointments live here too.
 - **More**: feed reminders and sleep sounds.
 - **Sleep sounds**: loops of real recordings (rain, ocean waves, stream, white noise, pink noise) with an optional auto-off.

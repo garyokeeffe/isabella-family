@@ -192,7 +192,7 @@
 
   /* ----- tab bar ----- */
   nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--bar); border-top: 1.5px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
-  nav.tabs .in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); }
+  nav.tabs .in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
   nav.tabs button { height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; color: var(--muted); border-top: 2px solid transparent; margin-top: -1.5px; }
   nav.tabs button svg { width: 26px; height: 26px; }
   nav.tabs button[aria-current="page"] { color: var(--ink); border-top-color: var(--brass); font-weight: 600; }
@@ -333,6 +333,7 @@
 
   <!-- TRENDS -->
   <section class="tab" id="tabTrends" hidden>
+    <button class="quiet" type="button" id="trendBack" style="padding-left:2px">‹ Back to More</button>
     <h2>Trends</h2>
     <div class="day24"><div class="l">Last 24 hours</div><div class="v" id="last24"></div></div>
     <div class="seg two" id="trendRange" style="margin-bottom:18px">
@@ -342,12 +343,19 @@
     <div class="stats" id="trendStats"></div>
     <p class="note" id="trendNote"></p>
     <div id="trendCharts"></div>
+    <button class="wide" type="button" id="trendMoreBtn" aria-expanded="false">Show all the numbers</button>
+    <div id="trendMore" hidden>
+      <div class="stats" id="trendStats2" style="margin-top:22px"></div>
+      <div id="trendCharts2"></div>
+    </div>
     <h2 class="sub">Day by day</h2>
     <div class="list"><table class="days" id="trendTable"></table></div>
   </section>
 
   <!-- MORE -->
   <section class="tab" id="tabMore" hidden>
+    <button class="wide" type="button" id="openTrends" style="margin:0 0 26px;display:flex;justify-content:space-between;align-items:center;padding:0 20px"><span>Trends and averages</span><span aria-hidden="true">›</span></button>
+
     <h2>Feed reminders</h2>
     <p class="note" id="remState" style="margin:0 2px 10px;color:var(--ink);font-size:18px"></p>
     <p class="note" style="margin:0 2px 14px">A notification on this phone when it has been this long since her last feed started. It repeats every 30 minutes until a feed starts.</p>
@@ -381,7 +389,6 @@
     <button type="button" data-tab="Today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg>Today</button>
     <button type="button" data-tab="Journal"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-page"/></svg>Journal</button>
     <button type="button" data-tab="Notes"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pencil"/></svg>Notes</button>
-    <button type="button" data-tab="Trends"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bars"/></svg>Trends</button>
     <button type="button" data-tab="More"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-leaf"/></svg>More</button>
   </div>
 </nav>
@@ -719,7 +726,7 @@
   function showTab(name) {
     for (const t of ['Today', 'Journal', 'Notes', 'Trends', 'More']) $('tab' + t).hidden = t !== name;
     if (name === 'Trends') loadTrends();
-    for (const b of document.querySelectorAll('[data-tab]')) { if (b.dataset.tab === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
+    for (const b of document.querySelectorAll('[data-tab]')) { if (b.dataset.tab === (name === 'Trends' ? 'More' : name)) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
     window.scrollTo(0, 0);
   }
   for (const b of document.querySelectorAll('[data-tab]')) b.onclick = () => showTab(b.dataset.tab);
@@ -808,33 +815,40 @@
     const gaps = full.flatMap((d) => d.gaps), L = full.reduce((s, d) => s + d.left, 0), R = full.reduce((s, d) => s + d.right, 0);
     const dayAgo = Date.now() - 864e5, recent = (trendEvents || events()).filter((e) => new Date(e.at) >= dayAgo);
     $('last24').textContent = tally(recent);
-    const tiles = [
+    const main = [
       [one(feeds), 'feeds a day', 'today so far: ' + today.feeds],
+      [gaps.length ? hm(Math.max(...gaps)) : '–', 'longest stretch', 'between two feeds'],
+      [one(avg((d) => d.wet)), 'wet diapers a day', 'today so far: ' + today.wet],
+      [one(avg((d) => d.dirty)), 'dirty diapers a day', 'today so far: ' + today.dirty],
+    ];
+    const extra = [
       [Math.round(mins) + ' min', 'feeding a day', 'today so far: ' + today.mins + ' min'],
       [feeds ? Math.round(mins / feeds) + ' min' : '–', 'average feed', ''],
       [gaps.length ? hm(gaps.reduce((a, b) => a + b, 0) / gaps.length) : '–', 'between feeds', 'start to start'],
-      [gaps.length ? hm(Math.max(...gaps)) : '–', 'longest stretch', 'between two feeds'],
       [L + R ? Math.round((100 * L) / (L + R)) + ' / ' + Math.round((100 * R) / (L + R)) : '–', 'left / right %', 'share of feeding time'],
-      [one(avg((d) => d.wet)), 'wet diapers a day', 'today so far: ' + today.wet],
-      [one(avg((d) => d.dirty)), 'dirty diapers a day', 'today so far: ' + today.dirty],
       [diapers ? Math.round(mins / diapers) + ' min' : '–', 'feeding per diaper', one(diapers) + ' diapers a day'],
     ];
-    const st = $('trendStats'); st.textContent = '';
-    for (const [v, l, s] of tiles) st.append(el('div', { className: 'stat-t' }, el('div', { className: 'v', textContent: v }), el('div', { className: 'l', textContent: l }), el('div', { className: 's', textContent: s })));
+    for (const [id, tiles] of [['trendStats', main], ['trendStats2', extra]]) {
+      const st = $(id); st.textContent = '';
+      for (const [v, l, s] of tiles) st.append(el('div', { className: 'stat-t' }, el('div', { className: 'v', textContent: v }), el('div', { className: 'l', textContent: l }), el('div', { className: 's', textContent: s })));
+    }
     $('trendNote').textContent = partial ? 'Averages will settle once there is a full day logged.' : 'Averages over ' + full.length + (full.length === 1 ? ' full day' : ' full days') + ' with entries. Today is left out until it is over.';
-    const host = $('trendCharts'); host.textContent = '';
+    const host = $('trendCharts'), host2 = $('trendCharts2'); host.textContent = ''; host2.textContent = '';
     const css = getComputedStyle(document.documentElement), s1 = css.getPropertyValue('--s1').trim(), s2 = css.getPropertyValue('--s2').trim();
     drawChart(host, 'Feeds per day', days, [{ key: 'feeds', label: 'Feeds', color: s1 }], { unit: 'feeds', summary: 'Average ' + one(feeds) + ' a day' });
     days.forEach((d) => { d.unsided = Math.max(0, d.mins - d.left - d.right); });
     const sides = [{ key: 'left', label: 'Left', color: s1 }, { key: 'right', label: 'Right', color: s2 }];
     if (days.some((d) => d.unsided)) sides.push({ key: 'unsided', label: 'Side not recorded', color: css.getPropertyValue('--muted').trim() });
-    drawChart(host, 'Minutes feeding per day', days, sides, { stacked: true, unit: 'min', summary: 'Average ' + Math.round(mins) + ' min a day' });
+    drawChart(host2, 'Minutes feeding per day', days, sides, { stacked: true, unit: 'min', summary: 'Average ' + Math.round(mins) + ' min a day' });
     drawChart(host, 'Diapers per day', days, [{ key: 'wet', label: 'Wet', color: s1 }, { key: 'dirty', label: 'Dirty', color: s2 }], { unit: '', summary: 'A diaper with both counts once in each' });
     const tb = $('trendTable'); tb.textContent = '';
     const tr = (cells, tag) => { const r = document.createElement('tr'); for (const c of cells) r.append(el(tag, { textContent: c })); return r; };
     tb.append(tr(['Day', 'Feeds', 'Min', 'Wet', 'Dirty'], 'th'));
     for (const d of days.slice().reverse()) if (d.feeds || d.diapers) tb.append(tr([d.key === today.key ? 'Today' : dayName(d.date, true), d.feeds, d.mins, d.wet, d.dirty], 'td'));
   }
+  $('openTrends').onclick = () => showTab('Trends');
+  $('trendBack').onclick = () => showTab('More');
+  $('trendMoreBtn').onclick = () => { const m = $('trendMore'); m.hidden = !m.hidden; $('trendMoreBtn').setAttribute('aria-expanded', !m.hidden); $('trendMoreBtn').textContent = m.hidden ? 'Show all the numbers' : 'Show fewer numbers'; };
   for (const b of document.querySelectorAll('[data-range]')) b.onclick = () => { trendDays = Number(b.dataset.range); drawTrends(); };
 
   // ----- night mode -----
