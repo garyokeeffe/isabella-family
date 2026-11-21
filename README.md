@@ -8,7 +8,8 @@ Google Cloud project; the data lives in your own Firestore database.
 - **Pee / Poop / Both**: one tap logs it with the time and who tapped.
 - **Journal**: the last 7 days by day, with totals. Tap a line to fix the time, minutes per side, note, or remove it.
 - **Trends**: 7 or 14 day averages (feeds, feeding minutes, time between feeds, left/right split, wet and dirty diapers, feeding minutes per diaper), three charts and a day-by-day table.
-- **More**: appointments (upcoming and past, with place and notes) and sleep sounds.
+- **Notes**: quick notes and questions for the doctor. Questions gather under the next visit as a checklist, each with room for what was said; every visit keeps "What the doctor said". Appointments live here too.
+- **More**: feed reminders and sleep sounds.
 - **Sleep sounds**: loops of real recordings (rain, ocean waves, stream, white noise, pink noise) with an optional auto-off.
 - **Feed reminders**: a push notification on each phone that turned them on, once it has been 3 hours (adjustable) since the last feed started; repeats every 30 minutes until a feed starts. A Cloud Scheduler job checks every 5 minutes.
 - **Night mode**: the moon button dims the whole app.
@@ -64,6 +65,7 @@ Each person signs in once with their name and the passcode; the phone stays sign
 ## Raw data
 
 - Page footer: Download all as spreadsheet (CSV).
+- Notes: Firestore collection `notes` (`text`, `is_question`, `asked`, `answer`, `appt_id`, `by`, `at`), or "Download notes".
 - Appointments: "Download appointments" in the footer, or Firestore collection `appointments` (`at`, `title`, `where`, `note`, `by`).
 - Direct: Firestore console, collection `events`. One document per event:
 

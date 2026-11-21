@@ -88,6 +88,7 @@ const makeStore = (name) =>
     : firestoreStore(name);
 const store = makeStore('events');
 const appts = makeStore('appointments');
+const notes = makeStore('notes');        // free-standing notes and questions for the doctor
 const pushSubs = makeStore('push');      // one row per phone that turned reminders on
 const settings = makeStore('settings');  // reminder interval, push keys, last reminder sent
 
@@ -267,11 +268,39 @@ function cleanAppointment(input, existing) {
   out.title = String(src.title || '').trim().slice(0, 80);
   if (!out.title) throw new Error('Say what the appointment is');
   out.where = String(src.where || '').trim().slice(0, 120);
-  out.note = String(src.note || '').slice(0, 2000);
+  out.note = String(src.note || '').slice(0, 2000);       // older free-text notes; new notes live in the notes collection
+  out.summary = String(src.summary || '').slice(0, 4000); // what the doctor said
   out.by = String(src.by || '').trim().slice(0, 40);
   out.created_at = (existing && existing.created_at) || new Date().toISOString();
   out.updated_at = new Date().toISOString();
   return out;
+}
+
+function cleanNote(input, existing) {
+  const src = { ...(existing || {}), ...input };
+  const out = { id: src.id };
+  if (!ID_RE.test(String(out.id || ''))) throw new Error('bad id');
+  out.text = String(src.text || '').trim().slice(0, 2000);
+  if (!out.text) throw new Error('Write something first');
+  out.is_question = !!src.is_question;
+  out.appt_id = ID_RE.test(String(src.appt_id || '')) ? src.appt_id : null; // the visit it belongs to, once asked or answered
+  out.asked = out.is_question && !!src.asked;
+  out.answer = out.is_question ? String(src.answer || '').slice(0, 2000) : '';
+  out.by = String(src.by || '').trim().slice(0, 40);
+  const at = new Date((existing && existing.at) || src.at || Date.now());
+  out.at = (isNaN(at) ? new Date() : at).toISOString();
+  out.updated_at = new Date().toISOString();
+  return out;
+}
+
+// Notes used to be one text box on each appointment. Copy those across once, each attached to its visit.
+async function migrateAppointmentNotes() {
+  if (await settings.get('notes_migrated')) return;
+  for (const a of await appts.all()) {
+    if (a.note && a.note.trim() && !(await notes.get('fromappt-' + a.id.slice(0, 50))))
+      await notes.put(cleanNote({ id: 'fromappt-' + a.id.slice(0, 50), text: a.note, appt_id: a.id, by: a.by, at: a.created_at }));
+  }
+  await settings.put({ id: 'notes_migrated', at: new Date().toISOString() });
 }
 
 // ---------- export ----------
@@ -489,8 +518,35 @@ async function handle(req, res) {
     await appts.remove(am[1]);
     return send(res, 200, { ok: true });
   }
+  if (p === '/api/notes' && req.method === 'GET') {
+    await migrateAppointmentNotes();
+    return send(res, 200, { notes: await notes.all() });
+  }
+  if (p === '/api/notes' && req.method === 'POST') {
+    const body = await readJson(req);
+    let n;
+    try {
+      n = cleanNote(body, ID_RE.test(String(body.id || '')) ? await notes.get(body.id) : null);
+    } catch (e) {
+      return send(res, 400, { error: e.message });
+    }
+    await notes.put(n);
+    return send(res, 200, { note: n });
+  }
+  const nm = p.match(/^\/api\/notes\/([A-Za-z0-9_-]{8,64})$/);
+  if (nm && req.method === 'DELETE') {
+    await notes.remove(nm[1]);
+    return send(res, 200, { ok: true });
+  }
+  if (p === '/api/notes.csv' && req.method === 'GET') {
+    const cols = ['id', 'at_utc', 'at_local', 'text', 'is_question', 'asked', 'answer', 'appt_id', 'by', 'updated_at'];
+    return send(res, 200, toCsv(await notes.all(), cols), {
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': 'attachment; filename="isabella-notes.csv"',
+    });
+  }
   if (p === '/api/appointments.csv' && req.method === 'GET') {
-    const cols = ['id', 'at_utc', 'at_local', 'title', 'where', 'note', 'by', 'created_at', 'updated_at'];
+    const cols = ['id', 'at_utc', 'at_local', 'title', 'where', 'summary', 'note', 'by', 'created_at', 'updated_at'];
     return send(res, 200, toCsv(await appts.all(), cols), {
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': 'attachment; filename="isabella-appointments.csv"',
