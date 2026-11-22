@@ -8,7 +8,7 @@ Google Cloud project; the data lives in your own Firestore database.
 - **Pee / Poop / Both**: one tap logs it with the time and who tapped.
 - **Journal**: the last 7 days by day, with totals. Tap a line to fix the time, minutes per side, note, or remove it.
 - **Trends**: a short view first, with the rest behind "Show all the numbers". 7 or 14 day averages (feeds, feeding minutes, time between feeds, left/right split, wet and dirty diapers, feeding minutes per diaper), three charts and a day-by-day table.
-- **Appointments**: any kind of appointment (date, time, place, notes), upcoming and past. A second tab on the same page, **Notes**, is a simple list of free-standing notes.
+- **Appointments**: any kind of appointment. Tap one to open its own page with two tabs: **Details** (what, when, where) and **Notes**, a full-screen text field that saves by itself.
 - **More**: a short menu. Feed reminders, Sleep sounds, Trends and averages, and Export and account each open on their own page.
 - **Sleep sounds**: loops of real recordings (rain, ocean waves, stream, white noise, pink noise) with an optional auto-off.
 - **Feed reminders**: a push notification on each phone that turned them on, once it has been 3 hours (adjustable) since the last feed started; repeats every 30 minutes until a feed starts. A Cloud Scheduler job checks every 5 minutes.

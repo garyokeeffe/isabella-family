@@ -268,7 +268,7 @@ function cleanAppointment(input, existing) {
   out.title = String(src.title || '').trim().slice(0, 80);
   if (!out.title) throw new Error('Say what the appointment is');
   out.where = String(src.where || '').trim().slice(0, 120);
-  out.note = String(src.note || '').slice(0, 2000);       // older free-text notes; new notes live in the notes collection
+  out.note = String(src.note || '').slice(0, 20000);       // older free-text notes; new notes live in the notes collection
   out.summary = String(src.summary || '').slice(0, 4000); // what the doctor said
   out.by = String(src.by || '').trim().slice(0, 40);
   out.created_at = (existing && existing.created_at) || new Date().toISOString();

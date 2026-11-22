@@ -145,6 +145,14 @@
   .clamp2 { display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-line; }
   .cap { display: block; color: var(--brass); font-size: 15px; font-weight: 600; }
   .btn:disabled { opacity: .45; }
+  .ap-title { font-size: 34px; margin: 2px 2px 4px; line-height: 1.1; }
+  .ap-when { color: var(--muted); font-size: 18px; margin: 0 2px 16px; }
+  .notebox { display: block; width: 100%; min-height: 260px; font-size: 20px; line-height: 1.5; border-radius: 24px; padding: 18px; resize: none; }
+  .savedline { color: var(--muted); font-size: 15px; margin: 8px 4px 0; min-height: 22px; }
+  .kv { padding: 16px; border-top: 1.5px solid var(--line); }
+  .kv:first-child { border-top: 0; }
+  .kv small { display: block; color: var(--muted); font-size: 15px; }
+  .kv span { font-size: 20px; }
   .menu .row { min-height: 76px; }
   .menu .row .what { font-size: 20px; }
   /* ----- notes and visits ----- */
@@ -320,28 +328,51 @@
     <div id="lists"></div>
   </section>
 
-  <!-- APPOINTMENTS (with Notes as a tab inside) -->
+  <!-- APPOINTMENTS: the list -->
   <section class="tab" id="tabAppointments" hidden>
     <h2>Appointments</h2>
-    <div class="seg two pagetabs" role="tablist" style="margin-bottom:18px">
-      <button class="chip" type="button" role="tab" data-sub="appts">Appointments</button>
-      <button class="chip" type="button" role="tab" data-sub="notes">Notes</button>
+    <button class="wide" type="button" id="apptAdd" style="margin-top:0">Add an appointment</button>
+    <div class="list" id="apptList" style="margin-top:14px"></div>
+    <button class="quiet" type="button" id="apptPastBtn" hidden></button>
+    <div class="list" id="apptPast" style="opacity:.62" hidden></div>
+    <button class="quiet" type="button" id="otherNotesBtn" style="display:block" hidden></button>
+  </section>
+
+  <!-- ONE APPOINTMENT: Details and Notes tabs -->
+  <section class="tab" id="tabAppt" hidden>
+    <button class="back" type="button" id="apBack">‹ Appointments</button>
+    <h2 class="ap-title" id="apTitle"></h2>
+    <div class="ap-when" id="apWhen"></div>
+    <div class="seg two pagetabs" role="tablist" style="margin-bottom:16px">
+      <button class="chip" type="button" role="tab" data-ap="details">Details</button>
+      <button class="chip" type="button" role="tab" data-ap="notes">Notes</button>
     </div>
-    <div id="subAppts">
-      <button class="wide" type="button" id="apptAdd" style="margin-top:0">Add an appointment</button>
-      <div class="list" id="apptList" style="margin-top:14px"></div>
-      <button class="quiet" type="button" id="apptPastBtn" hidden></button>
-      <div class="list" id="apptPast" style="opacity:.62" hidden></div>
-    </div>
-    <div id="subNotes" hidden>
-      <div class="composer">
-        <label for="quickNote" style="position:absolute;left:-9999px">Write a note</label>
-        <textarea id="quickNote" maxlength="2000" placeholder="Write a note…"></textarea>
-        <button class="btn" type="button" id="quickSave" style="width:100%;margin-top:10px" disabled>Save note</button>
-        <div class="err" id="quickErr" role="alert"></div>
+    <div id="apDetails">
+      <div class="list">
+        <div class="kv"><small>What</small><span id="apWhat"></span></div>
+        <div class="kv"><small>When</small><span id="apWhenFull"></span></div>
+        <div class="kv"><small>Where</small><span id="apWhere"></span></div>
       </div>
-      <div id="notesByDay"></div>
+      <button class="wide" type="button" id="apEdit">Change details</button>
     </div>
+    <div id="apNotes" hidden>
+      <label for="apNoteBox" style="position:absolute;left:-9999px">Notes for this appointment</label>
+      <textarea class="notebox" id="apNoteBox" maxlength="20000" placeholder="Notes for this appointment…"></textarea>
+      <div class="savedline" id="apSaved" role="status"></div>
+    </div>
+  </section>
+
+  <!-- notes that were written without an appointment (only reachable while any exist) -->
+  <section class="tab" id="tabOtherNotes" hidden>
+    <button class="back" type="button" id="onBack">‹ Appointments</button>
+    <h2>Other notes</h2>
+    <div class="composer">
+      <label for="quickNote" style="position:absolute;left:-9999px">Write a note</label>
+      <textarea id="quickNote" maxlength="2000" placeholder="Write a note…"></textarea>
+      <button class="btn" type="button" id="quickSave" style="width:100%;margin-top:10px" disabled>Save note</button>
+      <div class="err" id="quickErr" role="alert"></div>
+    </div>
+    <div id="notesByDay"></div>
   </section>
 
   <!-- TRENDS -->
@@ -488,7 +519,6 @@
       <div><label class="lab" for="apptTime">Time</label><input id="apptTime" type="time"></div>
     </div>
     <div class="field"><label for="apptWhere">Where</label><input id="apptWhere" type="text" maxlength="120"></div>
-    <div class="field"><label for="apptNote">Notes</label><textarea id="apptNote" maxlength="6000"></textarea></div>
     <div class="err" id="apptErr" role="alert"></div>
     <button class="redlink" type="button" id="apptDelete">Remove this appointment</button>
     <div class="btns">
@@ -748,11 +778,13 @@
   $('toastUndo').onclick = () => { if (undoFn) undoFn(); undoFn = null; $('toast').hidden = true; };
 
   // ----- tabs -----
-  const SUBPAGES = ['Trends', 'Reminders', 'Sounds', 'Account'], PAGES = ['Today', 'Journal', 'Appointments', 'More', ...SUBPAGES];
+  const SUBPAGES = ['Trends', 'Reminders', 'Sounds', 'Account'], APPTPAGES = ['Appt', 'OtherNotes'], PAGES = ['Today', 'Journal', 'Appointments', 'More', ...SUBPAGES, ...APPTPAGES];
   function showTab(name) {
+    if (name !== 'Appt' && !$('tabAppt').hidden) saveApNotes(); // leaving an appointment: make sure its notes are saved
     for (const t of PAGES) $('tab' + t).hidden = t !== name;
+    if (name === 'Appt') sizeNoteBox();
     if (name === 'Trends') loadTrends();
-    for (const b of document.querySelectorAll('[data-tab]')) { if (b.dataset.tab === (SUBPAGES.includes(name) ? 'More' : name)) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
+    for (const b of document.querySelectorAll('[data-tab]')) { if (b.dataset.tab === (SUBPAGES.includes(name) ? 'More' : APPTPAGES.includes(name) ? 'Appointments' : name)) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
     window.scrollTo(0, 0);
   }
   for (const b of document.querySelectorAll('[data-tab]')) b.onclick = () => showTab(b.dataset.tab);
@@ -954,8 +986,8 @@
   const upcomingAppts = () => appointments.filter((a) => new Date(a.at) >= Date.now() - 2 * 3600e3).sort((a, b) => (a.at < b.at ? -1 : 1)); // stays "upcoming" until two hours after it starts
   const whenLine = (a) => { const d = new Date(a.at); return (dayWord(d) || d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })) + ' at ' + clock(a.at) + (a.where ? ', ' + a.where : ''); };
 
-  // ----- appointments list, and notes as a tab beside it -----
-  let notes = [], noteEditing = null, subTab = 'appts';
+  // ----- appointments: a list, and a page per appointment with Details and Notes tabs -----
+  let notes = [], noteEditing = null;
   async function loadNotes() { try { const res = await api('/api/notes'); if (res.ok) { notes = (await res.json()).notes; renderAppts(); } } catch {} }
   async function putNote(n) {
     const res = await api('/api/notes', { method: 'POST', body: JSON.stringify(n) });
@@ -963,26 +995,32 @@
     const { note } = await res.json();
     notes = notes.filter((x) => x.id !== note.id).concat(note); renderAppts();
   }
-  // Earlier versions stored some notes as a question with an answer, or tied to an appointment. They all read as plain notes now.
+  // Earlier versions kept some notes as separate entries (a question with an answer, or a note tied to an appointment).
   const noteText = (n) => n.text + (n.is_question && n.answer ? '\n' + n.answer : '');
   const apptOf = (n) => (n.appt_id ? appointments.find((a) => a.id === n.appt_id) : null);
-  // A copy that was made from an appointment's own Notes box stays hidden while that appointment exists: the text is in the box.
-  const shownNotes = () => notes.filter((n) => !(String(n.id).startsWith('fromappt-') && apptOf(n))).sort((a, b) => (a.at < b.at ? 1 : -1));
-  const apptNotes = (a) => [a.note, a.summary].filter((x) => x && x.trim()).join('\n\n');
+  const linked = (a) => notes.filter((n) => n.appt_id === a.id).sort((x, y) => (x.at < y.at ? -1 : 1));
+  // Everything written about one appointment, as one piece of text: its own notes plus any of those older separate entries.
+  function fullNotes(a) {
+    const parts = [a.note, a.summary].filter((x) => x && x.trim());
+    for (const n of linked(a)) { const t = noteText(n).trim(); if (t && !parts.some((p) => p.includes(t))) parts.push(t); }
+    return parts.join('\n\n');
+  }
+  const looseNotes = () => notes.filter((n) => !apptOf(n)).sort((a, b) => (a.at < b.at ? 1 : -1));
 
   function apptRow(a) {
-    const d = new Date(a.at);
+    const d = new Date(a.at), txt = fullNotes(a);
     const what = el('span', { className: 'what', textContent: a.title });
     if (a.where) what.append(el('small', { textContent: a.where }));
-    if (apptNotes(a)) what.append(el('small', { className: 'clamp2', textContent: apptNotes(a) }));
+    if (txt) what.append(el('small', { className: 'clamp2', textContent: txt }));
+    const ch = document.createElementNS(SVG, 'svg'); ch.setAttribute('viewBox', '0 0 10 16'); ch.setAttribute('class', 'chev'); ch.setAttribute('aria-hidden', 'true');
+    const pth = document.createElementNS(SVG, 'path'); for (const [k, v] of [['d', 'M2 2l6 6-6 6'], ['fill', 'none'], ['stroke', 'currentColor'], ['stroke-width', '1.8'], ['stroke-linecap', 'round'], ['stroke-linejoin', 'round']]) pth.setAttribute(k, v);
+    ch.append(pth);
     const row = el('button', { className: 'row appt', type: 'button' },
-      el('span', { className: 'when' }, el('b', { textContent: dayWord(d) || d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) }), clock(a.at)), what);
-    row.onclick = () => openAppt(a);
+      el('span', { className: 'when' }, el('b', { textContent: dayWord(d) || d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) }), clock(a.at)), what, ch);
+    row.onclick = () => openApptPage(a.id);
     return row;
   }
   function renderAppts() {
-    for (const b of document.querySelectorAll('[data-sub]')) { b.classList.toggle('on', b.dataset.sub === subTab); b.setAttribute('aria-selected', b.dataset.sub === subTab); }
-    $('subAppts').hidden = subTab !== 'appts'; $('subNotes').hidden = subTab !== 'notes';
     const upcoming = upcomingAppts(), past = appointments.filter((a) => !upcoming.includes(a)).sort((a, b) => (a.at < b.at ? 1 : -1));
     const list = $('apptList'); list.textContent = '';
     if (!upcoming.length) list.append(el('div', { className: 'empty', textContent: 'Nothing coming up.' }));
@@ -992,27 +1030,77 @@
     const pl = $('apptPast'); pl.hidden = !showPast || !past.length; pl.textContent = '';
     for (const a of past) pl.append(apptRow(a));
 
+    const loose = looseNotes();
+    $('otherNotesBtn').hidden = !loose.length; $('otherNotesBtn').textContent = 'Other notes (' + loose.length + ')';
     const days = $('notesByDay'); days.textContent = '';
-    const all = shownNotes(), groups = new Map();
-    if (!all.length) days.append(el('div', { className: 'list', style: 'margin-top:18px' }, el('div', { className: 'empty', textContent: 'No notes yet.' })));
-    for (const n of all) { const k = dayKey(n.at); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(n); }
-    const yesterday = dayKey(Date.now() - 864e5);
+    const groups = new Map(), yesterday = dayKey(Date.now() - 864e5);
+    if (!loose.length) days.append(el('div', { className: 'list', style: 'margin-top:18px' }, el('div', { className: 'empty', textContent: 'No notes yet.' })));
+    for (const n of loose) { const k = dayKey(n.at); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(n); }
     for (const [k, items] of groups) {
       days.append(el('div', { className: 'daytotal', style: 'margin:22px 2px 8px', textContent: k === dayKey(Date.now()) ? 'Today' : k === yesterday ? 'Yesterday' : new Date(items[0].at).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) }));
       const box = el('div', { className: 'list' });
       for (const n of items) {
-        const what = el('span', { className: 'what', textContent: noteText(n) }), a = apptOf(n);
-        if (a) what.prepend(el('span', { className: 'cap', textContent: a.title + ', ' + new Date(a.at).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) }));
-        const row = el('button', { className: 'row nrow', type: 'button' }, el('span', { className: 't', textContent: clock(n.at) }), what);
+        const row = el('button', { className: 'row nrow', type: 'button' }, el('span', { className: 't', textContent: clock(n.at) }), el('span', { className: 'what', textContent: noteText(n) }));
         if (n.by && n.by !== who) row.append(el('span', { className: 'by', textContent: n.by }));
         row.onclick = () => openNote(n); box.append(row);
       }
       days.append(box);
     }
+    if (!$('tabAppt').hidden) drawApptPage(false);
     paintStrips();
   }
-  for (const b of document.querySelectorAll('[data-sub]')) b.onclick = () => { subTab = b.dataset.sub; renderAppts(); };
   $('apptPastBtn').onclick = () => { showPast = !showPast; renderAppts(); };
+  $('otherNotesBtn').onclick = () => showTab('OtherNotes');
+  $('onBack').onclick = () => showTab('Appointments');
+
+  // --- one appointment ---
+  let apptOpen = null, apTab = ls.get('apTab', 'details'), apDirty = false, apSaving = false, apTimer = null;
+  const openAppointment = () => appointments.find((a) => a.id === apptOpen);
+  function openApptPage(id) { apptOpen = id; apDirty = false; $('apSaved').textContent = ''; drawApptPage(true); showTab('Appt'); }
+  function sizeNoteBox() { // the notes field fills the screen down to the tab bar
+    const box = $('apNoteBox'); if ($('apNotes').hidden || $('tabAppt').hidden) return;
+    box.style.height = Math.max(260, window.innerHeight - box.getBoundingClientRect().top - window.scrollY - $('tabs').offsetHeight - 46) + 'px';
+  }
+  function drawApptPage(reset) {
+    const a = openAppointment();
+    if (!a) { if (!$('tabAppt').hidden) showTab('Appointments'); return; }
+    const d = new Date(a.at), when = (dayWord(d) ? dayWord(d) + ', ' : '') + d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) + ' at ' + clock(a.at);
+    $('apTitle').textContent = a.title; $('apWhen').textContent = when + (a.where ? ', ' + a.where : '');
+    $('apWhat').textContent = a.title; $('apWhenFull').textContent = when; $('apWhere').textContent = a.where || 'Not set';
+    for (const b of document.querySelectorAll('[data-ap]')) { b.classList.toggle('on', b.dataset.ap === apTab); b.setAttribute('aria-selected', b.dataset.ap === apTab); }
+    $('apDetails').hidden = apTab !== 'details'; $('apNotes').hidden = apTab !== 'notes';
+    const box = $('apNoteBox');
+    if (reset || (!apDirty && document.activeElement !== box)) box.value = fullNotes(a); // never overwrite what she is typing
+    sizeNoteBox();
+  }
+  for (const b of document.querySelectorAll('[data-ap]')) b.onclick = () => { if (apTab === 'notes') saveApNotes(); apTab = b.dataset.ap; ls.set('apTab', apTab); drawApptPage(false); };
+  $('apBack').onclick = () => showTab('Appointments');
+  $('apEdit').onclick = () => { const a = openAppointment(); if (a) openAppt(a); };
+  window.addEventListener('resize', sizeNoteBox);
+  // Notes save by themselves a moment after she stops typing, and again when she leaves the field or the page.
+  $('apNoteBox').oninput = () => { apDirty = true; $('apSaved').textContent = 'Saving…'; clearTimeout(apTimer); apTimer = setTimeout(saveApNotes, 1200); };
+  $('apNoteBox').onblur = () => saveApNotes();
+  async function saveApNotes() {
+    const a = openAppointment();
+    if (!a || !apDirty || apSaving) return;
+    clearTimeout(apTimer); apSaving = true;
+    const text = $('apNoteBox').value, fold = linked(a);
+    try {
+      const res = await api('/api/appointments', { method: 'POST', body: JSON.stringify({ ...a, note: text, summary: '' }) });
+      if (!res.ok) throw new Error('save');
+      const { appointment } = await res.json();
+      appointments = appointments.filter((x) => x.id !== appointment.id).concat(appointment);
+      // Older separate entries for this appointment are now part of its notes text, so the separate copies go.
+      for (const n of fold) { try { const r = await api('/api/notes/' + n.id, { method: 'DELETE' }); if (r.ok) notes = notes.filter((x) => x.id !== n.id); } catch {} }
+      if ($('apNoteBox').value === text) apDirty = false;
+      $('apSaved').textContent = apDirty ? 'Saving…' : 'Saved at ' + clock(new Date().toISOString());
+    } catch (e) {
+      if (e.message !== 'auth') $('apSaved').textContent = 'Not saved yet. It will try again when the connection is back.';
+    } finally {
+      apSaving = false;
+      if (apDirty) { clearTimeout(apTimer); apTimer = setTimeout(saveApNotes, 4000); }
+    }
+  }
 
   function openNote(n) { noteEditing = { ...n }; $('noteText').value = noteText(n); $('noteErr').textContent = ''; $('noteScrim').hidden = false; }
   const closeNote = () => { $('noteScrim').hidden = true; noteEditing = null; };
@@ -1039,7 +1127,7 @@
   function openAppt(a) {
     apptEditing = a ? { ...a } : { id: uuid(), at: '', title: '', where: '', note: '', by: who };
     $('apptTitle').textContent = a ? 'Change appointment' : 'Add an appointment';
-    $('apptWhat').value = apptEditing.title; $('apptWhere').value = apptEditing.where || ''; $('apptNote').value = a ? apptNotes(a) : '';
+    $('apptWhat').value = apptEditing.title; $('apptWhere').value = apptEditing.where || ''; 
     const loc = apptEditing.at ? toLocalInput(apptEditing.at) : '';
     $('apptDate').value = loc.slice(0, 10); $('apptTime').value = loc.slice(11, 16);
     $('apptDelete').hidden = !a; $('apptErr').textContent = '';
@@ -1055,13 +1143,15 @@
     if (!$('apptDate').value || !$('apptTime').value) { $('apptErr').textContent = 'Pick a date and a time.'; return; }
     const d = new Date($('apptDate').value + 'T' + $('apptTime').value);
     if (isNaN(d)) { $('apptErr').textContent = 'Pick a date and a time.'; return; }
-    const body = { id: apptEditing.id, at: d.toISOString(), title: $('apptWhat').value, where: $('apptWhere').value, note: $('apptNote').value, summary: '', by: apptEditing.by || who };
+    const body = { id: apptEditing.id, at: d.toISOString(), title: $('apptWhat').value, where: $('apptWhere').value, note: apptEditing.note || '', summary: apptEditing.summary || '', by: apptEditing.by || who };
     try {
       const res = await api('/api/appointments', { method: 'POST', body: JSON.stringify(body) });
       if (!res.ok) { $('apptErr').textContent = (await res.json()).error || 'Could not save. Try again.'; return; }
       const { appointment } = await res.json();
+      const isNew = !appointments.some((x) => x.id === appointment.id);
       appointments = appointments.filter((x) => x.id !== appointment.id).concat(appointment);
       closeAppt(); renderAppts();
+      if (isNew) openApptPage(appointment.id); // straight into the new appointment, ready for notes
     } catch { $('apptErr').textContent = 'No connection. Try again in a moment.'; }
   };
   $('apptDelete').onclick = async () => {
@@ -1069,7 +1159,7 @@
     try {
       const res = await api('/api/appointments/' + id, { method: 'DELETE' });
       if (!res.ok) throw 0;
-      appointments = appointments.filter((x) => x.id !== id); closeAppt(); renderAppts();
+      appointments = appointments.filter((x) => x.id !== id); closeAppt(); if (apptOpen === id) { apptOpen = null; showTab('Appointments'); } renderAppts();
     } catch { $('apptErr').textContent = 'Could not remove it. Try again in a moment.'; }
   };
 
@@ -1116,7 +1206,7 @@
     if (next) {
       const d = new Date(next.at);
       s.append(el('span', {}, 'Next: ', el('b', { textContent: next.title }), ', ' + (dayWord(d) ? dayWord(d).toLowerCase() : d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })) + ' at ' + clock(next.at)));
-      s.onclick = () => { subTab = 'appts'; renderAppts(); showTab('Appointments'); };
+      s.onclick = () => openApptPage(next.id);
     }
     $('soundStrip').hidden = !playing;
     if (playing) $('soundStripText').textContent = 'Playing ' + soundName(playing).toLowerCase() + (stopAt ? ', off at ' + clock(new Date(stopAt).toISOString()) : '');
@@ -1193,7 +1283,7 @@
   setInterval(() => {
     if (document.hidden || $('app').hidden) return;
     ticks++;
-    const busy = editing || apptEditing || noteEditing;
+    const busy = editing || apptEditing || noteEditing || apDirty;
     if (feeding()) { paintFeeding(); if (ticks % 10 === 0 && !busy) refresh(); } // pick up a switch or finish from the other phone quickly
     else if (ticks % 30 === 0 && !busy) refresh();
     else if (ticks % 20 === 0 && !busy) render();
