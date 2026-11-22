@@ -4,7 +4,8 @@ One-tap log of feedings and diaper changes for two phones. Runs in your own
 Google Cloud project; the data lives in your own Firestore database.
 
 - **Today**: time since the last feed, which side to start on next, and the last diaper. One big button starts a feed.
-- **Feeding timer**: shared between both phones. Tap Left or Right when she switches; each side keeps its own time. Finish saves the feed.
+- **Feeding timer**: shared between both phones. "Pause to burp" keeps the same feed open; the next big button starts the other side. "Done feeding" saves it. Starting again within 30 minutes carries on with the same feed.
+- **One feed, however it was logged**: pieces that start within 30 minutes of the previous piece ending count as one feed, timed from the first start. That is what the 3-hour reminder, Today, the Journal and Trends all use.
 - **Pee / Poop / Both**: one tap logs it with the time and who tapped.
 - **Journal**: the last 7 days by day, with totals. Tap a line to fix the time, minutes per side, note, or remove it.
 - **Trends**: a short view first, with the rest behind "Show all the numbers". 7 or 14 day averages (feeds, feeding minutes, time between feeds, left/right split, wet and dirty diapers, feeding minutes per diaper), three charts and a day-by-day table.
@@ -79,6 +80,8 @@ Each person signs in once with their name and the passcode; the phone stays sign
 | `left_min`, `right_min` | minutes on each side |
 | `last_side` | side the feed ended on (drives "start on the ... next") |
 | `in_progress` | true while a feeding timer is running |
+| `paused_at` | when a running feed was paused |
+| `separate` | true if she chose "start a new feed" within 30 minutes of the last one |
 | `by` | who logged it |
 | `note` | free text |
 | `created_at`, `updated_at` | when the row was written / last edited |

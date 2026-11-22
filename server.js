@@ -139,18 +139,49 @@ async function sendPush(sub, payload) {
   }
 }
 
+// One feed is often logged in pieces (left, burp, right). Pieces that start within 30 minutes of the previous
+// piece ending are one feed, and the clock runs from the START of the first piece.
+const SAME_FEED_MS = 30 * 60e3;
+const feedEnd = (e) => (e.in_progress ? Date.now() : new Date(e.at).getTime() + (e.duration_min || 0) * 60e3);
+function feedSessions(events) {
+  const out = [];
+  for (const e of events.filter((x) => x.kind === 'feed').sort((a, b) => (a.at < b.at ? -1 : 1))) {
+    const s = out[out.length - 1];
+    if (s && !e.separate && new Date(e.at).getTime() - s.end <= SAME_FEED_MS) { s.feeds.push(e); s.end = Math.max(s.end, feedEnd(e)); }
+    else out.push({ start: e.at, end: feedEnd(e), feeds: [e] });
+  }
+  return out;
+}
+// A feed left paused for 30 minutes is over: close it at the moment it was paused.
+async function closeStalePauses(events) {
+  for (const e of events) {
+    if (e.kind !== 'feed' || !e.in_progress || !e.paused_at || Date.now() - new Date(e.paused_at) < SAME_FEED_MS) continue;
+    const left = Math.round((e.left_ms || 0) / 60e3) || (e.left_ms > 0 ? 1 : 0), right = Math.round((e.right_ms || 0) / 60e3) || (e.right_ms > 0 ? 1 : 0);
+    Object.assign(e, cleanEvent({ in_progress: false, side: null, paused_at: null, left_min: left, right_min: right,
+      duration_min: Math.max(1, Math.round((new Date(e.paused_at) - new Date(e.at)) / 60e3)),
+      method: left && right ? 'breast_both' : left ? 'breast_left' : right ? 'breast_right' : null }, e));
+    await store.put(e);
+  }
+}
+
 // Called every few minutes by Cloud Scheduler. Time is counted from the START of the last feed.
 async function checkReminders() {
   const cfg = await getReminderConfig();
-  const feeds = (await store.latest(12)).filter((e) => e.kind === 'feed');
-  if (!feeds.length) return { sent: 0, why: 'no feeds yet' };
-  if (feeds.some((e) => e.in_progress)) return { sent: 0, why: 'feeding now' };
-  const last = feeds[0];
-  const elapsed = Date.now() - new Date(last.at);
+  const recent = await store.latest(16);
+  await closeStalePauses(recent);
+  const sessions = feedSessions(recent);
+  if (!sessions.length) return { sent: 0, why: 'no feeds yet' };
+  const session = sessions[sessions.length - 1], last = session.feeds[session.feeds.length - 1];
+  const elapsed = Date.now() - new Date(session.start);
   const due = cfg.hours * 3600e3;
+  // A feed that is really under way means no reminder; a timer forgotten for hours does not get to silence them.
+  if (session.feeds.some((e) => e.in_progress) && elapsed < due) return { sent: 0, why: 'feeding now' };
   if (elapsed < due) return { sent: 0, why: 'not due' };
   if (elapsed > due + GIVE_UP_AFTER_MS) return { sent: 0, why: 'gave up' };
-  if (cfg.last_for === last.id && cfg.last_sent && Date.now() - new Date(cfg.last_sent) < NUDGE_EVERY_MS - 60e3) return { sent: 0, why: 'nudged recently' };
+  // Past the due time, only a side that has been running for under 90 minutes counts as really feeding.
+  if (session.feeds.some((e) => e.in_progress && e.side && e.side_since && Date.now() - new Date(e.side_since) < 90 * 60e3)) return { sent: 0, why: 'feeding now' };
+  const key = session.feeds[0].id;
+  if (cfg.last_for === key && cfg.last_sent && Date.now() - new Date(cfg.last_sent) < NUDGE_EVERY_MS - 60e3) return { sent: 0, why: 'nudged recently' };
 
   const mins = Math.floor(elapsed / 60000);
   const ended = last.last_side || (last.method === 'breast_left' ? 'left' : last.method === 'breast_right' ? 'right' : null);
@@ -162,7 +193,7 @@ async function checkReminders() {
   };
   let sent = 0;
   for (const sub of await pushSubs.all()) if (await sendPush(sub, payload)) sent++;
-  await settings.put({ ...cfg, last_for: last.id, last_sent: new Date().toISOString() });
+  await settings.put({ ...cfg, last_for: key, last_sent: new Date().toISOString() });
   return { sent, why: 'due' };
 }
 
@@ -246,6 +277,9 @@ function cleanEvent(input, existing) {
     out.side = out.in_progress ? side(src.side) : null;
     const since = out.side && src.side_since ? new Date(src.side_since) : null;
     out.side_since = since && !isNaN(since) ? since.toISOString() : null;
+    const paused = out.in_progress && !out.side && src.paused_at ? new Date(src.paused_at) : null; // paused to burp: still the same feed
+    out.paused_at = paused && !isNaN(paused) ? paused.toISOString() : null;
+    out.separate = !!src.separate; // she said "this is a new feed" even though it follows closely on the last one
     out.left_ms = num(src.left_ms, 864e5) || 0;
     out.right_ms = num(src.right_ms, 864e5) || 0;
     out.last_side = side(src.last_side);

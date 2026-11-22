@@ -87,13 +87,21 @@
   .side small { font-weight: 400; font-size: 18px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .side.on { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
   .side.on small { color: var(--on-primary); }
-  .side .live { display: none; position: absolute; top: 10px; left: 14px; font-size: 14px; font-weight: 400; align-items: center; gap: 6px; }
-  .side.on .live { display: flex; }
-  .side .live::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--brass); animation: pulse 1.6s ease-in-out infinite; }
-  @keyframes pulse { 50% { opacity: .25; } }
-  @media (prefers-reduced-motion: reduce) { .side .live::before { animation: none; } }
-  .side.suggest::after { content: ""; position: absolute; top: 12px; right: 14px; width: 12px; height: 12px; border-radius: 50%; background: var(--brass); }
-  .sidehint { color: var(--muted); font-size: 17px; margin-top: 10px; min-height: 24px; }
+  .sidehint { color: var(--muted); font-size: 17px; margin-top: 12px; }
+  .fhead { font-size: 30px; margin: 0 0 2px; text-align: center; }
+  .feeding .clock.dim { opacity: .5; }
+  .pausedline { color: var(--brass); font-weight: 600; font-size: 19px; margin-top: 8px; }
+  .side:disabled { opacity: .75; }
+  .side { min-height: 78px !important; }
+  .done { min-height: 54px; margin-top: 16px; }
+  .status .lbl2 { font-size: 18px; color: var(--muted); }
+  .status .due { font-size: 20px; color: var(--brass); font-weight: 600; margin-top: 8px; }
+  .status .due.late { color: var(--danger); }
+  .cont { grid-column: 1 / -1; text-align: center; color: var(--muted); font-size: 16px; margin-top: -4px; }
+  .cont button { display: block; margin: 0 auto; color: var(--ink); text-decoration: underline; font-size: 17px; padding: 10px 8px; }
+  .act.feed .lbl small { display: block; font-size: 18px; font-weight: 400; }
+  .row.part { padding-left: 52px; background: var(--bg); }
+  .row .parts { color: var(--muted); font-size: 15px; font-weight: 400; }
   .finish { width: 100%; margin-top: 16px; min-height: 112px; border-radius: 24px; background: var(--primary); color: var(--on-primary); font-weight: 600; font-size: 28px; }
   .quiet { color: var(--muted); text-decoration: underline; font-size: 16px; padding: 12px 4px; }
 
@@ -293,29 +301,40 @@
   <section class="tab" id="tabToday">
     <div id="idle">
       <div class="status">
+        <div class="lbl2" id="fedLabel"></div>
         <div class="big" id="fedBig">No feeds yet</div>
+        <div class="slim" id="fedDetail" style="margin-top:2px"></div>
+        <div class="due" id="fedDue"></div>
         <div class="next" id="fedNext"></div>
         <div class="slim" id="diaperLine"></div>
       </div>
     </div>
 
     <div class="feeding" id="feedingBox" hidden>
+      <h2 class="fhead" id="feedHead"></h2>
       <div class="clock" id="feedClock">0:00</div>
       <div class="since" id="feedSince"></div>
+      <div class="pausedline" id="pausedLine" hidden></div>
       <div class="sides">
-        <button class="side" type="button" data-side="left"><em class="live">timing</em><span>Left</span><small id="leftTime">0:00</small></button>
-        <button class="side" type="button" data-side="right"><em class="live">timing</em><span>Right</span><small id="rightTime">0:00</small></button>
+        <button class="side" type="button" data-side="left"><span>Left</span><small id="leftTime">0:00</small></button>
+        <button class="side" type="button" data-side="right"><span>Right</span><small id="rightTime">0:00</small></button>
       </div>
-      <div class="sidehint" id="sideHint"></div>
-      <button class="finish" type="button" id="finishBtn">Finish feeding</button>
-      <button class="quiet" type="button" id="feedCancel">Started by mistake?</button>
+      <button class="finish" type="button" id="mainBtn">Pause to burp</button>
+      <button class="wide" type="button" id="backBtn" hidden></button>
+      <div class="sidehint" id="reassure" hidden>No rush. If you don't come back, this feed saves itself.</div>
     </div>
 
     <div class="actions">
-      <button class="act feed" data-log="feed" id="startBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg><span class="lbl">Start feeding</span></button>
+      <button class="act feed" data-log="feed" id="startBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg><span class="lbl" id="startLbl">Start feeding</span></button>
+      <div class="cont" id="contBox" hidden><span id="contLine"></span><button type="button" id="newFeedBtn">No, start a new feed</button></div>
       <button class="act" data-log="pee"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-drop"/></svg><span class="lbl">Pee</span></button>
       <button class="act" data-log="poop"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-poop"/></svg><span class="lbl">Poop</span></button>
       <button class="act" data-log="both"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-both"/></svg><span class="lbl">Both</span></button>
+    </div>
+
+    <div id="feedEnd" hidden>
+      <button class="wide done" type="button" id="doneBtn">Done feeding</button>
+      <button class="quiet" type="button" id="feedCancel" style="display:block;margin:4px auto 0">Started by mistake? Delete this feed</button>
     </div>
 
     <div class="counts" id="counts"></div>
@@ -554,6 +573,7 @@
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
   };
 
+  let rem = { hours: 3, publicKey: null }; // feed-reminder setting; also drives "Next feed by" on Today
   let who = ls.get('who', '');
   let server = [];                  // events as the server last reported them
   let queue = ls.get('queue', []);  // changes not yet confirmed by the server
@@ -650,7 +670,22 @@
   const describe = (e) => (e.kind === 'diaper' ? diaperWord(e) : e.in_progress ? 'Feeding now' : 'Fed' + (e.duration_min ? ' ' + e.duration_min + ' min' : ''));
   const lastSide = (e) => e.last_side || (e.method === 'breast_left' ? 'left' : e.method === 'breast_right' ? 'right' : null);
   const other = (s) => (s === 'left' ? 'right' : 'left');
-  const tally = (list) => { const f = list.filter((e) => e.kind === 'feed').length, w = list.filter((e) => e.pee).length, d = list.filter((e) => e.poop).length; return f + (f === 1 ? ' feed, ' : ' feeds, ') + w + ' wet, ' + d + ' dirty'; };
+  // One feed is often logged in pieces (left, burp, right). Pieces that start within 30 minutes of the previous piece
+  // ending count as ONE feed, and its clock runs from the start of the first piece.
+  const SAME_FEED_MS = 30 * 60000;
+  const feedEnd = (e) => (e.in_progress ? Date.now() : new Date(e.at).getTime() + (e.duration_min || 0) * 60000);
+  function sessionsOf(list) {
+    const out = [];
+    for (const e of list.filter((x) => x.kind === 'feed').sort((a, b) => (a.at < b.at ? -1 : 1))) {
+      const s = out[out.length - 1];
+      if (s && !e.separate && new Date(e.at).getTime() - s.end <= SAME_FEED_MS) { s.feeds.push(e); s.end = Math.max(s.end, feedEnd(e)); }
+      else out.push({ id: e.id, start: e.at, end: feedEnd(e), feeds: [e] });
+    }
+    return out; // oldest first
+  }
+  const minsOf = (e) => (e.left_min || 0) + (e.right_min || 0) || e.duration_min || 0;
+  const sessionSides = (s) => { const l = s.feeds.reduce((t, e) => t + (e.left_min || 0), 0), r = s.feeds.reduce((t, e) => t + (e.right_min || 0), 0); return l && r ? 'left ' + l + ', right ' + r : l ? 'left ' + l + ' min' : r ? 'right ' + r + ' min' : ''; };
+  const tally = (list) => { const f = sessionsOf(list).length, w = list.filter((e) => e.pee).length, d = list.filter((e) => e.poop).length; return f + (f === 1 ? ' feed, ' : ' feeds, ') + w + ' wet, ' + d + ' dirty'; };
 
   // ----- feeding timer -----
   const feeding = () => events().find((e) => e.kind === 'feed' && e.in_progress);
@@ -658,75 +693,99 @@
   // Which side to start on: the opposite of the one the last finished feed ended on.
   function nextSide() { const last = events().find((e) => e.kind === 'feed' && !e.in_progress); const s = last && lastSide(last); return s ? other(s) : null; }
   const buzz = () => { if (navigator.vibrate) navigator.vibrate(30); };
+  // For 30 minutes after a feed is finished, starting again carries on with that same feed.
+  function continuable() { if (feeding()) return null; const last = events().find((e) => e.kind === 'feed'); return last && Date.now() - feedEnd(last) <= SAME_FEED_MS ? last : null; }
 
-  function startFeed() {
+  function startFeed(separate) {
     // The side she is due to start on is selected straight away; tap the other one only if that is wrong.
     const at = new Date().toISOString(), ns = nextSide();
-    const ev = { id: uuid(), at, by: who, note: '', kind: 'feed', in_progress: true, side: ns, side_since: ns ? at : null, left_ms: 0, right_ms: 0, last_side: ns };
+    const ev = { id: uuid(), at, by: who, note: '', kind: 'feed', in_progress: true, side: ns, side_since: ns ? at : null, paused_at: null, left_ms: 0, right_ms: 0, last_side: ns, separate: !!separate };
     enqueue({ op: 'put', ev });
     toast(ns ? 'Feeding started on the ' + ns : 'Feeding started', () => enqueue({ op: 'del', id: ev.id }));
   }
-  // True while the feed is still on the side the app picked for her and nothing else has been tapped.
-  const preselected = (e) => !!e.side && e.side_since === e.at && !e.left_ms && !e.right_ms;
+  function keepFeeding(last) {
+    const before = plain(last), now = new Date().toISOString(), side = lastSide(last) ? other(lastSide(last)) : null;
+    const ev = { ...before, in_progress: true, duration_min: null, side, side_since: side ? now : null, paused_at: side ? null : now, last_side: side || before.last_side,
+      left_ms: before.left_ms || (before.left_min || 0) * 60000, right_ms: before.right_ms || (before.right_min || 0) * 60000 };
+    enqueue({ op: 'put', ev });
+    toast(side ? 'Carrying on, ' + side + ' side' : 'Carrying on with the same feed', () => enqueue({ op: 'put', ev: before }));
+  }
   function bank(ev) { // move the running side's time into its total
     if (ev.side && ev.side_since) ev[ev.side + '_ms'] = sideMs(ev, ev.side);
     ev.side_since = null;
   }
-  function tapSide(side) {
-    const cur = feeding(); if (!cur) return;
-    const ev = plain(cur), was = ev.side, correcting = was && was !== side && Date.now() - new Date(cur.at) < 60000;
+  function pauseFeed() { const cur = feeding(); if (!cur || !cur.side) return; const ev = plain(cur); bank(ev); ev.side = null; ev.paused_at = new Date().toISOString(); enqueue({ op: 'put', ev }); }
+  function goSide(side) { // start, switch to, or come back to a side
+    const cur = feeding(); if (!cur || cur.side === side) return;
+    const ev = plain(cur), was = ev.side, correcting = was && Date.now() - new Date(cur.at) < 60000 && !cur.left_ms && !cur.right_ms;
     bank(ev);
-    if (correcting) { ev[side + '_ms'] = (ev[side + '_ms'] || 0) + ev[was + '_ms']; ev[was + '_ms'] = 0; } // in the first minute a tap is a correction: the seconds move across
-    if (was === side) ev.side = null;                                     // tap the active side again to pause
-    else { ev.side = side; ev.side_since = new Date().toISOString(); ev.last_side = side; }
+    if (correcting) { ev[side + '_ms'] = (ev[side + '_ms'] || 0) + ev[was + '_ms']; ev[was + '_ms'] = 0; } // wrong side picked at the start: the seconds move across
+    ev.side = side; ev.side_since = new Date().toISOString(); ev.last_side = side; ev.paused_at = null;
     enqueue({ op: 'put', ev });
   }
-  function finishFeed() {
+  function finishFeed(quiet) {
     const cur = feeding(); if (!cur) return;
-    const before = plain(cur), ev = plain(cur);
+    const before = plain(cur), ev = plain(cur), end = cur.paused_at ? new Date(cur.paused_at).getTime() : Date.now(); // a paused feed ended when it was paused
     bank(ev);
-    ev.side = null; ev.in_progress = false;
-    ev.duration_min = Math.max(1, Math.round((Date.now() - new Date(ev.at)) / 60000));
+    ev.side = null; ev.paused_at = null; ev.in_progress = false;
+    ev.duration_min = Math.max(1, Math.round((end - new Date(ev.at)) / 60000));
     ev.left_min = Math.round((ev.left_ms || 0) / 60000); ev.right_min = Math.round((ev.right_ms || 0) / 60000);
     if (ev.left_ms > 0 && !ev.left_min) ev.left_min = 1;
     if (ev.right_ms > 0 && !ev.right_min) ev.right_min = 1;
     ev.method = ev.left_min && ev.right_min ? 'breast_both' : ev.left_min ? 'breast_left' : ev.right_min ? 'breast_right' : null;
     enqueue({ op: 'put', ev });
-    toast('Saved: fed ' + ev.duration_min + ' min', () => enqueue({ op: 'put', ev: before }));
+    if (!quiet) toast('Feed saved', () => enqueue({ op: 'put', ev: before }));
   }
-  $('finishBtn').onclick = () => { buzz(); finishFeed(); };
-  $('feedCancel').onclick = () => { const cur = feeding(); if (cur) { const keep = plain(cur); enqueue({ op: 'del', id: cur.id }); toast('Feeding removed', () => enqueue({ op: 'put', ev: keep })); } };
-  for (const b of document.querySelectorAll('[data-side]')) b.onclick = () => { buzz(); tapSide(b.dataset.side); };
+  $('mainBtn').onclick = () => { buzz(); const cur = feeding(); if (!cur) return; if (cur.side) pauseFeed(); else goSide(cur.last_side ? other(cur.last_side) : nextSide() || 'left'); };
+  $('backBtn').onclick = () => { buzz(); const cur = feeding(); if (cur && cur.last_side) goSide(cur.last_side); };
+  $('doneBtn').onclick = () => { buzz(); finishFeed(); };
+  $('feedCancel').onclick = () => { const cur = feeding(); if (cur) { const keep = plain(cur); enqueue({ op: 'del', id: cur.id }); toast('Feed deleted', () => enqueue({ op: 'put', ev: keep })); } };
+  $('newFeedBtn').onclick = () => { buzz(); startFeed(true); };
+  for (const b of document.querySelectorAll('[data-side]')) b.onclick = () => { buzz(); goSide(b.dataset.side); };
 
   function paintFeeding() {
-    const cur = feeding();
-    $('feedingBox').hidden = !cur; $('idle').hidden = !!cur; $('startBtn').hidden = !!cur;
-    if (!cur) return;
-    $('feedClock').textContent = mmss(Date.now() - new Date(cur.at));
-    $('feedSince').textContent = 'started ' + clock(cur.at) + (cur.by && cur.by !== who ? ' by ' + cur.by : '');
-    $('leftTime').textContent = mmss(sideMs(cur, 'left')); $('rightTime').textContent = mmss(sideMs(cur, 'right'));
-    const untouched = !cur.side && !cur.left_ms && !cur.right_ms, hintSide = untouched ? nextSide() : null;
-    for (const b of document.querySelectorAll('[data-side]')) {
-      b.classList.toggle('on', cur.side === b.dataset.side);
-      b.classList.toggle('suggest', hintSide === b.dataset.side);
-      b.setAttribute('aria-pressed', cur.side === b.dataset.side);
+    const cur = feeding(), cont = cur ? null : continuable();
+    $('feedingBox').hidden = !cur; $('idle').hidden = !!cur; $('startBtn').hidden = !!cur; $('feedEnd').hidden = !cur; $('counts').hidden = !!cur;
+    // idle: the big button either starts a feed or, shortly after one, carries on with it
+    $('contBox').hidden = !cont;
+    const lbl = $('startLbl'); lbl.textContent = cont ? 'Keep feeding' : 'Start feeding';
+    if (cont) {
+      const side = lastSide(cont) ? other(lastSide(cont)) : null;
+      if (side) lbl.append(el('small', { textContent: side + ' side' }));
+      $('contLine').textContent = 'Adds to the feed that started at ' + clock(sessionsOf(events()).pop().start);
     }
-    $('sideHint').textContent = Date.now() - new Date(cur.at) > 90 * 60000 ? 'Timer left running? Finish it, then fix the minutes in the Journal.'
-      : hintSide ? 'Tap the side she is on. Last feed ended on the ' + other(hintSide) + '.'
-      : untouched ? 'Tap the side she is on.'
-      : cur.side ? 'Timing the ' + cur.side + '. Tap ' + (cur.side === 'left' ? 'Right' : 'Left') + ' when she switches.' : 'Paused. Tap a side to carry on.';
+    if (!cur) return;
+    if (cur.paused_at && Date.now() - new Date(cur.paused_at) >= SAME_FEED_MS) return finishFeed(true); // left paused: it saves itself
+    const paused = !cur.side && (cur.paused_at || cur.left_ms || cur.right_ms), fresh = !cur.side && !paused;
+    $('feedHead').textContent = cur.side ? 'Feeding on the ' + cur.side : paused ? 'Paused' : 'Which side is she on?';
+    $('feedClock').textContent = mmss(sideMs(cur, 'left') + sideMs(cur, 'right')); $('feedClock').classList.toggle('dim', !!paused);
+    $('feedSince').textContent = 'started ' + clock(cur.at) + (cur.by && cur.by !== who ? ' by ' + cur.by : '');
+    $('pausedLine').hidden = !paused;
+    if (paused) $('pausedLine').textContent = (cur.paused_at ? 'Paused ' + Math.max(0, Math.floor((Date.now() - new Date(cur.paused_at)) / 60000)) + 'm. ' : 'Paused. ') + 'Still the same feed.';
+    $('leftTime').textContent = mmss(sideMs(cur, 'left')); $('rightTime').textContent = mmss(sideMs(cur, 'right'));
+    for (const b of document.querySelectorAll('[data-side]')) {
+      b.classList.toggle('on', cur.side === b.dataset.side); b.setAttribute('aria-pressed', cur.side === b.dataset.side);
+      b.disabled = !!paused; // while paused the two big buttons underneath do the choosing
+    }
+    const nextUp = cur.last_side ? other(cur.last_side) : null;
+    $('mainBtn').hidden = fresh; $('mainBtn').textContent = cur.side ? 'Pause to burp' : nextUp ? 'Start the ' + nextUp + ' side' : 'Carry on';
+    $('backBtn').hidden = !paused || !cur.last_side; if (cur.last_side) $('backBtn').textContent = 'Back on the ' + cur.last_side;
+    $('reassure').hidden = !paused;
   }
 
   // ----- render -----
   function render() {
     const all = events();
-    const lastFeed = all.find((e) => e.kind === 'feed' && !e.in_progress);
+    const sess = sessionsOf(all), last = sess[sess.length - 1];
     const lastDiaper = all.find((e) => e.kind === 'diaper');
-    $('fedBig').textContent = lastFeed ? 'Fed ' + ago(lastFeed.at) : 'No feeds yet';
+    $('fedLabel').textContent = last ? 'Last feed started' : '';
+    $('fedBig').textContent = last ? ago(last.start) : 'No feeds yet';
+    $('fedDetail').textContent = last ? 'at ' + clock(last.start) + (sessionSides(last) ? ', ' + sessionSides(last) : '') : '';
+    const due = $('fedDue'); due.textContent = ''; due.classList.remove('late');
+    if (last) { const by = new Date(new Date(last.start).getTime() + rem.hours * 3600e3); const late = by < Date.now(); due.classList.toggle('late', late); due.textContent = (late ? 'Next feed was due at ' : 'Next feed by ') + clock(by.toISOString()); }
     const nx = $('fedNext'); nx.textContent = '';
     const ns = nextSide();
     if (ns) nx.append('Start on the ', el('b', { textContent: ns }), ' next');
-    else if (lastFeed) nx.textContent = 'at ' + clock(lastFeed.at);
     $('diaperLine').textContent = lastDiaper ? 'Diaper ' + ago(lastDiaper.at) + ', ' + diaperWord(lastDiaper).toLowerCase() : 'No diapers yet';
     paintFeeding();
 
@@ -734,25 +793,38 @@
     $('counts').textContent = 'Today: ' + tally(all.filter((e) => dayKey(e.at) === today));
 
     const lists = $('lists'); lists.textContent = '';
+    // Journal: one line per feed (pieces of the same feed are folded together) and one per diaper, newest first.
+    const items = all.filter((e) => e.kind === 'diaper').map((e) => ({ at: e.at, ev: e })).concat(sess.map((s) => ({ at: s.start, s }))).sort((a, b) => (a.at < b.at ? 1 : -1));
+    const chev = () => { const ch = document.createElementNS(SVG, 'svg'); ch.setAttribute('viewBox', '0 0 10 16'); ch.setAttribute('class', 'chev'); ch.setAttribute('aria-hidden', 'true'); const p = document.createElementNS(SVG, 'path'); for (const [k, v] of [['d', 'M2 2l6 6-6 6'], ['fill', 'none'], ['stroke', 'currentColor'], ['stroke-width', '1.8'], ['stroke-linecap', 'round'], ['stroke-linejoin', 'round']]) p.setAttribute(k, v); ch.append(p); return ch; };
+    const evRow = (e, part) => {
+      const row = el('button', { className: 'row' + (e._pending ? ' pending' : '') + (part ? ' part' : ''), type: 'button' }); row.dataset.id = e.id;
+      const what = el('span', { className: 'what', textContent: describe(e) });
+      const detail = [e.kind === 'feed' ? feedDetail(e) : '', e.note].filter(Boolean).join('. ');
+      if (detail) what.append(el('small', { textContent: detail }));
+      if (!part) row.append(icon(e.kind === 'feed' ? 'heart' : e.pee && e.poop ? 'both' : e.poop ? 'poop' : 'drop', 'ico' + (e.poop ? ' poop' : '')));
+      row.append(el('span', { className: 't', textContent: clock(e.at) }), what);
+      if (e.by && e.by !== who) row.append(el('span', { className: 'by', textContent: e.by }));
+      row.append(chev()); return row;
+    };
     const groups = new Map();
-    for (const e of all) { const k = dayKey(e.at); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(e); }
-    if (!all.length) lists.append(el('h2', { textContent: 'Journal' }), el('div', { className: 'list' }, el('div', { className: 'empty', textContent: 'Nothing yet. Feeds and diapers you log on Today show up here.' })));
-    for (const [k, items] of groups) {
-      const title = k === today ? 'Today' : k === yesterday ? 'Yesterday' : new Date(items[0].at).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+    for (const it of items) { const k = dayKey(it.at); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(it); }
+    if (!items.length) lists.append(el('h2', { textContent: 'Journal' }), el('div', { className: 'list' }, el('div', { className: 'empty', textContent: 'Nothing yet. Feeds and diapers you log on Today show up here.' })));
+    for (const [k, its] of groups) {
+      const title = k === today ? 'Today' : k === yesterday ? 'Yesterday' : new Date(its[0].at).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
       const list = el('div', { className: 'list' });
-      for (const e of items) {
-        const row = el('button', { className: 'row' + (e._pending ? ' pending' : ''), type: 'button' }); row.dataset.id = e.id;
-        const what = el('span', { className: 'what', textContent: describe(e) });
-        const detail = [e.kind === 'feed' ? feedDetail(e) : '', e.note].filter(Boolean).join('. ');
-        if (detail) what.append(el('small', { textContent: detail }));
-        row.append(icon(e.kind === 'feed' ? 'heart' : e.pee && e.poop ? 'both' : e.poop ? 'poop' : 'drop', 'ico' + (e.poop ? ' poop' : '')),
-          el('span', { className: 't', textContent: clock(e.at) }), what);
-        if (e.by && e.by !== who) row.append(el('span', { className: 'by', textContent: e.by }));
-        const ch = document.createElementNS(SVG, 'svg'); ch.setAttribute('viewBox', '0 0 10 16'); ch.setAttribute('class', 'chev'); ch.setAttribute('aria-hidden', 'true');
-        const p = document.createElementNS(SVG, 'path'); p.setAttribute('d', 'M2 2l6 6-6 6'); p.setAttribute('fill', 'none'); p.setAttribute('stroke', 'currentColor'); p.setAttribute('stroke-width', '1.8'); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round');
-        ch.append(p); row.append(ch); list.append(row);
+      for (const it of its) {
+        if (it.ev) { list.append(evRow(it.ev)); continue; }
+        if (it.s.feeds.length === 1) { list.append(evRow(it.s.feeds[0])); continue; }
+        // several pieces logged for one feed: one line, which opens to show the pieces
+        const s = it.s, open = openSessions.has(s.id), running = s.feeds.some((e) => e.in_progress);
+        const what = el('span', { className: 'what', textContent: running ? 'Feeding now' : 'Fed ' + s.feeds.reduce((t, e) => t + minsOf(e), 0) + ' min' });
+        what.append(el('small', { textContent: [sessionSides(s).replace(/^./, (c) => c.toUpperCase()), 'logged in ' + s.feeds.length + ' parts'].filter(Boolean).join('. ') }));
+        const row = el('button', { className: 'row', type: 'button' }, icon('heart', 'ico'), el('span', { className: 't', textContent: clock(s.start) }), what, el('span', { className: 'parts', textContent: open ? 'Hide' : 'Show' }));
+        row.setAttribute('aria-expanded', open); row.dataset.session = s.id; list.append(row);
+        if (open) for (const e of s.feeds) list.append(evRow(e, true));
       }
-      lists.append(el('h2', { textContent: title }), el('div', { className: 'daytotal', textContent: tally(items) }), list);
+      const dayEvents = all.filter((e) => dayKey(e.at) === k);
+      lists.append(el('h2', { textContent: title }), el('div', { className: 'daytotal', textContent: tally(dayEvents) }), list);
     }
     paintStrips();
   }
@@ -760,7 +832,7 @@
   // ----- logging diapers, starting a feed -----
   function log(type) {
     buzz();
-    if (type === 'feed') return startFeed();
+    if (type === 'feed') { const c = continuable(); return c ? keepFeeding(c) : startFeed(); }
     const ev = { id: uuid(), at: new Date().toISOString(), by: who, note: '', kind: 'diaper', pee: type !== 'poop', poop: type !== 'pee' };
     enqueue({ op: 'put', ev });
     const b = document.querySelector('[data-log="' + type + '"]'), lbl = b.querySelector('.lbl');
@@ -802,15 +874,15 @@
     const days = [];
     for (let i = n - 1; i >= 0; i--) { const d = new Date(start); d.setDate(d.getDate() - i); days.push({ date: d, key: dayKey(d), feeds: 0, mins: 0, left: 0, right: 0, wet: 0, dirty: 0, diapers: 0, gaps: [] }); }
     const by = new Map(days.map((d) => [d.key, d]));
+    const src = trendEvents || events();
     let prev = null;
-    for (const e of (trendEvents || events()).slice().sort((a, b) => (a.at < b.at ? -1 : 1))) {
-      const d = by.get(dayKey(e.at));
-      if (e.kind === 'feed') {
-        if (prev && d) d.gaps.push((new Date(e.at) - new Date(prev.at)) / 60000); // start to start
-        prev = e;
-        if (d) { const l = e.left_min || 0, r = e.right_min || 0; d.feeds++; d.left += l; d.right += r; d.mins += l + r || e.duration_min || 0; }
-      } else if (d) { d.diapers++; if (e.pee) d.wet++; if (e.poop) d.dirty++; }
+    for (const s of sessionsOf(src)) { // a feed logged in pieces counts once, from its first start
+      const d = by.get(dayKey(s.start));
+      if (prev && d) d.gaps.push((new Date(s.start) - new Date(prev.start)) / 60000);
+      prev = s;
+      if (d) { d.feeds++; for (const e of s.feeds) { const l = e.left_min || 0, r = e.right_min || 0; d.left += l; d.right += r; d.mins += l + r || e.duration_min || 0; } }
     }
+    for (const e of src) { const d = e.kind === 'diaper' && by.get(dayKey(e.at)); if (d) { d.diapers++; if (e.pee) d.wet++; if (e.poop) d.dirty++; } }
     return days;
   }
   const hm = (mins) => { mins = Math.round(mins); return Math.floor(mins / 60) + 'h ' + String(mins % 60).padStart(2, '0') + 'm'; };
@@ -974,7 +1046,12 @@
     enqueue({ op: 'put', ev: editing }); closeEdit();
   };
   $('editDelete').onclick = () => { const keep = editing; closeEdit(); enqueue({ op: 'del', id: keep.id }); toast('Removed', () => enqueue({ op: 'put', ev: keep })); };
-  $('lists').onclick = (e) => { const row = e.target.closest('.row'); if (row) openEdit(row.dataset.id); };
+  const openSessions = new Set();
+  $('lists').onclick = (e) => {
+    const row = e.target.closest('.row'); if (!row) return;
+    if (row.dataset.session) { if (openSessions.has(row.dataset.session)) openSessions.delete(row.dataset.session); else openSessions.add(row.dataset.session); return render(); }
+    openEdit(row.dataset.id);
+  };
 
   // ----- appointments -----
   let appointments = [], apptEditing = null, showPast = false;
@@ -1214,7 +1291,7 @@
 
   // ----- feed reminders -----
   const pushOk = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
-  let rem = { hours: 3, publicKey: null }, swReg = null, mySub = null;
+  let swReg = null, mySub = null;
   const keyBytes = (b64) => { const s = atob((b64 + '='.repeat((4 - (b64.length % 4)) % 4)).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(s, (c) => c.charCodeAt(0)); };
   const savePhone = () => api('/api/push/subscribe', { method: 'POST', body: JSON.stringify({ subscription: mySub.toJSON(), by: who }) });
   function drawRem(msg) {
@@ -1227,7 +1304,7 @@
     $('remMsg').textContent = msg !== undefined ? msg : pushOk ? '' : 'This browser cannot show notifications. On an iPhone, open Isabella from its home-screen icon and come back to this page.';
   }
   async function initReminders() {
-    try { const r = await api('/api/reminders'); if (r.ok) rem = await r.json(); } catch {}
+    try { const r = await api('/api/reminders'); if (r.ok) { rem = await r.json(); render(); } } catch {}
     if (pushOk) {
       try {
         swReg = await navigator.serviceWorker.register('/sw.js');
