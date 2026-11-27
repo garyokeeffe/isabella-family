@@ -4,7 +4,7 @@ self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 self.addEventListener('push', (e) => {
   let d = {};
   try { d = e.data.json(); } catch {}
-  e.waitUntil(self.registration.showNotification(d.title || 'Isabella', { body: d.body || '', tag: d.tag || 'isabella', renotify: true, icon: '/icon-192.png', badge: '/icon-192.png' }));
+  e.waitUntil(self.registration.showNotification(d.title || "Casa O'Keeffe", { body: d.body || '', tag: d.tag || 'isabella', renotify: true, icon: '/icon-192.png', badge: '/icon-192.png' }));
 });
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();

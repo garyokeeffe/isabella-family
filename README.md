@@ -1,4 +1,4 @@
-# Isabella's log
+# Casa O'Keeffe (isabella.family and okeeffe.casa)
 
 One-tap log of feedings and diaper changes for two phones. Runs in your own
 Google Cloud project; the data lives in your own Firestore database.

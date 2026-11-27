@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Isabella</title>
+<title>Casa O'Keeffe</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#f8f4ea" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b1f18" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Isabella">
+<meta name="apple-mobile-web-app-title" content="Casa O'Keeffe">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon-180.png">
@@ -347,7 +347,7 @@
     </g>
   </svg>
   <div class="wrap">
-    <div><h1 class="name display">Isabella</h1><div class="rule"></div></div>
+    <div><h1 class="name display">Casa O’Keeffe</h1><div class="rule"></div></div>
     <button class="moon" id="moon" type="button" aria-pressed="false" aria-label="Night mode" hidden><svg viewBox="0 0 24 24"><use href="#i-moon"/></svg></button>
   </div>
 </div>
@@ -1787,7 +1787,7 @@
     playing = key; stopAt = stopMin ? Date.now() + stopMin * 60000 : 0;
     player.src = '/sound-' + key + '.flac'; player.loop = true;
     const p = player.play(); if (p && p.catch) p.catch(() => { if (playing === key) { playing = null; drawSounds(); toast('Could not play that sound', null); } });
-    if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: soundName(key), artist: 'Isabella' });
+    if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: soundName(key), artist: 'Casa O\'Keeffe' });
     drawSounds();
   }
   player.addEventListener('timeupdate', () => { if (stopAt && Date.now() >= stopAt) stopSound(); });
@@ -1837,7 +1837,7 @@
     $('remToggle').classList.toggle('filled', !mySub);
     $('mRem').textContent = !pushOk ? 'Not available in this browser' : mySub ? 'On for this phone, after ' + rem.hours + (rem.hours === 1 ? ' hour' : ' hours') : 'Off on this phone';
     $('remState').textContent = !pushOk ? '' : mySub ? 'On for this phone: after ' + rem.hours + (rem.hours === 1 ? ' hour' : ' hours') : 'Off on this phone';
-    $('remMsg').textContent = msg !== undefined ? msg : pushOk ? '' : 'This browser cannot show notifications. On an iPhone, open Isabella from its home-screen icon and come back to this page.';
+    $('remMsg').textContent = msg !== undefined ? msg : pushOk ? '' : 'This browser cannot show notifications. On an iPhone, open Casa O\'Keeffe from its home-screen icon and come back to this page.';
   }
   async function initReminders() {
     try { const r = await api('/api/reminders'); if (r.ok) { rem = await r.json(); render(); } } catch {}
@@ -1857,7 +1857,7 @@
         await mySub.unsubscribe(); mySub = null;
         return drawRem('Reminders are off for this phone.');
       }
-      if ((await Notification.requestPermission()) !== 'granted') return drawRem('Notifications are blocked for Isabella. Allow them in this phone\'s settings, then try again.');
+      if ((await Notification.requestPermission()) !== 'granted') return drawRem('Notifications are blocked for Casa O\'Keeffe. Allow them in this phone\'s settings, then try again.');
       if (!swReg) swReg = await navigator.serviceWorker.register('/sw.js');
       await navigator.serviceWorker.ready;
       mySub = await swReg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(rem.publicKey) });

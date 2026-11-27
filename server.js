@@ -536,7 +536,7 @@ async function handle(req, res) {
     if (p === '/api/push/unsubscribe') { await pushSubs.remove(id); return send(res, 200, { ok: true }); }
     const sub = await pushSubs.get(id);
     if (!sub) return send(res, 404, { error: 'Reminders are not on for this phone' });
-    const ok = await sendPush(sub, { title: 'Isabella', body: 'Test: reminders are working on this phone.', tag: 'test' });
+    const ok = await sendPush(sub, { title: "Casa O'Keeffe", body: 'Test: reminders are working on this phone.', tag: 'test' });
     return send(res, ok ? 200 : 502, ok ? { ok: true } : { error: 'The notification could not be sent' });
   }
 
