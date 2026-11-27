@@ -162,6 +162,60 @@
   .credits { color: var(--muted); font-size: 15px; margin: 10px 2px 0; }
 
   .pagetabs .chip.on { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+  /* calendar */
+  .calviews { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .calviews .chip { min-height: 56px; padding: 6px 2px; }
+  .calnav { display: flex; align-items: center; gap: 4px; margin: 12px 0 8px; }
+  .calnav > button { width: 56px; height: 56px; flex: none; font-size: 34px; line-height: 1; color: var(--ink); border-radius: 999px; }
+  .calhead { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .calhead h2 { margin: 0; font-size: 28px; text-align: center; }
+  .calpill { border: 1.5px solid var(--brass); color: var(--ink); border-radius: 999px; padding: 6px 14px; font-size: 16px; font-weight: 600; min-height: 40px; }
+  .caldow { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; color: var(--muted); font-size: 14px; padding: 0 0 4px; }
+  .calweek { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: 28px 15px 15px 15px 12px; row-gap: 1px; height: 92px; border-top: 1.5px solid var(--line); }
+  .calcell { grid-row: 1 / -1; z-index: 2; display: flex; justify-content: center; align-items: flex-start; padding-top: 3px; background: none; }
+  .calcell .num { width: 27px; height: 27px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-variant-numeric: tabular-nums; border: 2px solid transparent; }
+  .calcell.today .num, .calmini .d.today { border-color: var(--brass); font-weight: 600; }
+  .calcell.sel .num { background: var(--primary); color: var(--on-primary); font-weight: 600; }
+  .calbar { z-index: 1; pointer-events: none; background: var(--s2); color: #1c1a14; font-size: 11px; font-weight: 600; line-height: 15px; padding: 0 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin: 0; }
+  .calbar.l { border-top-left-radius: 8px; border-bottom-left-radius: 8px; margin-left: 3px; }
+  .calbar.r { border-top-right-radius: 8px; border-bottom-right-radius: 8px; margin-right: 3px; }
+  .calbar.open { background: repeating-linear-gradient(135deg, var(--s2) 0 7px, color-mix(in srgb, var(--s2) 55%, var(--card)) 7px 12px); }
+  .calbar.past, .calmini .d.past { opacity: .5; }
+  .caldot { grid-row: 5; justify-self: center; align-self: center; width: 7px; height: 7px; border-radius: 999px; background: var(--s1); pointer-events: none; }
+  .calmore { grid-row: 5; justify-self: center; font-size: 11px; line-height: 12px; color: var(--muted); pointer-events: none; }
+  .calpanel { background: var(--card); border-radius: 24px; padding: 14px 16px; margin-top: 14px; }
+  .calpanel h3, .calday h3 { font-size: 24px; margin: 0 0 6px; }
+  .calline { display: block; width: 100%; text-align: left; font-size: 18px; padding: 5px 0; line-height: 1.3; }
+  .calline.none { color: var(--muted); }
+  .calline .tm { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 8px; }
+  .callink { text-decoration: underline; text-decoration-color: var(--s2); text-decoration-thickness: 2px; text-underline-offset: 3px; font-weight: 600; padding: 6px 0; }
+  .calline.apl { padding: 8px 0; min-height: 44px; }
+  .calline.apl b { font-weight: 600; text-decoration: underline; text-decoration-color: var(--s1); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .calwk { display: flex; gap: 12px; min-height: 72px; padding: 10px 14px 10px 0; border-top: 1.5px solid var(--line); border-left: 6px solid transparent; }
+  .calwk:first-child { border-top: 0; }
+  .calwk.stay { border-left-color: var(--s2); }
+  .calwk .dd { flex: none; width: 62px; text-align: center; padding: 4px 0 0 8px; color: var(--muted); font-size: 15px; min-height: 56px; }
+  .calwk .dd b { display: block; font-size: 24px; color: var(--ink); font-weight: 600; }
+  .calwk.today .dd b { color: var(--brass); }
+  .calwk .cc { flex: 1; min-width: 0; }
+  .calwk .calline { font-size: 17px; padding: 3px 0; }
+  .calday h3 { margin: 20px 2px 8px; }
+  .calyear { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 12px; }
+  .calmini { text-align: left; padding: 4px 2px; min-height: 56px; }
+  .calmini .mn { font-family: "Isabella Display", Georgia, serif; font-style: italic; font-weight: 600; font-size: 20px; margin-bottom: 2px; }
+  .calmini.now .mn { color: var(--brass); }
+  .calmini .g { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .calmini .d { font-size: 9.5px; line-height: 15px; text-align: center; font-variant-numeric: tabular-nums; border: 1px solid transparent; border-radius: 4px; }
+  .calmini .d.stay { background: var(--s2); color: #1c1a14; border-radius: 0; font-weight: 600; }
+  .fab { position: fixed; right: max(16px, calc(50vw - 244px)); bottom: calc(env(safe-area-inset-bottom) + 80px); z-index: 5; width: 60px; height: 60px; border-radius: 999px; background: var(--brass); color: #14110a; font-size: 36px; line-height: 1; font-weight: 400; box-shadow: 0 4px 14px rgba(0, 0, 0, .28); display: flex; align-items: center; justify-content: center; padding-bottom: 4px; }
+  .row.vis { box-shadow: inset 5px 0 0 var(--s2); }
+  .row.appt:not(.vis) { box-shadow: inset 5px 0 0 var(--s1); }
+  .addpick { display: block; width: 100%; min-height: 68px; border-radius: 24px; border: 1.5px solid var(--muted); background: var(--card); font-weight: 600; font-size: 21px; margin-bottom: 12px; text-align: left; padding: 10px 20px; }
+  .addpick small { display: block; font-weight: 400; color: var(--muted); font-size: 16px; }
+  .checkline { display: flex; align-items: center; gap: 12px; font-size: 18px; min-height: 48px; margin-top: 6px; color: var(--ink); }
+  .checkline input { width: 26px; height: 26px; accent-color: var(--primary); }
+  .stayline { display: block; width: 100%; text-align: left; color: var(--muted); font-size: 17px; padding: 4px 2px; line-height: 1.3; }
+  .stayline b { color: var(--ink); font-weight: 600; }
   .back { color: var(--muted); font-size: 17px; padding: 10px 6px 10px 0; margin-bottom: 2px; }
   .clamp2 { display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-line; }
   .cap { display: block; color: var(--brass); font-size: 15px; font-weight: 600; }
@@ -313,6 +367,7 @@
 
   <!-- TODAY -->
   <section class="tab" id="tabToday">
+    <div id="stayBox" hidden></div>
     <div id="idle">
       <div class="status">
         <div class="lbl2" id="fedLabel"></div>
@@ -370,17 +425,59 @@
 
   <!-- APPOINTMENTS: the list -->
   <section class="tab" id="tabAppointments" hidden>
-    <h2>Appointments</h2>
-    <button class="wide" type="button" id="apptAdd" style="margin-top:0">Add an appointment</button>
-    <div class="list" id="apptList" style="margin-top:14px"></div>
-    <button class="quiet" type="button" id="apptPastBtn" hidden></button>
-    <div class="list" id="apptPast" style="opacity:.62" hidden></div>
-    <button class="quiet" type="button" id="otherNotesBtn" style="display:block" hidden></button>
+    <div class="seg calviews" role="tablist" id="calViews">
+      <button class="chip" type="button" role="tab" data-cv="day">Day</button>
+      <button class="chip" type="button" role="tab" data-cv="week">Week</button>
+      <button class="chip" type="button" role="tab" data-cv="month">Month</button>
+      <button class="chip" type="button" role="tab" data-cv="year">Year</button>
+    </div>
+    <div class="calnav">
+      <button type="button" id="calPrev" aria-label="Earlier">‹</button>
+      <div class="calhead"><h2 id="calTitle"></h2><button class="calpill" type="button" id="calToday" hidden>Today</button></div>
+      <button type="button" id="calNext" aria-label="Later">›</button>
+    </div>
+    <div id="calBody"></div>
+    <div id="calUnder">
+      <div class="calpanel" id="calPanel"></div>
+      <h2 class="sub" style="margin-top:26px">Coming up</h2>
+      <div class="list" id="apptList"></div>
+      <button class="quiet" type="button" id="apptPastBtn" hidden></button>
+      <div class="list" id="apptPast" style="opacity:.62" hidden></div>
+      <button class="quiet" type="button" id="otherNotesBtn" style="display:block" hidden></button>
+    </div>
+    <div style="height:70px"></div>
+    <button class="fab" type="button" id="calAdd" aria-label="Add">+</button>
+  </section>
+
+  <!-- ONE VISIT: Details and Notes tabs, the same shape as an appointment -->
+  <section class="tab" id="tabVisit" hidden>
+    <button class="back" type="button" id="viBack">‹ Calendar</button>
+    <h2 class="ap-title" id="viTitle"></h2>
+    <div class="ap-when" id="viWhen"></div>
+    <div class="seg two pagetabs" role="tablist" style="margin-bottom:16px">
+      <button class="chip" type="button" role="tab" data-vi="details">Details</button>
+      <button class="chip" type="button" role="tab" data-vi="notes">Notes</button>
+    </div>
+    <div id="viDetails">
+      <div class="list">
+        <div class="kv"><small>Who</small><span id="viWho"></span></div>
+        <div class="kv"><small>Arrives</small><span id="viArr"></span></div>
+        <div class="kv"><small>Leaves</small><span id="viLea"></span></div>
+        <div class="kv" id="viNightsRow"><small>Staying</small><span id="viNights"></span></div>
+      </div>
+      <button class="wide" type="button" id="viEdit">Change details</button>
+      <button class="redlink" type="button" id="viDelete" style="margin-top:14px">Delete this visit</button>
+    </div>
+    <div id="viNotes" hidden>
+      <label for="viNoteBox" style="position:absolute;left:-9999px">Notes for this visit</label>
+      <textarea class="notebox" id="viNoteBox" maxlength="20000" placeholder="Flight number, where they're sleeping, favourite breakfast…"></textarea>
+      <div class="savedline" id="viSaved" role="status"></div>
+    </div>
   </section>
 
   <!-- ONE APPOINTMENT: Details and Notes tabs -->
   <section class="tab" id="tabAppt" hidden>
-    <button class="back" type="button" id="apBack">‹ Appointments</button>
+    <button class="back" type="button" id="apBack">‹ Calendar</button>
     <h2 class="ap-title" id="apTitle"></h2>
     <div class="ap-when" id="apWhen"></div>
     <div class="seg two pagetabs" role="tablist" style="margin-bottom:16px">
@@ -404,7 +501,7 @@
 
   <!-- notes that were written without an appointment (only reachable while any exist) -->
   <section class="tab" id="tabOtherNotes" hidden>
-    <button class="back" type="button" id="onBack">‹ Appointments</button>
+    <button class="back" type="button" id="onBack">‹ Calendar</button>
     <h2>Other notes</h2>
     <div class="composer">
       <label for="quickNote" style="position:absolute;left:-9999px">Write a note</label>
@@ -476,6 +573,7 @@
     <div class="account" style="margin-top:0">
         <a href="/api/export.csv">Download feeds and diapers (spreadsheet)</a>
         <a href="/api/appointments.csv">Download appointments (spreadsheet)</a>
+        <a href="/api/visits.csv">Download visits (spreadsheet)</a>
         <a href="/api/notes.csv">Download notes (spreadsheet)</a>
         <button class="link" type="button" id="signout">Sign out of this phone</button>
         <p class="credits">Sounds: Rain by alex36917 (CC BY), Waves by Luftrum (CC BY), Stream by gluckose (CC0), White noise by Jorge Stolfi (CC BY-SA), Pink noise by Omegatron (CC BY-SA), via the Blanket project. Trimmed, looped and levelled for this app.</p>
@@ -487,7 +585,7 @@
   <div class="in">
     <button type="button" data-tab="Today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg>Today</button>
     <button type="button" data-tab="Journal"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-page"/></svg>Journal</button>
-    <button type="button" data-tab="Appointments"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cal"/></svg>Appointments</button>
+    <button type="button" data-tab="Appointments"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cal"/></svg>Calendar</button>
     <button type="button" data-tab="More"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-leaf"/></svg>More</button>
   </div>
 </nav>
@@ -544,6 +642,38 @@
     <div class="btns">
       <button class="btn ghost" type="button" id="editCancel">Cancel</button>
       <button class="btn" type="button" id="editSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- add to the calendar: appointment or visit -->
+<div class="scrim" id="addScrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+    <h3 id="addTitle">Add to calendar</h3>
+    <button class="addpick" type="button" id="addAppt">Appointment</button>
+    <button class="addpick" type="button" id="addVisit">Visit<small>Someone coming to stay</small></button>
+    <div class="btns"><button class="btn ghost" type="button" id="addCancel">Cancel</button></div>
+  </div>
+</div>
+
+<!-- add or change a visit -->
+<div class="scrim" id="visitScrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="visitTitle">
+    <h3 id="visitTitle">Visit</h3>
+    <div class="field"><label for="visWho">Who's coming?</label><input id="visWho" type="text" maxlength="120" placeholder="Grandma Mary and Grandpa Joe"></div>
+    <div class="field"><label for="visArr">Arrives</label><input id="visArr" type="date"></div>
+    <div class="field">
+      <label for="visLea">Leaves</label><input id="visLea" type="date">
+      <label class="checkline"><input type="checkbox" id="visUnsure">Not sure yet</label>
+    </div>
+    <div class="field two-col">
+      <div><label class="lab" for="visArrT">Arrival time (optional)</label><input id="visArrT" type="time"></div>
+      <div><label class="lab" for="visLeaT">Departure time (optional)</label><input id="visLeaT" type="time"></div>
+    </div>
+    <div class="err" id="visErr" role="alert"></div>
+    <div class="btns">
+      <button class="btn ghost" type="button" id="visCancel">Cancel</button>
+      <button class="btn" type="button" id="visSave">Save visit</button>
     </div>
   </div>
 </div>
@@ -976,16 +1106,18 @@
   $('toastUndo').onclick = () => { if (undoFn) undoFn(); undoFn = null; $('toast').hidden = true; };
 
   // ----- tabs -----
-  const SUBPAGES = ['Trends', 'Reminders', 'Sounds', 'Account'], APPTPAGES = ['Appt', 'OtherNotes'], PAGES = ['Today', 'Journal', 'Appointments', 'More', ...SUBPAGES, ...APPTPAGES];
+  const SUBPAGES = ['Trends', 'Reminders', 'Sounds', 'Account'], APPTPAGES = ['Appt', 'OtherNotes', 'Visit'], PAGES = ['Today', 'Journal', 'Appointments', 'More', ...SUBPAGES, ...APPTPAGES];
   function showTab(name) {
     if (name !== 'Appt' && !$('tabAppt').hidden) saveApNotes(); // leaving an appointment: make sure its notes are saved
+    if (name !== 'Visit' && !$('tabVisit').hidden) saveViNotes();
     for (const t of PAGES) $('tab' + t).hidden = t !== name;
-    if (name === 'Appt') sizeNoteBox();
+    if (name === 'Appt' || name === 'Visit') sizeNoteBox();
+    if (name === 'Appointments') drawCal();
     if (name === 'Trends') loadTrends();
     for (const b of document.querySelectorAll('[data-tab]')) { if (b.dataset.tab === (SUBPAGES.includes(name) ? 'More' : APPTPAGES.includes(name) ? 'Appointments' : name)) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
     window.scrollTo(0, 0);
   }
-  for (const b of document.querySelectorAll('[data-tab]')) b.onclick = () => showTab(b.dataset.tab);
+  for (const b of document.querySelectorAll('[data-tab]')) b.onclick = () => { if (b.dataset.tab === 'Appointments') { calView = 'month'; calDate = today0(); } showTab(b.dataset.tab); }; // the Calendar tab always opens on this month
   for (const b of document.querySelectorAll('[data-open]')) b.onclick = () => showTab(b.dataset.open);
   for (const b of document.querySelectorAll('[data-back]')) b.onclick = () => showTab('More');
 
@@ -1192,7 +1324,7 @@
   let appointments = [], apptEditing = null, showPast = false;
   async function loadAppts() {
     try { const res = await api('/api/appointments'); if (res.ok) { appointments = (await res.json()).appointments; renderAppts(); } } catch {}
-    loadNotes();
+    loadNotes(); loadVisits();
   }
   const dayWord = (d) => (dayKey(d) === dayKey(Date.now()) ? 'Today' : dayKey(d) === dayKey(Date.now() + 864e5) ? 'Tomorrow' : null);
   const upcomingAppts = () => appointments.filter((a) => new Date(a.at) >= Date.now() - 2 * 3600e3).sort((a, b) => (a.at < b.at ? -1 : 1)); // stays "upcoming" until two hours after it starts
@@ -1219,28 +1351,45 @@
   }
   const looseNotes = () => notes.filter((n) => !apptOf(n)).sort((a, b) => (a.at < b.at ? 1 : -1));
 
+  function chev() {
+    const ch = document.createElementNS(SVG, 'svg'); ch.setAttribute('viewBox', '0 0 10 16'); ch.setAttribute('class', 'chev'); ch.setAttribute('aria-hidden', 'true');
+    const pth = document.createElementNS(SVG, 'path'); for (const [k, v] of [['d', 'M2 2l6 6-6 6'], ['fill', 'none'], ['stroke', 'currentColor'], ['stroke-width', '1.8'], ['stroke-linecap', 'round'], ['stroke-linejoin', 'round']]) pth.setAttribute(k, v);
+    ch.append(pth);
+    return ch;
+  }
   function apptRow(a) {
     const d = new Date(a.at), txt = fullNotes(a);
     const what = el('span', { className: 'what', textContent: a.title });
     if (a.where) what.append(el('small', { textContent: a.where }));
     if (txt) what.append(el('small', { className: 'clamp2', textContent: txt }));
-    const ch = document.createElementNS(SVG, 'svg'); ch.setAttribute('viewBox', '0 0 10 16'); ch.setAttribute('class', 'chev'); ch.setAttribute('aria-hidden', 'true');
-    const pth = document.createElementNS(SVG, 'path'); for (const [k, v] of [['d', 'M2 2l6 6-6 6'], ['fill', 'none'], ['stroke', 'currentColor'], ['stroke-width', '1.8'], ['stroke-linecap', 'round'], ['stroke-linejoin', 'round']]) pth.setAttribute(k, v);
-    ch.append(pth);
+    const ch = chev();
     const row = el('button', { className: 'row appt', type: 'button' },
       el('span', { className: 'when' }, el('b', { textContent: dayWord(d) || d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) }), clock(a.at)), what, ch);
     row.onclick = () => openApptPage(a.id);
     return row;
   }
+  function visitRow(v) {
+    const n = nights(v), bits = [oneDay(v) ? 'Here for the day' : n == null ? 'Leaves: not sure yet' : n + (n === 1 ? ' night' : ' nights')];
+    if (v.arrive_time && v.arrive >= ymd(Date.now())) bits.push('arrives ' + fmtT(v.arrive_time));
+    const what = el('span', { className: 'what', textContent: v.who }, el('small', { textContent: bits.join(' · ') }));
+    if (v.note && v.note.trim()) what.append(el('small', { className: 'clamp2', textContent: v.note }));
+    const row = el('button', { className: 'row appt vis', type: 'button' }, el('span', { className: 'when' }, el('b', { textContent: rangeText(v) }), 'Visit'), what, chev());
+    row.onclick = () => openVisitPage(v.id);
+    return row;
+  }
   function renderAppts() {
-    const upcoming = upcomingAppts(), past = appointments.filter((a) => !upcoming.includes(a)).sort((a, b) => (a.at < b.at ? 1 : -1));
+    const upcoming = upcomingAppts(), past = appointments.filter((a) => !upcoming.includes(a));
+    const t = ymd(Date.now()), vUp = visits.filter((v) => vEnd(v) >= t), vPast = visits.filter((v) => vEnd(v) < t);
+    const key = (x) => (x.at ? ymd(x.at) + 'T' + new Date(x.at).toTimeString().slice(0, 5) : x.arrive + 'T' + (x.arrive_time || '00:00'));
+    const rowOf = (x) => (x.at ? apptRow(x) : visitRow(x));
     const list = $('apptList'); list.textContent = '';
-    if (!upcoming.length) list.append(el('div', { className: 'empty', textContent: 'Nothing coming up.' }));
-    for (const a of upcoming) list.append(apptRow(a));
-    $('apptPastBtn').hidden = !past.length;
-    $('apptPastBtn').textContent = showPast ? 'Hide past appointments' : 'Past appointments (' + past.length + ')';
-    const pl = $('apptPast'); pl.hidden = !showPast || !past.length; pl.textContent = '';
-    for (const a of past) pl.append(apptRow(a));
+    const up = [...upcoming, ...vUp].sort((a, b) => (key(a) < key(b) ? -1 : 1)), old = [...past, ...vPast].sort((a, b) => (key(a) < key(b) ? 1 : -1));
+    if (!up.length) list.append(el('div', { className: 'empty', textContent: 'Nothing coming up.' }));
+    for (const x of up) list.append(rowOf(x));
+    $('apptPastBtn').hidden = !old.length;
+    $('apptPastBtn').textContent = showPast ? 'Hide past' : 'Past (' + old.length + ')';
+    const pl = $('apptPast'); pl.hidden = !showPast || !old.length; pl.textContent = '';
+    for (const x of old) pl.append(rowOf(x));
 
     const loose = looseNotes();
     $('otherNotesBtn').hidden = !loose.length; $('otherNotesBtn').textContent = 'Other notes (' + loose.length + ')';
@@ -1259,6 +1408,8 @@
       days.append(box);
     }
     if (!$('tabAppt').hidden) drawApptPage(false);
+    if (!$('tabVisit').hidden) drawVisitPage(false);
+    if (!$('tabAppointments').hidden) drawCal();
     paintStrips();
   }
   $('apptPastBtn').onclick = () => { showPast = !showPast; renderAppts(); };
@@ -1270,8 +1421,10 @@
   const openAppointment = () => appointments.find((a) => a.id === apptOpen);
   function openApptPage(id) { apptOpen = id; apDirty = false; $('apSaved').textContent = ''; drawApptPage(true); showTab('Appt'); }
   function sizeNoteBox() { // the notes field fills the screen down to the tab bar
-    const box = $('apNoteBox'); if ($('apNotes').hidden || $('tabAppt').hidden) return;
-    box.style.height = Math.max(260, window.innerHeight - box.getBoundingClientRect().top - window.scrollY - $('tabs').offsetHeight - 46) + 'px';
+    for (const [boxId, wrapId, tabId] of [['apNoteBox', 'apNotes', 'tabAppt'], ['viNoteBox', 'viNotes', 'tabVisit']]) {
+      const box = $(boxId); if ($(wrapId).hidden || $(tabId).hidden) continue;
+      box.style.height = Math.max(260, window.innerHeight - box.getBoundingClientRect().top - window.scrollY - $('tabs').offsetHeight - 46) + 'px';
+    }
   }
   function drawApptPage(reset) {
     const a = openAppointment();
@@ -1341,12 +1494,11 @@
     $('apptTitle').textContent = a ? 'Change appointment' : 'Add an appointment';
     $('apptWhat').value = apptEditing.title; $('apptWhere').value = apptEditing.where || ''; 
     const loc = apptEditing.at ? toLocalInput(apptEditing.at) : '';
-    $('apptDate').value = loc.slice(0, 10); $('apptTime').value = loc.slice(11, 16);
+    $('apptDate').value = loc.slice(0, 10) || ymd(calDate); $('apptTime').value = loc.slice(11, 16); // a new one starts on the day she has selected
     $('apptDelete').hidden = !a; $('apptErr').textContent = '';
     $('apptScrim').hidden = false;
   }
   const closeAppt = () => { $('apptScrim').hidden = true; apptEditing = null; };
-  $('apptAdd').onclick = () => openAppt(null);
   $('apptCancel').onclick = closeAppt;
   $('apptScrim').onclick = (e) => { if (e.target === $('apptScrim')) closeAppt(); };
   for (const c of $('apptChips').children) c.onclick = () => { $('apptWhat').value = c.textContent; };
@@ -1374,6 +1526,254 @@
       appointments = appointments.filter((x) => x.id !== id); closeAppt(); if (apptOpen === id) { apptOpen = null; showTab('Appointments'); } renderAppts();
     } catch { $('apptErr').textContent = 'Could not remove it. Try again in a moment.'; }
   };
+
+  // ----- visits: who is staying with us, stored as plain calendar dates -----
+  let visits = [], visitEditing = null, calView = 'month';
+  const pd = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  const ymd = (d) => { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const today0 = () => pd(ymd(Date.now()));
+  let calDate = today0();
+  const fmtT = (t) => { if (!t) return ''; const [hh, mm] = t.split(':').map(Number); return new Date(2000, 0, 1, hh, mm).toLocaleTimeString([], mm ? { hour: 'numeric', minute: '2-digit' } : { hour: 'numeric' }); };
+  const md = (d) => d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  const dayDiff = (a, b) => Math.round((pd(a) - pd(b)) / 864e5);
+  // today, tomorrow, the weekday within six days, otherwise "Dec 14"
+  const nearDay = (k) => { const n = dayDiff(k, ymd(Date.now())); return n === 0 ? 'today' : n === 1 ? 'tomorrow' : n > 1 && n <= 6 ? pd(k).toLocaleDateString([], { weekday: 'long' }) : md(pd(k)); };
+  const oneDay = (v) => v.leave === v.arrive;
+  const nights = (v) => (v.leave ? dayDiff(v.leave, v.arrive) : null);
+  // Where a stay is drawn to. With no leaving date yet it runs to today, or six days past arrival, whichever is later.
+  const vEnd = (v) => v.leave || ymd(Math.max(today0(), addDays(pd(v.arrive), 6)));
+  const byArrival = (a, b) => (a.arrive + (a.arrive_time || '') < b.arrive + (b.arrive_time || '') ? -1 : 1);
+  const visitsOn = (k) => visits.filter((v) => v.arrive <= k && k <= vEnd(v)).sort(byArrival);
+  const apptsOn = (k) => appointments.filter((a) => ymd(a.at) === k).sort((a, b) => (a.at < b.at ? -1 : 1));
+  function rangeText(v) {
+    const a = pd(v.arrive); if (oneDay(v)) return md(a); if (!v.leave) return 'From ' + md(a);
+    const b = pd(v.leave); return md(a) + ' – ' + (a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear() ? b.getDate() : md(b));
+  }
+  async function loadVisits() { try { const res = await api('/api/visits'); if (res.ok) { visits = (await res.json()).visits; renderAppts(); } } catch {} }
+  async function putVisit(v) {
+    const res = await api('/api/visits', { method: 'POST', body: JSON.stringify(v) });
+    if (!res.ok) throw new Error((await res.json()).error || 'Could not save. Try again.');
+    const { visit } = await res.json();
+    visits = visits.filter((x) => x.id !== visit.id).concat(visit);
+    return visit;
+  }
+
+  // --- the calendar ---
+  const sameK = (a, b) => ymd(a) === ymd(b);
+  const weekStart = (d) => addDays(d, -new Date(d).getDay());
+  const link = (text, fn) => { const b = el('button', { className: 'callink', type: 'button', textContent: text }); b.onclick = fn; return b; };
+  // What is happening on one day, in words: who is staying, who arrives or leaves, and the appointments.
+  function dayLines(k) {
+    const out = [], on = visitsOn(k), staying = on.filter((v) => !oneDay(v));
+    if (staying.length) {
+      const line = el('div', { className: 'calline' }, 'Staying with us: ');
+      staying.forEach((v, i) => line.append(i ? ', ' : '', link(v.who, () => openVisitPage(v.id))));
+      out.push(line);
+    } else out.push(el('div', { className: 'calline none', textContent: 'Nobody staying' }));
+    for (const v of on) {
+      if (oneDay(v)) out.push(el('div', { className: 'calline' }, 'Here for the day: ', link(v.who, () => openVisitPage(v.id)), v.arrive_time ? ', ' + fmtT(v.arrive_time) : ''));
+      else if (v.arrive === k) out.push(el('div', { className: 'calline' }, link(v.who, () => openVisitPage(v.id)), ' arrives' + (v.arrive_time ? ' ' + fmtT(v.arrive_time) : '')));
+      else if (v.leave === k) out.push(el('div', { className: 'calline' }, link(v.who, () => openVisitPage(v.id)), ' leaves' + (v.leave_time ? ' ' + fmtT(v.leave_time) : '')));
+    }
+    for (const a of apptsOn(k)) { const b = el('button', { className: 'calline apl', type: 'button' }, el('span', { className: 'tm', textContent: clock(a.at) }), el('b', { textContent: a.title })); b.onclick = () => openApptPage(a.id); out.push(b); }
+    return out;
+  }
+  function laneMap() { // each stay keeps one lane for its whole length; the earliest arrival gets the top one
+    const ends = [], map = new Map();
+    for (const v of [...visits].sort(byArrival)) { let i = ends.findIndex((e) => e < v.arrive); if (i < 0) i = ends.length; ends[i] = vEnd(v); map.set(v.id, i); }
+    return map;
+  }
+  function drawMonth(body) {
+    const y = calDate.getFullYear(), m = calDate.getMonth(), first = new Date(y, m, 1), last = new Date(y, m + 1, 0), lanes = laneMap(), tk = ymd(Date.now());
+    body.append(el('div', { className: 'caldow' }, ...['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((x) => el('span', { textContent: x }))));
+    for (let ws = weekStart(first); ws <= last; ws = addDays(ws, 7)) {
+      const wk = el('div', { className: 'calweek' }), days = [...Array(7)].map((_, i) => addDays(ws, i)), inM = (d) => d.getMonth() === m;
+      days.forEach((d, i) => {
+        if (!inM(d)) return;
+        const k = ymd(d), c = el('button', { className: 'calcell' + (k === tk ? ' today' : '') + (sameK(d, calDate) ? ' sel' : ''), type: 'button' }, el('span', { className: 'num', textContent: d.getDate() }));
+        const on = visitsOn(k), ap = apptsOn(k);
+        c.setAttribute('aria-label', d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) + (on.length ? ', staying: ' + on.map((v) => v.who).join(', ') : ', nobody staying') + (ap.length ? ', ' + ap.length + (ap.length === 1 ? ' appointment' : ' appointments') : ''));
+        c.style.gridColumn = i + 1; c.onclick = () => { calDate = d; drawCal(); };
+        wk.append(c);
+        const extra = on.filter((v) => lanes.get(v.id) > 2).length;
+        if (extra) { const x = el('span', { className: 'calmore', textContent: '+' + extra + ' more' }); x.style.gridColumn = i + 1; wk.append(x); }
+        else if (ap.length) { const x = el('span', { className: 'caldot' }); x.style.gridColumn = i + 1; wk.append(x); }
+      });
+      const from = days.find(inM), to = [...days].reverse().find(inM), fk = ymd(from), tk2 = ymd(to);
+      for (const v of visits) {
+        const lane = lanes.get(v.id), end = vEnd(v); if (lane > 2 || v.arrive > tk2 || end < fk) continue;
+        const s = v.arrive > fk ? v.arrive : fk, e = end < tk2 ? end : tk2, open = !v.leave;
+        const bar = el('div', { className: 'calbar' + (v.arrive === s ? ' l' : '') + (end === e ? ' r' : '') + (open ? ' open' : '') + (end < tk ? ' past' : ''), textContent: v.who + (open && end === e ? ' ?' : '') });
+        bar.style.gridColumn = (pd(s).getDay() + 1) + ' / ' + (pd(e).getDay() + 2); bar.style.gridRow = lane + 2;
+        wk.append(bar);
+      }
+      body.append(wk);
+    }
+  }
+  function drawWeek(body) {
+    const box = el('div', { className: 'list' }), tk = ymd(Date.now());
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(weekStart(calDate), i), k = ymd(d);
+      const dd = el('button', { className: 'dd', type: 'button' }, d.toLocaleDateString([], { weekday: 'short' }), el('b', { textContent: d.getDate() }));
+      dd.setAttribute('aria-label', 'Open ' + d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }));
+      dd.onclick = () => { calDate = d; calView = 'day'; drawCal(); };
+      box.append(el('div', { className: 'calwk' + (visitsOn(k).length ? ' stay' : '') + (k === tk ? ' today' : '') }, dd, el('div', { className: 'cc' }, ...dayLines(k))));
+    }
+    body.append(box);
+  }
+  function drawDay(body) {
+    const k = ymd(calDate), on = visitsOn(k), ap = apptsOn(k), wrap = el('div', { className: 'calday' });
+    wrap.append(el('h3', { textContent: 'Staying with us' }));
+    const a = el('div', { className: 'list' });
+    if (!on.length) a.append(el('div', { className: 'empty', textContent: 'Nobody staying' }));
+    for (const v of on) {
+      const n = nights(v), bits = [];
+      if (oneDay(v)) bits.push('Here for the day' + (v.arrive_time ? ', from ' + fmtT(v.arrive_time) : ''));
+      else {
+        if (v.arrive === k) bits.push('arrives' + (v.arrive_time ? ' ' + fmtT(v.arrive_time) : ' this day'));
+        else if (v.leave !== k) bits.push('night ' + (dayDiff(k, v.arrive) + 1) + (n ? ' of ' + n : ''));
+        bits.push(!v.leave ? 'leaving date not set' : v.leave === k ? 'leaves this day' + (v.leave_time ? ', ' + fmtT(v.leave_time) : '') : 'leaves ' + pd(v.leave).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' }));
+      }
+      const row = el('button', { className: 'row appt vis', type: 'button' }, el('span', { className: 'what', textContent: v.who }, el('small', { textContent: bits.join(' · ') })), chev());
+      row.onclick = () => openVisitPage(v.id); a.append(row);
+    }
+    wrap.append(a, el('h3', { textContent: 'Appointments' }));
+    const b = el('div', { className: 'list' });
+    if (!ap.length) b.append(el('div', { className: 'empty', textContent: 'Nothing planned' }));
+    for (const x of ap) b.append(apptRow(x));
+    wrap.append(b); body.append(wrap);
+  }
+  function drawYear(body) {
+    const y = calDate.getFullYear(), grid = el('div', { className: 'calyear' }), now = new Date(), tk = ymd(now);
+    for (let m = 0; m < 12; m++) {
+      const first = new Date(y, m, 1), n = new Date(y, m + 1, 0).getDate(), g = el('div', { className: 'g' });
+      for (let i = 0; i < first.getDay(); i++) g.append(el('span', { className: 'd' }));
+      let stayDays = 0;
+      for (let d = 1; d <= n; d++) { const k = ymd(new Date(y, m, d)), st = visitsOn(k).length > 0; if (st) stayDays++; g.append(el('span', { className: 'd' + (st ? ' stay' + (k < tk ? ' past' : '') : '') + (k === tk ? ' today' : ''), textContent: d })); }
+      const bt = el('button', { className: 'calmini' + (y === now.getFullYear() && m === now.getMonth() ? ' now' : ''), type: 'button' }, el('div', { className: 'mn', textContent: first.toLocaleDateString([], { month: 'short' }) }), g);
+      bt.setAttribute('aria-label', first.toLocaleDateString([], { month: 'long', year: 'numeric' }) + (stayDays ? ', someone staying on ' + stayDays + (stayDays === 1 ? ' day' : ' days') : ', nobody staying'));
+      bt.onclick = () => { calDate = sameK(new Date(y, m, 1), new Date(now.getFullYear(), now.getMonth(), 1)) ? today0() : new Date(y, m, 1); calView = 'month'; drawCal(); };
+      grid.append(bt);
+    }
+    body.append(grid);
+  }
+  function drawCal() {
+    for (const b of document.querySelectorAll('[data-cv]')) { b.classList.toggle('on', b.dataset.cv === calView); b.setAttribute('aria-selected', b.dataset.cv === calView); }
+    const t = today0(), ws = weekStart(calDate), we = addDays(ws, 6);
+    $('calTitle').textContent = calView === 'year' ? calDate.getFullYear() : calView === 'month' ? calDate.toLocaleDateString([], { month: 'long', year: 'numeric' })
+      : calView === 'week' ? md(ws) + ' – ' + (ws.getMonth() === we.getMonth() ? we.getDate() : md(we)) : calDate.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+    const hasToday = calView === 'year' ? calDate.getFullYear() === t.getFullYear() : calView === 'month' ? calDate.getFullYear() === t.getFullYear() && calDate.getMonth() === t.getMonth() : calView === 'week' ? ws <= t && t <= we : sameK(calDate, t);
+    $('calToday').hidden = hasToday;
+    const body = $('calBody'); body.textContent = '';
+    ({ day: drawDay, week: drawWeek, month: drawMonth, year: drawYear })[calView](body);
+    $('calUnder').hidden = calView !== 'month';
+    if (calView === 'month') { const p = $('calPanel'); p.textContent = ''; p.append(el('h3', { textContent: calDate.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) }), ...dayLines(ymd(calDate))); }
+  }
+  for (const b of document.querySelectorAll('[data-cv]')) b.onclick = () => { calView = b.dataset.cv; drawCal(); };
+  function calStep(n) {
+    const t = today0();
+    if (calView === 'day') calDate = addDays(calDate, n);
+    else if (calView === 'week') calDate = addDays(calDate, 7 * n);
+    else if (calView === 'month') { const d = new Date(calDate.getFullYear(), calDate.getMonth() + n, 1); calDate = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() ? t : d; }
+    else calDate = new Date(calDate.getFullYear() + n, calDate.getMonth(), 1);
+    drawCal();
+  }
+  $('calPrev').onclick = () => calStep(-1); $('calNext').onclick = () => calStep(1);
+  $('calToday').onclick = () => { calDate = today0(); drawCal(); };
+
+  // --- adding ---
+  const closeAdd = () => { $('addScrim').hidden = true; };
+  $('calAdd').onclick = () => { $('addScrim').hidden = false; };
+  $('addCancel').onclick = closeAdd;
+  $('addScrim').onclick = (e) => { if (e.target === $('addScrim')) closeAdd(); };
+  $('addAppt').onclick = () => { closeAdd(); openAppt(null); };
+  $('addVisit').onclick = () => { closeAdd(); openVisit(null); };
+  function openVisit(v) {
+    visitEditing = v ? { ...v } : { id: uuid(), who: '', arrive: ymd(calDate), leave: '', arrive_time: '', leave_time: '', note: '', by: who };
+    $('visitTitle').textContent = v ? 'Change visit' : 'Add a visit';
+    $('visWho').value = visitEditing.who; $('visArr').value = visitEditing.arrive; $('visLea').value = visitEditing.leave || '';
+    $('visUnsure').checked = !!v && !v.leave; $('visArrT').value = visitEditing.arrive_time || ''; $('visLeaT').value = visitEditing.leave_time || '';
+    $('visErr').textContent = ''; syncUnsure(); $('visitScrim').hidden = false;
+  }
+  function syncUnsure() { const u = $('visUnsure').checked; if (u) { $('visLea').value = ''; $('visLeaT').value = ''; } $('visLea').disabled = u; $('visLeaT').disabled = u; }
+  $('visUnsure').onchange = syncUnsure;
+  const closeVisit = () => { $('visitScrim').hidden = true; visitEditing = null; };
+  $('visCancel').onclick = closeVisit;
+  $('visitScrim').onclick = (e) => { if (e.target === $('visitScrim')) closeVisit(); };
+  $('visSave').onclick = async () => {
+    const err = (m) => { $('visErr').textContent = m; };
+    if (!$('visWho').value.trim()) return err('Say who is coming.');
+    if (!$('visArr').value) return err('Pick the day they arrive.');
+    if (!$('visLea').value && !$('visUnsure').checked) return err('Pick the day they leave, or tick "Not sure yet".');
+    if ($('visLea').value && $('visLea').value < $('visArr').value) return err('Leaves must be on or after Arrives');
+    const isNew = !visits.some((x) => x.id === visitEditing.id);
+    try {
+      const v = await putVisit({ ...visitEditing, who: $('visWho').value, arrive: $('visArr').value, leave: $('visLea').value, arrive_time: $('visArrT').value, leave_time: $('visLeaT').value });
+      closeVisit(); calDate = pd(v.arrive); renderAppts();
+      if (isNew) openVisitPage(v.id); // straight into the new visit, ready for notes
+    } catch (e) { if (e.message !== 'auth') err(e.message && !/fetch|network/i.test(e.message) ? e.message : 'No connection. Try again in a moment.'); }
+  };
+
+  // --- one visit ---
+  let visitOpen = null, viTab = 'details', viDirty = false, viSaving = false, viTimer = null;
+  const openVisitObj = () => visits.find((v) => v.id === visitOpen);
+  function openVisitPage(id) { visitOpen = id; viTab = 'details'; viDirty = false; $('viSaved').textContent = ''; drawVisitPage(true); showTab('Visit'); }
+  const longDay = (k) => pd(k).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+  function drawVisitPage(reset) {
+    const v = openVisitObj();
+    if (!v) { if (!$('tabVisit').hidden) showTab('Appointments'); return; }
+    const n = nights(v);
+    $('viTitle').textContent = v.who; $('viWhen').textContent = rangeText(v) + (oneDay(v) ? ', here for the day' : n == null ? ', not sure when they leave' : ', ' + n + (n === 1 ? ' night' : ' nights'));
+    $('viWho').textContent = v.who; $('viArr').textContent = longDay(v.arrive) + (v.arrive_time ? ' at ' + fmtT(v.arrive_time) : '');
+    $('viLea').textContent = v.leave ? longDay(v.leave) + (v.leave_time ? ' at ' + fmtT(v.leave_time) : '') : 'Not sure yet';
+    $('viNightsRow').hidden = n == null; $('viNights').textContent = oneDay(v) ? 'Here for the day' : n + (n === 1 ? ' night' : ' nights');
+    for (const b of document.querySelectorAll('[data-vi]')) { b.classList.toggle('on', b.dataset.vi === viTab); b.setAttribute('aria-selected', b.dataset.vi === viTab); }
+    $('viDetails').hidden = viTab !== 'details'; $('viNotes').hidden = viTab !== 'notes';
+    const box = $('viNoteBox');
+    if (reset || (!viDirty && document.activeElement !== box)) box.value = v.note || ''; // never overwrite what she is typing
+    sizeNoteBox();
+  }
+  for (const b of document.querySelectorAll('[data-vi]')) b.onclick = () => { if (viTab === 'notes') saveViNotes(); viTab = b.dataset.vi; drawVisitPage(false); };
+  $('viBack').onclick = () => showTab('Appointments');
+  $('viEdit').onclick = () => { const v = openVisitObj(); if (v) openVisit(v); };
+  $('viDelete').onclick = async () => {
+    const v = openVisitObj(); if (!v || !confirm('Delete this visit?')) return;
+    try { const res = await api('/api/visits/' + v.id, { method: 'DELETE' }); if (!res.ok) throw 0; visits = visits.filter((x) => x.id !== v.id); visitOpen = null; showTab('Appointments'); renderAppts(); toast('Visit deleted', null); }
+    catch { toast('Could not delete it. Try again in a moment.', null); }
+  };
+  $('viNoteBox').oninput = () => { viDirty = true; $('viSaved').textContent = 'Saving…'; clearTimeout(viTimer); viTimer = setTimeout(saveViNotes, 1200); };
+  $('viNoteBox').onblur = () => saveViNotes();
+  async function saveViNotes() {
+    const v = openVisitObj();
+    if (!v || !viDirty || viSaving) return;
+    clearTimeout(viTimer); viSaving = true;
+    const text = $('viNoteBox').value;
+    try {
+      await putVisit({ ...v, note: text });
+      if ($('viNoteBox').value === text) viDirty = false;
+      $('viSaved').textContent = viDirty ? 'Saving…' : 'Saved at ' + clock(new Date().toISOString());
+    } catch (e) {
+      if (e.message !== 'auth') $('viSaved').textContent = 'Not saved yet. It will try again when the connection is back.';
+    } finally {
+      viSaving = false;
+      if (viDirty) { clearTimeout(viTimer); viTimer = setTimeout(saveViNotes, 4000); }
+    }
+  }
+
+  // --- on Today: who is here, and who is about to arrive ---
+  function paintStay() {
+    const box = $('stayBox'), t = ymd(Date.now()), tm = ymd(addDays(today0(), 1)); box.textContent = '';
+    const line = (v, ...kids) => { const b = el('button', { className: 'stayline', type: 'button' }, ...kids); b.onclick = () => (v ? openVisitPage(v.id) : showTab('Appointments')); box.append(b); };
+    const here = visitsOn(t).filter((v) => !oneDay(v) && v.arrive < t);
+    if (here.length === 1) {
+      const v = here[0];
+      line(v, 'Staying with us: ', el('b', { textContent: v.who }), !v.leave ? '' : v.leave === t ? ', leaves today' + (v.leave_time ? ' at ' + fmtT(v.leave_time) : '') : ', until ' + nearDay(v.leave));
+    } else if (here.length) line(null, 'Staying with us: ', el('b', { textContent: here.map((v) => v.who).join(', ') }));
+    for (const v of visits.filter((x) => oneDay(x) && x.arrive === t)) line(v, 'Here for the day: ', el('b', { textContent: v.who }));
+    for (const v of visits.filter((x) => !oneDay(x) && (x.arrive === t || x.arrive === tm)).sort(byArrival)) line(v, 'Arriving ' + nearDay(v.arrive) + (v.arrive_time ? ', ' + fmtT(v.arrive_time) : '') + ': ', el('b', { textContent: v.who }));
+    box.hidden = !box.children.length || !!feeding();
+  }
 
   // ----- sleep sounds: loops of real recordings served from this site -----
   const SOUNDS = [['rain', 'Rain', 'rain'], ['waves', 'Ocean waves', 'waves'], ['stream', 'Stream', 'stream'], ['white-noise', 'White noise', 'noise'], ['pink-noise', 'Pink noise (softer)', 'soft']];
@@ -1413,6 +1813,7 @@
 
   // ----- strips on Today: only when there is something to say -----
   function paintStrips() {
+    paintStay();
     const next = upcomingAppts()[0];
     const s = $('apptStrip'); s.hidden = !next; s.textContent = '';
     if (next) {
@@ -1495,7 +1896,7 @@
   setInterval(() => {
     if (document.hidden || $('app').hidden) return;
     ticks++;
-    const busy = editing || apptEditing || noteEditing || apDirty || amt;
+    const busy = editing || apptEditing || noteEditing || apDirty || amt || visitEditing || viDirty;
     if (feeding()) { paintFeeding(); if (ticks % 10 === 0 && !busy) refresh(); } // pick up a switch or finish from the other phone quickly
     else if (ticks % 30 === 0 && !busy) refresh();
     else if (ticks % 20 === 0 && !busy) render();

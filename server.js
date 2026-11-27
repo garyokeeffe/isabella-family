@@ -88,6 +88,7 @@ const makeStore = (name) =>
     : firestoreStore(name);
 const store = makeStore('events');
 const appts = makeStore('appointments');
+const visits = makeStore('visits');      // people coming to stay: plain calendar dates, no time zone
 const notes = makeStore('notes');        // free-standing notes and questions for the doctor
 const pushSubs = makeStore('push');      // one row per phone that turned reminders on
 const settings = makeStore('settings');  // reminder interval, push keys, last reminder sent
@@ -326,6 +327,28 @@ function cleanAppointment(input, existing) {
   out.where = String(src.where || '').trim().slice(0, 120);
   out.note = String(src.note || '').slice(0, 20000);       // older free-text notes; new notes live in the notes collection
   out.summary = String(src.summary || '').slice(0, 4000); // what the doctor said
+  out.by = String(src.by || '').trim().slice(0, 40);
+  out.created_at = (existing && existing.created_at) || new Date().toISOString();
+  out.updated_at = new Date().toISOString();
+  return out;
+}
+
+// A visit is stored as calendar dates ("2026-12-05"), not instants, so a stay reads the same on every phone.
+function cleanVisit(input, existing) {
+  const src = { ...(existing || {}), ...input };
+  const out = { id: src.id };
+  if (!ID_RE.test(String(out.id || ''))) throw new Error('bad id');
+  const date = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) && !isNaN(new Date(v + 'T12:00:00Z')) ? String(v) : '');
+  const time = (v) => (/^([01]\d|2[0-3]):[0-5]\d$/.test(String(v || '')) ? String(v) : '');
+  out.who = String(src.who || '').trim().slice(0, 120);
+  if (!out.who) throw new Error('Say who is coming');
+  out.arrive = date(src.arrive);
+  if (!out.arrive) throw new Error('Pick the day they arrive');
+  out.leave = date(src.leave); // empty while they are not sure when they leave
+  if (out.leave && out.leave < out.arrive) throw new Error('Leaves must be on or after Arrives');
+  out.arrive_time = time(src.arrive_time);
+  out.leave_time = out.leave ? time(src.leave_time) : '';
+  out.note = String(src.note || '').slice(0, 20000);
   out.by = String(src.by || '').trim().slice(0, 40);
   out.created_at = (existing && existing.created_at) || new Date().toISOString();
   out.updated_at = new Date().toISOString();
@@ -588,6 +611,32 @@ async function handle(req, res) {
     return send(res, 200, toCsv(await notes.all(), cols), {
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': 'attachment; filename="isabella-notes.csv"',
+    });
+  }
+  if (p === '/api/visits' && req.method === 'GET') {
+    return send(res, 200, { visits: await visits.all() });
+  }
+  if (p === '/api/visits' && req.method === 'POST') {
+    const body = await readJson(req);
+    let v;
+    try {
+      v = cleanVisit(body, ID_RE.test(String(body.id || '')) ? await visits.get(body.id) : null);
+    } catch (e) {
+      return send(res, 400, { error: e.message });
+    }
+    await visits.put(v);
+    return send(res, 200, { visit: v });
+  }
+  const vm = p.match(/^\/api\/visits\/([A-Za-z0-9_-]{8,64})$/);
+  if (vm && req.method === 'DELETE') {
+    await visits.remove(vm[1]);
+    return send(res, 200, { ok: true });
+  }
+  if (p === '/api/visits.csv' && req.method === 'GET') {
+    const cols = ['id', 'who', 'arrive', 'arrive_time', 'leave', 'leave_time', 'note', 'by', 'created_at', 'updated_at'];
+    return send(res, 200, toCsv(await visits.all(), cols), {
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': 'attachment; filename="isabella-visits.csv"',
     });
   }
   if (p === '/api/appointments.csv' && req.method === 'GET') {
