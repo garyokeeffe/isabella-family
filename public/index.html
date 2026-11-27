@@ -347,7 +347,6 @@
 
     <div class="actions">
       <button class="act feed" data-log="feed" id="startBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg><span class="lbl" id="startLbl">Start feeding</span></button>
-      <button class="wide bottlebtn" type="button" id="bottleBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bottle"/></svg>Give a bottle</button>
       <div class="cont" id="contBox" hidden><span id="contLine"></span><button type="button" id="newFeedBtn">No, start a new feed</button></div>
       <button class="act" data-log="pee"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-drop"/></svg><span class="lbl">Pee</span></button>
       <button class="act" data-log="poop"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-poop"/></svg><span class="lbl">Poop</span></button>
@@ -750,19 +749,22 @@
   // For 30 minutes after a feed is finished, starting again carries on with that same feed.
   function continuable() { if (feeding()) return null; const last = events().find((e) => e.kind === 'feed'); return last && Date.now() - feedEnd(last) <= SAME_FEED_MS ? last : null; }
 
+  let autoPick = null; // the feed whose current side the app chose for her, and what 'last side' was before that
   function startFeed(separate, bottle) {
     // Breast: the side she is due on is selected straight away. Bottle: she picks formula or pumped milk next, and the time counts from this tap.
     const at = new Date().toISOString(), ns = bottle ? null : nextSide();
     const ev = { id: uuid(), at, by: who, note: '', kind: 'feed', in_progress: true, side: ns, side_since: ns ? at : null, paused_at: null, pick_since: bottle ? at : null,
       left_ms: 0, right_ms: 0, formula_ms: 0, pumped_ms: 0, last_side: ns, last_tile: ns, separate: !!separate };
+    autoPick = ns ? { id: ev.id, last_side: null, last_tile: null } : null;
     enqueue({ op: 'put', ev });
     toast(bottle ? 'Bottle feed started' : ns ? 'Feeding started on the ' + ns : 'Feeding started', () => enqueue({ op: 'del', id: ev.id }));
   }
   function keepFeeding(last, bottle) {
-    const before = plain(last), now = new Date().toISOString(), side = bottle ? null : lastSide(last) ? other(lastSide(last)) : null;
+    const before = plain(last), now = new Date().toISOString(), side = bottle ? null : lastSide(last) ? other(lastSide(last)) : nextSide(); // after a bottle-only feed, the breast she is due on
     const ev = { ...before, in_progress: true, duration_min: null, side, side_since: side ? now : null, pick_since: bottle ? now : null, paused_at: side || bottle ? null : now,
       last_side: side || before.last_side, last_tile: side || before.last_tile };
     for (const k of TILES) ev[k + '_ms'] = before[k + '_ms'] || (before[k + '_min'] || 0) * 60000;
+    autoPick = side ? { id: ev.id, last_side: before.last_side || null, last_tile: before.last_tile || null } : null;
     enqueue({ op: 'put', ev });
     toast(bottle ? 'Adding a bottle to the same feed' : side ? 'Carrying on, ' + side + ' side' : 'Carrying on with the same feed', () => enqueue({ op: 'put', ev: before }));
   }
@@ -770,13 +772,16 @@
     if (ev.side && ev.side_since) ev[ev.side + '_ms'] = sideMs(ev, ev.side);
     ev.side_since = null;
   }
-  function pauseFeed() { const cur = feeding(); if (!cur || !cur.side) return; const ev = plain(cur); bank(ev); ev.side = null; ev.pick_since = null; ev.paused_at = new Date().toISOString(); enqueue({ op: 'put', ev }); }
+  function pauseFeed() { const cur = feeding(); if (!cur || !cur.side) return; autoPick = null; const ev = plain(cur); bank(ev); ev.side = null; ev.pick_since = null; ev.paused_at = new Date().toISOString(); enqueue({ op: 'put', ev }); }
   function goSide(tile) { // start on, switch to, or come back to: left, right, formula or pumped milk
     const cur = feeding(); if (!cur || cur.side === tile) return;
     const ev = plain(cur), was = ev.side, untouched = !TILES.some((k) => cur[k + '_ms']);
-    const correcting = was && untouched && Date.now() - new Date(cur.at) < 60000;
+    // The app picked the side for her and she taps a different tile in the first minute: she is telling us what it really is, so those seconds move across.
+    const ran = was && cur.side_since ? Date.now() - new Date(cur.side_since) : 0;
+    const correcting = was && ran < 60000 && ((autoPick && autoPick.id === cur.id) || (untouched && Date.now() - new Date(cur.at) < 60000));
     bank(ev);
-    if (correcting) { ev[tile + '_ms'] = (ev[tile + '_ms'] || 0) + ev[was + '_ms']; ev[was + '_ms'] = 0; } // wrong tile at the very start: the seconds move across
+    if (correcting) { ev[tile + '_ms'] = (ev[tile + '_ms'] || 0) + ran; ev[was + '_ms'] = Math.max(0, (ev[was + '_ms'] || 0) - ran); if (autoPick && autoPick.id === cur.id) ev.last_side = autoPick.last_side; else ev.last_side = null; }
+    autoPick = null;
     // After "Give a bottle", or when no side was picked at the start, the time since that tap belongs to the tile she now picks.
     ev.side_since = !was && cur.pick_since ? cur.pick_since : !was && untouched && !cur.paused_at ? cur.at : new Date().toISOString();
     ev.side = tile; ev.last_tile = tile; ev.paused_at = null; ev.pick_since = null;
@@ -805,12 +810,11 @@
   $('doneBtn').onclick = () => { buzz(); finishFeed(); };
   $('feedCancel').onclick = () => { const cur = feeding(); if (cur) { const keep = plain(cur); enqueue({ op: 'del', id: cur.id }); toast('Feed deleted', () => enqueue({ op: 'put', ev: keep })); } };
   $('newFeedBtn').onclick = () => { buzz(); startFeed(true); };
-  $('bottleBtn').onclick = () => { buzz(); const c = continuable(); if (c) keepFeeding(c, true); else startFeed(false, true); };
   for (const b of document.querySelectorAll('[data-side]')) b.onclick = () => { buzz(); goSide(b.dataset.side); };
 
   function paintFeeding() {
     const cur = feeding(), cont = cur ? null : continuable();
-    $('feedingBox').hidden = !cur; $('idle').hidden = !!cur; $('startBtn').hidden = !!cur; $('bottleBtn').hidden = !!cur; $('feedEnd').hidden = !cur; $('counts').hidden = !!cur;
+    $('feedingBox').hidden = !cur; $('idle').hidden = !!cur; $('startBtn').hidden = !!cur; $('feedEnd').hidden = !cur; $('counts').hidden = !!cur;
     // idle: the big button either starts a feed or, shortly after one, carries on with it
     $('contBox').hidden = !cont;
     const lbl = $('startLbl'); lbl.textContent = cont ? 'Keep feeding' : 'Start feeding';
