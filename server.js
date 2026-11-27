@@ -54,7 +54,7 @@ function fileStore(file) {
   };
 }
 
-function firestoreStore(name) {
+function firestoreStore(name, orderBy = 'at') { // Firestore leaves out records that lack the field it sorts by, so each collection names a field every record has
   const { Firestore } = require('@google-cloud/firestore');
   const db = new Firestore({ ignoreUndefinedProperties: true });
   const col = db.collection(name);
@@ -64,7 +64,7 @@ function firestoreStore(name) {
       return rows(await col.where('at', '>=', sinceIso).orderBy('at', 'desc').get());
     },
     async all() {
-      return rows(await col.orderBy('at', 'asc').get());
+      return rows(await col.orderBy(orderBy, 'asc').get());
     },
     async latest(n) {
       return rows(await col.orderBy('at', 'desc').limit(n).get());
@@ -85,7 +85,7 @@ function firestoreStore(name) {
 const makeStore = (name) =>
   process.env.LOCAL_DATA_FILE
     ? fileStore(name === 'events' ? process.env.LOCAL_DATA_FILE : process.env.LOCAL_DATA_FILE + '.' + name)
-    : firestoreStore(name);
+    : firestoreStore(name, name === 'visits' ? 'arrive' : 'at');
 const store = makeStore('events');
 const appts = makeStore('appointments');
 const visits = makeStore('visits');      // people coming to stay: plain calendar dates, no time zone
