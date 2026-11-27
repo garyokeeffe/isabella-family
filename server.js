@@ -477,6 +477,10 @@ async function handle(req, res) {
   const ip = (req.headers['x-forwarded-for'] || '').split(',').pop().trim() || req.socket.remoteAddress;
 
   if (p === '/healthz') return send(res, 200, 'ok');
+  // www.okeeffe.casa is the same place as okeeffe.casa: send it there so there is one sign-in and one set of reminders.
+  const host = String(req.headers.host || '').toLowerCase();
+  if (/^www\.[a-z0-9.-]+$/.test(host)) { res.writeHead(301, { Location: 'https://' + host.slice(4) + req.url }); return res.end(); }
+
   if (!p.startsWith('/api/')) {
     if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
     return serveStatic(req, res, p);

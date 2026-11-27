@@ -162,58 +162,77 @@
   .credits { color: var(--muted); font-size: 15px; margin: 10px 2px 0; }
 
   .pagetabs .chip.on { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
-  /* calendar */
-  .calviews { grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .calviews .chip { min-height: 56px; padding: 6px 2px; }
-  .calnav { display: flex; align-items: center; gap: 4px; margin: 12px 0 8px; }
-  .calnav > button { width: 56px; height: 56px; flex: none; font-size: 34px; line-height: 1; color: var(--ink); border-radius: 999px; }
-  .calhead { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
-  .calhead h2 { margin: 0; font-size: 28px; text-align: center; }
-  .calpill { border: 1.5px solid var(--brass); color: var(--ink); border-radius: 999px; padding: 6px 14px; font-size: 16px; font-weight: 600; min-height: 40px; }
-  .caldow { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; color: var(--muted); font-size: 14px; padding: 0 0 4px; }
-  .calweek { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: 28px 15px 15px 15px 12px; row-gap: 1px; height: 92px; border-top: 1.5px solid var(--line); }
-  .calcell { grid-row: 1 / -1; z-index: 2; display: flex; justify-content: center; align-items: flex-start; padding-top: 3px; background: none; }
-  .calcell .num { width: 27px; height: 27px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-variant-numeric: tabular-nums; border: 2px solid transparent; }
-  .calcell.today .num, .calmini .d.today { border-color: var(--brass); font-weight: 600; }
-  .calcell.sel .num { background: var(--primary); color: var(--on-primary); font-weight: 600; }
-  .calbar { z-index: 1; pointer-events: none; background: var(--s2); color: #1c1a14; font-size: 11px; font-weight: 600; line-height: 15px; padding: 0 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin: 0; }
-  .calbar.l { border-top-left-radius: 8px; border-bottom-left-radius: 8px; margin-left: 3px; }
-  .calbar.r { border-top-right-radius: 8px; border-bottom-right-radius: 8px; margin-right: 3px; }
-  .calbar.open { background: repeating-linear-gradient(135deg, var(--s2) 0 7px, color-mix(in srgb, var(--s2) 55%, var(--card)) 7px 12px); }
+  /* calendar: a pinned header, and the calendar itself is what scrolls */
+  body.cal .top { display: none; }
+  .calhdr { position: sticky; top: 0; z-index: 4; background: var(--bg); padding: calc(env(safe-area-inset-top) + 10px) 0 6px; margin: 0 -2px; }
+  .calrow1 { display: flex; align-items: center; gap: 10px; height: 56px; }
+  .calrow1 h2 { flex: 1; min-width: 0; margin: 0 2px; font-size: 26px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .calpill { flex: none; border: 1.5px solid var(--brass); color: var(--ink); border-radius: 999px; padding: 0 16px; font-size: 16px; font-weight: 600; height: 44px; }
+  .calplus { flex: none; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; }
+  .calplus span { width: 44px; height: 44px; border-radius: 999px; background: var(--brass); color: #14110a; display: flex; align-items: center; justify-content: center; }
+  .calplus svg { width: 22px; height: 22px; }
+  .calseg { display: flex; height: 44px; margin-top: 4px; border: 1.5px solid var(--muted); border-radius: 999px; overflow: hidden; background: var(--card); }
+  .calseg button { flex: 1 1 0; min-width: 0; font-size: 15px; color: var(--ink); border-radius: 999px; }
+  .calseg button.on { background: var(--ink); color: var(--bg); font-weight: 600; }
+  .caldow { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; color: var(--muted); font-size: 13px; height: 24px; align-items: end; margin-top: 4px; }
+  #calBody { min-height: 100vh; }
+  .calmlabel { font-family: "Isabella Display", Georgia, serif; font-style: italic; font-weight: 600; font-size: 24px; height: 40px; display: flex; align-items: flex-end; padding: 0 2px 4px; margin-top: 10px; }
+  .calweek { position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: 16px; align-content: start; border-top: 1.5px solid var(--line); }
+  .calcell { grid-row: 1 / -1; z-index: 2; display: flex; align-items: flex-start; justify-content: center; width: 100%; height: 100%; padding: 1px 0 0; background: none; -webkit-tap-highlight-color: transparent; }
+  .calcell .num { display: inline-flex; width: 28px; height: 28px; border-radius: 999px; align-items: center; justify-content: center; font-size: 17px; font-variant-numeric: tabular-nums; }
+  .calcell.today .num { background: var(--s1); color: #fff; font-weight: 600; }
+  .calbar { z-index: 1; pointer-events: none; height: 14px; background: var(--s2); color: #1c1a14; font-size: 11px; font-weight: 600; line-height: 14px; padding: 0 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; min-width: 0; }
+  .calbar.l { border-top-left-radius: 7px; border-bottom-left-radius: 7px; margin-left: 3px; }
+  .calbar.r { border-top-right-radius: 7px; border-bottom-right-radius: 7px; margin-right: 3px; }
+  .calbar.open { background: repeating-linear-gradient(135deg, var(--s2) 0 7px, #e0b565 7px 12px); }
   .calbar.past, .calmini .d.past { opacity: .5; }
-  .caldot { grid-row: 5; justify-self: center; align-self: center; width: 7px; height: 7px; border-radius: 999px; background: var(--s1); pointer-events: none; }
-  .calmore { grid-row: 5; justify-self: center; font-size: 11px; line-height: 12px; color: var(--muted); pointer-events: none; }
-  .calpanel { background: var(--card); border-radius: 24px; padding: 14px 16px; margin-top: 14px; }
-  .calpanel h3, .calday h3 { font-size: 24px; margin: 0 0 6px; }
-  .calline { display: block; width: 100%; text-align: left; font-size: 18px; padding: 5px 0; line-height: 1.3; }
-  .calline.none { color: var(--muted); }
-  .calline .tm { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 8px; }
-  .callink { text-decoration: underline; text-decoration-color: var(--s2); text-decoration-thickness: 2px; text-underline-offset: 3px; font-weight: 600; padding: 6px 0; }
-  .calline.apl { padding: 8px 0; min-height: 44px; }
-  .calline.apl b { font-weight: 600; text-decoration: underline; text-decoration-color: var(--s1); text-decoration-thickness: 2px; text-underline-offset: 3px; }
-  .calwk { display: flex; gap: 12px; min-height: 72px; padding: 10px 14px 10px 0; border-top: 1.5px solid var(--line); border-left: 6px solid transparent; }
+  .caldot { justify-self: center; align-self: center; width: 7px; height: 7px; border-radius: 999px; background: var(--s1); pointer-events: none; }
+  .calmore { justify-self: center; font-size: 11px; line-height: 14px; color: var(--muted); pointer-events: none; white-space: nowrap; }
+  .calsticky { position: sticky; top: var(--calTop, 120px); z-index: 3; background: var(--bg); }
+  .calwlabel { height: 32px; display: flex; align-items: center; padding: 0 2px; color: var(--muted); font-size: 16px; font-weight: 600; margin-top: 8px; }
+  .calwlabel.now { color: var(--brass); }
+  .calwk { display: flex; gap: 12px; align-items: stretch; min-height: 44px; border-top: 1.5px solid var(--line); border-left: 6px solid transparent; }
   .calwk:first-child { border-top: 0; }
   .calwk.stay { border-left-color: var(--s2); }
-  .calwk .dd { flex: none; width: 62px; text-align: center; padding: 4px 0 0 8px; color: var(--muted); font-size: 15px; min-height: 56px; }
-  .calwk .dd b { display: block; font-size: 24px; color: var(--ink); font-weight: 600; }
-  .calwk.today .dd b { color: var(--brass); }
-  .calwk .cc { flex: 1; min-width: 0; }
-  .calwk .calline { font-size: 17px; padding: 3px 0; }
-  .calday h3 { margin: 20px 2px 8px; }
-  .calyear { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 12px; }
-  .calmini { text-align: left; padding: 4px 2px; min-height: 56px; }
+  .calwk .dd { flex: none; width: 92px; text-align: left; padding: 0 0 0 10px; color: var(--muted); font-size: 16px; min-height: 44px; }
+  .calwk .dd b { color: var(--ink); font-weight: 600; font-size: 18px; margin-left: 6px; }
+  .calwk.nil .dd b { color: var(--muted); font-weight: 400; }
+  .calwk.today .dd b { background: var(--s1); color: #fff; border-radius: 999px; padding: 2px 8px; }
+  .calwk .cc { flex: 1; min-width: 0; padding: 7px 12px 7px 0; }
+  .calline { display: block; width: 100%; text-align: left; font-size: 17px; padding: 3px 0; line-height: 1.3; }
+  .calline.none { color: var(--muted); }
+  .calline .tm { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 8px; }
+  .callink { text-decoration: underline; text-decoration-color: var(--s2); text-decoration-thickness: 2px; text-underline-offset: 3px; font-weight: 600; padding: 6px 0; text-align: left; }
+  .calline.apl { padding: 6px 0; min-height: 44px; }
+  .calline.apl b { font-weight: 600; text-decoration: underline; text-decoration-color: var(--s1); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .caldlabel { font-family: "Isabella Display", Georgia, serif; font-style: italic; font-weight: 600; font-size: 24px; padding: 14px 2px 6px; }
+  .caldlabel.now { color: var(--brass); }
+  .calgap { min-height: 44px; display: flex; align-items: center; color: var(--muted); font-size: 16px; padding: 0 4px; border-top: 1.5px solid var(--line); margin-top: 12px; }
+  .calgap + .calgap { margin-top: 0; }
+  .calsub { color: var(--muted); font-size: 15px; margin: 10px 2px 6px; }
+  .calylabel { font-family: "Isabella Display", Georgia, serif; font-style: italic; font-weight: 600; font-size: 34px; padding: 16px 2px 6px; }
+  .calyear { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 12px; }
+  .calmini { display: block; text-align: left; padding: 4px 2px; min-height: 56px; -webkit-tap-highlight-color: transparent; }
   .calmini .mn { font-family: "Isabella Display", Georgia, serif; font-style: italic; font-weight: 600; font-size: 20px; margin-bottom: 2px; }
   .calmini.now .mn { color: var(--brass); }
-  .calmini .g { display: grid; grid-template-columns: repeat(7, 1fr); }
-  .calmini .d { font-size: 9.5px; line-height: 15px; text-align: center; font-variant-numeric: tabular-nums; border: 1px solid transparent; border-radius: 4px; }
-  .calmini .d.stay { background: var(--s2); color: #1c1a14; border-radius: 0; font-weight: 600; }
-  .fab { position: fixed; right: max(16px, calc(50vw - 244px)); bottom: calc(env(safe-area-inset-bottom) + 80px); z-index: 5; width: 60px; height: 60px; border-radius: 999px; background: var(--brass); color: #14110a; font-size: 36px; line-height: 1; font-weight: 400; box-shadow: 0 4px 14px rgba(0, 0, 0, .28); display: flex; align-items: center; justify-content: center; padding-bottom: 4px; }
+  .calmini .g { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .calmini .d { font-size: 9.5px; line-height: 15px; text-align: center; font-variant-numeric: tabular-nums; }
+  .calmini .d.stay { background: var(--s2); color: #1c1a14; font-weight: 600; }
+  .calmini .d.today { box-shadow: inset 0 0 0 1.5px var(--s1); border-radius: 999px; }
+  .caltoday { display: flex; align-items: center; gap: 10px; color: var(--brass); font-weight: 600; font-size: 16px; padding: 14px 2px 8px; }
+  .caltoday::after { content: ""; flex: 1; height: 1.5px; background: var(--brass); opacity: .6; }
+  .daysheet .calline { font-size: 19px; padding: 6px 0; }
+  .stack { display: grid; gap: 18px; }
+  /* iPhone draws date and time fields its own way: keep them inside their row, left-aligned, and never blank */
+  input[type=date], input[type=time] { -webkit-appearance: none; appearance: none; display: block; width: 100%; min-width: 0; max-width: 100%; min-height: 56px; text-align: left; }
+  input::-webkit-date-and-time-value { text-align: left; min-height: 1.3em; }
+  @supports (-webkit-touch-callout: none) { input[type=date]:not(.has)::before, input[type=time]:not(.has)::before { content: "Not set"; color: var(--muted); } }
   .row.vis { box-shadow: inset 5px 0 0 var(--s2); }
   .row.appt:not(.vis) { box-shadow: inset 5px 0 0 var(--s1); }
   .addpick { display: block; width: 100%; min-height: 68px; border-radius: 24px; border: 1.5px solid var(--muted); background: var(--card); font-weight: 600; font-size: 21px; margin-bottom: 12px; text-align: left; padding: 10px 20px; }
   .addpick small { display: block; font-weight: 400; color: var(--muted); font-size: 16px; }
   .checkline { display: flex; align-items: center; gap: 12px; font-size: 18px; min-height: 48px; margin-top: 6px; color: var(--ink); }
-  .checkline input { width: 26px; height: 26px; accent-color: var(--primary); }
+  .checkline input { width: 26px; height: 26px; flex: none; margin: 0; accent-color: var(--primary); }
   .stayline { display: block; width: 100%; text-align: left; color: var(--muted); font-size: 17px; padding: 4px 2px; line-height: 1.3; }
   .stayline b { color: var(--ink); font-weight: 600; }
   .back { color: var(--muted); font-size: 17px; padding: 10px 6px 10px 0; margin-bottom: 2px; }
@@ -425,28 +444,22 @@
 
   <!-- APPOINTMENTS: the list -->
   <section class="tab" id="tabAppointments" hidden>
-    <div class="seg calviews" role="tablist" id="calViews">
-      <button class="chip" type="button" role="tab" data-cv="day">Day</button>
-      <button class="chip" type="button" role="tab" data-cv="week">Week</button>
-      <button class="chip" type="button" role="tab" data-cv="month">Month</button>
-      <button class="chip" type="button" role="tab" data-cv="year">Year</button>
-    </div>
-    <div class="calnav">
-      <button type="button" id="calPrev" aria-label="Earlier">‹</button>
-      <div class="calhead"><h2 id="calTitle"></h2><button class="calpill" type="button" id="calToday" hidden>Today</button></div>
-      <button type="button" id="calNext" aria-label="Later">›</button>
+    <div class="calhdr" id="calHdr">
+      <div class="calrow1">
+        <h2 id="calTitle"></h2>
+        <button class="calpill" type="button" id="calToday">Today</button>
+        <button class="calplus" type="button" id="calAdd" aria-label="Add to calendar"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span></button>
+      </div>
+      <div class="calseg" role="tablist" id="calViews">
+        <button type="button" role="tab" data-cv="list">List</button>
+        <button type="button" role="tab" data-cv="day">Day</button>
+        <button type="button" role="tab" data-cv="week">Week</button>
+        <button type="button" role="tab" data-cv="month">Month</button>
+        <button type="button" role="tab" data-cv="year">Year</button>
+      </div>
+      <div class="caldow" id="calDow" aria-hidden="true" hidden><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
     </div>
     <div id="calBody"></div>
-    <div id="calUnder">
-      <div class="calpanel" id="calPanel"></div>
-      <h2 class="sub" style="margin-top:26px">Coming up</h2>
-      <div class="list" id="apptList"></div>
-      <button class="quiet" type="button" id="apptPastBtn" hidden></button>
-      <div class="list" id="apptPast" style="opacity:.62" hidden></div>
-      <button class="quiet" type="button" id="otherNotesBtn" style="display:block" hidden></button>
-    </div>
-    <div style="height:70px"></div>
-    <button class="fab" type="button" id="calAdd" aria-label="Add">+</button>
   </section>
 
   <!-- ONE VISIT: Details and Notes tabs, the same shape as an appointment -->
@@ -646,6 +659,16 @@
   </div>
 </div>
 
+<!-- one day, tapped in the month or week -->
+<div class="scrim" id="dayScrim" hidden>
+  <div class="sheet daysheet" role="dialog" aria-modal="true" aria-labelledby="dayTitle" style="max-height:70vh">
+    <h3 id="dayTitle"></h3>
+    <div id="dayLines" style="margin-bottom:14px"></div>
+    <button class="wide filled" type="button" id="dayAdd" style="margin-top:0">Add to this day</button>
+    <div class="btns"><button class="btn ghost" type="button" id="dayClose">Close</button></div>
+  </div>
+</div>
+
 <!-- add to the calendar: appointment or visit -->
 <div class="scrim" id="addScrim" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="addTitle">
@@ -666,7 +689,7 @@
       <label for="visLea">Leaves</label><input id="visLea" type="date">
       <label class="checkline"><input type="checkbox" id="visUnsure">Not sure yet</label>
     </div>
-    <div class="field two-col">
+    <div class="field stack">
       <div><label class="lab" for="visArrT">Arrival time (optional)</label><input id="visArrT" type="time"></div>
       <div><label class="lab" for="visLeaT">Departure time (optional)</label><input id="visLeaT" type="time"></div>
     </div>
@@ -692,7 +715,7 @@
         <button class="chip" type="button">Photos</button>
       </div>
     </div>
-    <div class="field two-col">
+    <div class="field stack">
       <div><label class="lab" for="apptDate">Date</label><input id="apptDate" type="date"></div>
       <div><label class="lab" for="apptTime">Time</label><input id="apptTime" type="time"></div>
     </div>
@@ -1110,14 +1133,16 @@
   function showTab(name) {
     if (name !== 'Appt' && !$('tabAppt').hidden) saveApNotes(); // leaving an appointment: make sure its notes are saved
     if (name !== 'Visit' && !$('tabVisit').hidden) saveViNotes();
+    if (!$('tabAppointments').hidden && name !== 'Appointments') calSavedY = window.scrollY; // remember where she was in the calendar
     for (const t of PAGES) $('tab' + t).hidden = t !== name;
+    document.body.classList.toggle('cal', name === 'Appointments');
     if (name === 'Appt' || name === 'Visit') sizeNoteBox();
-    if (name === 'Appointments') drawCal();
     if (name === 'Trends') loadTrends();
     for (const b of document.querySelectorAll('[data-tab]')) { if (b.dataset.tab === (SUBPAGES.includes(name) ? 'More' : APPTPAGES.includes(name) ? 'Appointments' : name)) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
     window.scrollTo(0, 0);
+    if (name === 'Appointments') { const back = calBack; calBack = false; drawCal(true); if (back && calSavedY != null) window.scrollTo(0, calSavedY); else calGoToday(false); }
   }
-  for (const b of document.querySelectorAll('[data-tab]')) b.onclick = () => { if (b.dataset.tab === 'Appointments') { calView = 'month'; calDate = today0(); } showTab(b.dataset.tab); }; // the Calendar tab always opens on this month
+  for (const b of document.querySelectorAll('[data-tab]')) b.onclick = () => { if (b.dataset.tab === 'Appointments') { calDate = today0(); calBack = false; } showTab(b.dataset.tab); }; // the Calendar tab opens at today, in the view she used last
   for (const b of document.querySelectorAll('[data-open]')) b.onclick = () => showTab(b.dataset.open);
   for (const b of document.querySelectorAll('[data-back]')) b.onclick = () => showTab('More');
 
@@ -1378,21 +1403,7 @@
     return row;
   }
   function renderAppts() {
-    const upcoming = upcomingAppts(), past = appointments.filter((a) => !upcoming.includes(a));
-    const t = ymd(Date.now()), vUp = visits.filter((v) => vEnd(v) >= t), vPast = visits.filter((v) => vEnd(v) < t);
-    const key = (x) => (x.at ? ymd(x.at) + 'T' + new Date(x.at).toTimeString().slice(0, 5) : x.arrive + 'T' + (x.arrive_time || '00:00'));
-    const rowOf = (x) => (x.at ? apptRow(x) : visitRow(x));
-    const list = $('apptList'); list.textContent = '';
-    const up = [...upcoming, ...vUp].sort((a, b) => (key(a) < key(b) ? -1 : 1)), old = [...past, ...vPast].sort((a, b) => (key(a) < key(b) ? 1 : -1));
-    if (!up.length) list.append(el('div', { className: 'empty', textContent: 'Nothing coming up.' }));
-    for (const x of up) list.append(rowOf(x));
-    $('apptPastBtn').hidden = !old.length;
-    $('apptPastBtn').textContent = showPast ? 'Hide past' : 'Past (' + old.length + ')';
-    const pl = $('apptPast'); pl.hidden = !showPast || !old.length; pl.textContent = '';
-    for (const x of old) pl.append(rowOf(x));
-
     const loose = looseNotes();
-    $('otherNotesBtn').hidden = !loose.length; $('otherNotesBtn').textContent = 'Other notes (' + loose.length + ')';
     const days = $('notesByDay'); days.textContent = '';
     const groups = new Map(), yesterday = dayKey(Date.now() - 864e5);
     if (!loose.length) days.append(el('div', { className: 'list', style: 'margin-top:18px' }, el('div', { className: 'empty', textContent: 'No notes yet.' })));
@@ -1412,9 +1423,7 @@
     if (!$('tabAppointments').hidden) drawCal();
     paintStrips();
   }
-  $('apptPastBtn').onclick = () => { showPast = !showPast; renderAppts(); };
-  $('otherNotesBtn').onclick = () => showTab('OtherNotes');
-  $('onBack').onclick = () => showTab('Appointments');
+  $('onBack').onclick = () => { calBack = true; showTab('Appointments'); };
 
   // --- one appointment ---
   let apptOpen = null, apTab = ls.get('apTab', 'details'), apDirty = false, apSaving = false, apTimer = null;
@@ -1428,7 +1437,7 @@
   }
   function drawApptPage(reset) {
     const a = openAppointment();
-    if (!a) { if (!$('tabAppt').hidden) showTab('Appointments'); return; }
+    if (!a) { if (!$('tabAppt').hidden) { calBack = true; showTab('Appointments'); } return; }
     const d = new Date(a.at), when = (dayWord(d) ? dayWord(d) + ', ' : '') + d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) + ' at ' + clock(a.at);
     $('apTitle').textContent = a.title; $('apWhen').textContent = when + (a.where ? ', ' + a.where : '');
     $('apWhat').textContent = a.title; $('apWhenFull').textContent = when; $('apWhere').textContent = a.where || 'Not set';
@@ -1439,7 +1448,7 @@
     sizeNoteBox();
   }
   for (const b of document.querySelectorAll('[data-ap]')) b.onclick = () => { if (apTab === 'notes') saveApNotes(); apTab = b.dataset.ap; ls.set('apTab', apTab); drawApptPage(false); };
-  $('apBack').onclick = () => showTab('Appointments');
+  $('apBack').onclick = () => { calBack = true; showTab('Appointments'); };
   $('apEdit').onclick = () => { const a = openAppointment(); if (a) openAppt(a); };
   window.addEventListener('resize', sizeNoteBox);
   // Notes save by themselves a moment after she stops typing, and again when she leaves the field or the page.
@@ -1495,7 +1504,7 @@
     $('apptWhat').value = apptEditing.title; $('apptWhere').value = apptEditing.where || ''; 
     const loc = apptEditing.at ? toLocalInput(apptEditing.at) : '';
     $('apptDate').value = loc.slice(0, 10) || ymd(calDate); $('apptTime').value = loc.slice(11, 16); // a new one starts on the day she has selected
-    $('apptDelete').hidden = !a; $('apptErr').textContent = '';
+    $('apptDelete').hidden = !a; $('apptErr').textContent = ''; markFilled();
     $('apptScrim').hidden = false;
   }
   const closeAppt = () => { $('apptScrim').hidden = true; apptEditing = null; };
@@ -1528,7 +1537,7 @@
   };
 
   // ----- visits: who is staying with us, stored as plain calendar dates -----
-  let visits = [], visitEditing = null, calView = 'month';
+  let visits = [], visitEditing = null, calView = ls.get('calView', 'month'), calBack = false, calSavedY = null;
   const pd = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
   const ymd = (d) => { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
   const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
@@ -1559,24 +1568,36 @@
     return visit;
   }
 
-  // --- the calendar ---
+  // --- the calendar: every view is one long page that scrolls through time ---
   const sameK = (a, b) => ymd(a) === ymd(b);
   const weekStart = (d) => addDays(d, -new Date(d).getDay());
   const link = (text, fn) => { const b = el('button', { className: 'callink', type: 'button', textContent: text }); b.onclick = fn; return b; };
+  const goVisit = (id) => { closeDay(); openVisitPage(id); }, goAppt = (id) => { closeDay(); openApptPage(id); };
+  const yr = (d) => (d.getFullYear() === new Date().getFullYear() ? '' : ', ' + d.getFullYear());
   // What is happening on one day, in words: who is staying, who arrives or leaves, and the appointments.
-  function dayLines(k) {
-    const out = [], on = visitsOn(k), staying = on.filter((v) => !oneDay(v));
+  function dayLines(k, quiet) {
+    const out = [], on = visitsOn(k), staying = on.filter((v) => !oneDay(v)), ap = apptsOn(k);
     if (staying.length) {
       const line = el('div', { className: 'calline' }, 'Staying with us: ');
-      staying.forEach((v, i) => line.append(i ? ', ' : '', link(v.who, () => openVisitPage(v.id))));
+      staying.forEach((v, i) => line.append(i ? ', ' : '', link(v.who, () => goVisit(v.id))));
       out.push(line);
-    } else out.push(el('div', { className: 'calline none', textContent: 'Nobody staying' }));
+    } else if (!quiet) out.push(el('div', { className: 'calline none', textContent: on.length || ap.length ? 'Nobody staying' : 'Nothing planned' }));
     for (const v of on) {
-      if (oneDay(v)) out.push(el('div', { className: 'calline' }, 'Here for the day: ', link(v.who, () => openVisitPage(v.id)), v.arrive_time ? ', ' + fmtT(v.arrive_time) : ''));
-      else if (v.arrive === k) out.push(el('div', { className: 'calline' }, link(v.who, () => openVisitPage(v.id)), ' arrives' + (v.arrive_time ? ' ' + fmtT(v.arrive_time) : '')));
-      else if (v.leave === k) out.push(el('div', { className: 'calline' }, link(v.who, () => openVisitPage(v.id)), ' leaves' + (v.leave_time ? ' ' + fmtT(v.leave_time) : '')));
+      if (oneDay(v)) out.push(el('div', { className: 'calline' }, 'Here for the day: ', link(v.who, () => goVisit(v.id)), v.arrive_time ? ', ' + fmtT(v.arrive_time) : ''));
+      else if (v.arrive === k) out.push(el('div', { className: 'calline' }, link(v.who, () => goVisit(v.id)), ' arrives' + (v.arrive_time ? ' ' + fmtT(v.arrive_time) : '')));
+      else if (v.leave === k) out.push(el('div', { className: 'calline' }, link(v.who, () => goVisit(v.id)), ' leaves' + (v.leave_time ? ' ' + fmtT(v.leave_time) : '')));
     }
-    for (const a of apptsOn(k)) { const b = el('button', { className: 'calline apl', type: 'button' }, el('span', { className: 'tm', textContent: clock(a.at) }), el('b', { textContent: a.title })); b.onclick = () => openApptPage(a.id); out.push(b); }
+    for (const a of ap) { const b = el('button', { className: 'calline apl', type: 'button' }, el('span', { className: 'tm', textContent: clock(a.at) }), el('b', { textContent: a.title })); b.onclick = () => goAppt(a.id); out.push(b); }
+    return out;
+  }
+  // The same day, kept short for the week list: one line per guest, then the appointments.
+  function weekLines(k) {
+    const out = [];
+    for (const v of visitsOn(k)) {
+      const note = oneDay(v) ? 'here for the day' + (v.arrive_time ? ', ' + fmtT(v.arrive_time) : '') : v.arrive === k ? 'arrives' + (v.arrive_time ? ' ' + fmtT(v.arrive_time) : '') : v.leave === k ? 'leaves' + (v.leave_time ? ' ' + fmtT(v.leave_time) : '') : '';
+      out.push(el('div', { className: 'calline' }, link(v.who, () => goVisit(v.id)), note ? el('span', { className: 'tm', style: 'margin:0 0 0 8px', textContent: note }) : ''));
+    }
+    for (const a of apptsOn(k)) { const b = el('button', { className: 'calline apl', type: 'button' }, el('span', { className: 'tm', textContent: clock(a.at) }), el('b', { textContent: a.title })); b.onclick = () => goAppt(a.id); out.push(b); }
     return out;
   }
   function laneMap() { // each stay keeps one lane for its whole length; the earliest arrival gets the top one
@@ -1584,107 +1605,210 @@
     for (const v of [...visits].sort(byArrival)) { let i = ends.findIndex((e) => e < v.arrive); if (i < 0) i = ends.length; ends[i] = vEnd(v); map.set(v.id, i); }
     return map;
   }
-  function drawMonth(body) {
-    const y = calDate.getFullYear(), m = calDate.getMonth(), first = new Date(y, m, 1), last = new Date(y, m + 1, 0), lanes = laneMap(), tk = ymd(Date.now());
-    body.append(el('div', { className: 'caldow' }, ...['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((x) => el('span', { textContent: x }))));
-    for (let ws = weekStart(first); ws <= last; ws = addDays(ws, 7)) {
-      const wk = el('div', { className: 'calweek' }), days = [...Array(7)].map((_, i) => addDays(ws, i)), inM = (d) => d.getMonth() === m;
-      days.forEach((d, i) => {
-        if (!inM(d)) return;
-        const k = ymd(d), c = el('button', { className: 'calcell' + (k === tk ? ' today' : '') + (sameK(d, calDate) ? ' sel' : ''), type: 'button' }, el('span', { className: 'num', textContent: d.getDate() }));
-        const on = visitsOn(k), ap = apptsOn(k);
-        c.setAttribute('aria-label', d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) + (on.length ? ', staying: ' + on.map((v) => v.who).join(', ') : ', nobody staying') + (ap.length ? ', ' + ap.length + (ap.length === 1 ? ' appointment' : ' appointments') : ''));
-        c.style.gridColumn = i + 1; c.onclick = () => { calDate = d; drawCal(); };
-        wk.append(c);
-        const extra = on.filter((v) => lanes.get(v.id) > 2).length;
-        if (extra) { const x = el('span', { className: 'calmore', textContent: '+' + extra + ' more' }); x.style.gridColumn = i + 1; wk.append(x); }
-        else if (ap.length) { const x = el('span', { className: 'caldot' }); x.style.gridColumn = i + 1; wk.append(x); }
-      });
-      const from = days.find(inM), to = [...days].reverse().find(inM), fk = ymd(from), tk2 = ymd(to);
-      for (const v of visits) {
-        const lane = lanes.get(v.id), end = vEnd(v); if (lane > 2 || v.arrive > tk2 || end < fk) continue;
-        const s = v.arrive > fk ? v.arrive : fk, e = end < tk2 ? end : tk2, open = !v.leave;
-        const bar = el('div', { className: 'calbar' + (v.arrive === s ? ' l' : '') + (end === e ? ' r' : '') + (open ? ' open' : '') + (end < tk ? ' past' : ''), textContent: v.who + (open && end === e ? ' ?' : '') });
-        bar.style.gridColumn = (pd(s).getDay() + 1) + ' / ' + (pd(e).getDay() + 2); bar.style.gridRow = lane + 2;
-        wk.append(bar);
+  const blk = (title, ...kids) => { const b = el('div', { className: 'calblk' }, ...kids); b.dataset.title = title; return b; };
+
+  // How far each view reaches back and forward; more is added as she nears either end.
+  const calRange = { month: { back: 12, fwd: 24, step: 12 }, week: { back: 26, fwd: 52, step: 26 }, day: { back: 45, fwd: 120, step: 60 }, year: { back: 3, fwd: 5, step: 3 } };
+
+  function drawMonths(body) {
+    const t = today0(), tk = ymd(t), lanes = laneMap(), r = calRange.month;
+    for (let i = -r.back; i <= r.fwd; i++) {
+      const first = new Date(t.getFullYear(), t.getMonth() + i, 1), m = first.getMonth(), last = new Date(first.getFullYear(), m + 1, 0);
+      const name = first.toLocaleDateString([], { month: 'long', year: 'numeric' }), box = blk(name, el('div', { className: 'calmlabel', textContent: name }));
+      if (i === 0) box.dataset.today = '1';
+      for (let ws = weekStart(first); ws <= last; ws = addDays(ws, 7)) {
+        const wk = el('div', { className: 'calweek' }), days = [...Array(7)].map((_, n) => addDays(ws, n)).filter((d) => d.getMonth() === m), fk = ymd(days[0]), lk = ymd(days[days.length - 1]);
+        const bars = visits.filter((v) => v.arrive <= lk && vEnd(v) >= fk), used = Math.min(3, bars.reduce((mx, v) => Math.max(mx, lanes.get(v.id) + 1), 0)), dotRow = 3 + used;
+        wk.style.gridTemplateRows = '30px ' + '16px '.repeat(used) + '22px';
+        for (const d of days) {
+          const k = ymd(d), on = visitsOn(k), ap = apptsOn(k), col = d.getDay() + 1;
+          const c = el('button', { className: 'calcell' + (k === tk ? ' today' : ''), type: 'button' }, el('span', { className: 'num', textContent: d.getDate() }));
+          c.setAttribute('aria-label', d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) + (on.length ? ', staying: ' + on.map((v) => v.who).join(', ') : ', nobody staying') + (ap.length ? ', ' + ap.length + (ap.length === 1 ? ' appointment' : ' appointments') : ''));
+          c.style.gridColumn = col; c.onclick = () => openDay(k);
+          if (k === tk) wk.dataset.todayrow = '1';
+          wk.append(c);
+          const extra = on.filter((v) => lanes.get(v.id) > 2).length;
+          if (extra) { const x = el('span', { className: 'calmore', textContent: '+' + extra }); x.style.gridColumn = col; x.style.gridRow = dotRow - 1; wk.append(x); }
+          else if (ap.length) { const x = el('span', { className: 'caldot' }); x.style.gridColumn = col; x.style.gridRow = dotRow - 1; wk.append(x); }
+        }
+        for (const v of bars) {
+          const lane = lanes.get(v.id), end = vEnd(v); if (lane > 2) continue;
+          const s = v.arrive > fk ? v.arrive : fk, e = end < lk ? end : lk, open = !v.leave;
+          const bar = el('div', { className: 'calbar' + (v.arrive === s ? ' l' : '') + (end === e ? ' r' : '') + (open ? ' open' : '') + (end < tk ? ' past' : ''), textContent: v.who + (open && end === e ? ' ?' : '') });
+          bar.style.gridColumn = (pd(s).getDay() + 1) + ' / ' + (pd(e).getDay() + 2); bar.style.gridRow = lane + 2;
+          wk.append(bar);
+        }
+        box.append(wk);
       }
-      body.append(wk);
+      body.append(box);
     }
   }
-  function drawWeek(body) {
-    const box = el('div', { className: 'list' }), tk = ymd(Date.now());
-    for (let i = 0; i < 7; i++) {
-      const d = addDays(weekStart(calDate), i), k = ymd(d);
-      const dd = el('button', { className: 'dd', type: 'button' }, d.toLocaleDateString([], { weekday: 'short' }), el('b', { textContent: d.getDate() }));
-      dd.setAttribute('aria-label', 'Open ' + d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }));
-      dd.onclick = () => { calDate = d; calView = 'day'; drawCal(); };
-      box.append(el('div', { className: 'calwk' + (visitsOn(k).length ? ' stay' : '') + (k === tk ? ' today' : '') }, dd, el('div', { className: 'cc' }, ...dayLines(k))));
-    }
-    body.append(box);
-  }
-  function drawDay(body) {
-    const k = ymd(calDate), on = visitsOn(k), ap = apptsOn(k), wrap = el('div', { className: 'calday' });
-    wrap.append(el('h3', { textContent: 'Staying with us' }));
-    const a = el('div', { className: 'list' });
-    if (!on.length) a.append(el('div', { className: 'empty', textContent: 'Nobody staying' }));
-    for (const v of on) {
-      const n = nights(v), bits = [];
-      if (oneDay(v)) bits.push('Here for the day' + (v.arrive_time ? ', from ' + fmtT(v.arrive_time) : ''));
-      else {
-        if (v.arrive === k) bits.push('arrives' + (v.arrive_time ? ' ' + fmtT(v.arrive_time) : ' this day'));
-        else if (v.leave !== k) bits.push('night ' + (dayDiff(k, v.arrive) + 1) + (n ? ' of ' + n : ''));
-        bits.push(!v.leave ? 'leaving date not set' : v.leave === k ? 'leaves this day' + (v.leave_time ? ', ' + fmtT(v.leave_time) : '') : 'leaves ' + pd(v.leave).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' }));
+  function drawWeeks(body) {
+    const t = today0(), tk = ymd(t), r = calRange.week, w0 = weekStart(t);
+    for (let i = -r.back; i <= r.fwd; i++) {
+      const ws = addDays(w0, 7 * i), we = addDays(ws, 6), name = md(ws) + ' – ' + (ws.getMonth() === we.getMonth() ? we.getDate() : md(we)) + yr(we);
+      const list = el('div', { className: 'list' }), box = blk(name, el('div', { className: 'calwlabel calsticky' + (i === 0 ? ' now' : ''), textContent: i === 0 ? 'This week · ' + name : name }), list);
+      if (i === 0) box.dataset.today = '1';
+      for (let n = 0; n < 7; n++) {
+        const d = addDays(ws, n), k = ymd(d), lines = weekLines(k);
+        const dd = el('button', { className: 'dd', type: 'button' }, d.toLocaleDateString([], { weekday: 'short' }), el('b', { textContent: d.getDate() }));
+        dd.setAttribute('aria-label', d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })); dd.onclick = () => openDay(k);
+        list.append(el('div', { className: 'calwk' + (visitsOn(k).length ? ' stay' : '') + (k === tk ? ' today' : '') + (lines.length ? '' : ' nil') }, dd, el('div', { className: 'cc' }, ...lines)));
       }
-      const row = el('button', { className: 'row appt vis', type: 'button' }, el('span', { className: 'what', textContent: v.who }, el('small', { textContent: bits.join(' · ') })), chev());
-      row.onclick = () => openVisitPage(v.id); a.append(row);
+      body.append(box);
     }
-    wrap.append(a, el('h3', { textContent: 'Appointments' }));
-    const b = el('div', { className: 'list' });
-    if (!ap.length) b.append(el('div', { className: 'empty', textContent: 'Nothing planned' }));
-    for (const x of ap) b.append(apptRow(x));
-    wrap.append(b); body.append(wrap);
   }
-  function drawYear(body) {
-    const y = calDate.getFullYear(), grid = el('div', { className: 'calyear' }), now = new Date(), tk = ymd(now);
-    for (let m = 0; m < 12; m++) {
-      const first = new Date(y, m, 1), n = new Date(y, m + 1, 0).getDate(), g = el('div', { className: 'g' });
-      for (let i = 0; i < first.getDay(); i++) g.append(el('span', { className: 'd' }));
-      let stayDays = 0;
-      for (let d = 1; d <= n; d++) { const k = ymd(new Date(y, m, d)), st = visitsOn(k).length > 0; if (st) stayDays++; g.append(el('span', { className: 'd' + (st ? ' stay' + (k < tk ? ' past' : '') : '') + (k === tk ? ' today' : ''), textContent: d })); }
-      const bt = el('button', { className: 'calmini' + (y === now.getFullYear() && m === now.getMonth() ? ' now' : ''), type: 'button' }, el('div', { className: 'mn', textContent: first.toLocaleDateString([], { month: 'short' }) }), g);
-      bt.setAttribute('aria-label', first.toLocaleDateString([], { month: 'long', year: 'numeric' }) + (stayDays ? ', someone staying on ' + stayDays + (stayDays === 1 ? ' day' : ' days') : ', nobody staying'));
-      bt.onclick = () => { calDate = sameK(new Date(y, m, 1), new Date(now.getFullYear(), now.getMonth(), 1)) ? today0() : new Date(y, m, 1); calView = 'month'; drawCal(); };
-      grid.append(bt);
+  function dayCards(k) { // one day in full: who is staying, then the appointments
+    const on = visitsOn(k), ap = apptsOn(k), out = [];
+    if (!on.length && !ap.length) return [el('div', { className: 'list' }, el('div', { className: 'empty', textContent: 'Nothing planned' }))];
+    out.push(el('div', { className: 'calsub', textContent: on.length ? 'Staying with us' : 'Nobody staying' }));
+    if (on.length) {
+      const a = el('div', { className: 'list' });
+      for (const v of on) {
+        const n = nights(v), bits = [];
+        if (oneDay(v)) bits.push('Here for the day' + (v.arrive_time ? ', from ' + fmtT(v.arrive_time) : ''));
+        else {
+          if (v.arrive === k) bits.push('arrives' + (v.arrive_time ? ' ' + fmtT(v.arrive_time) : ' this day'));
+          else if (v.leave !== k) bits.push('night ' + (dayDiff(k, v.arrive) + 1) + (n ? ' of ' + n : ''));
+          bits.push(!v.leave ? 'leaving date not set' : v.leave === k ? 'leaves this day' + (v.leave_time ? ', ' + fmtT(v.leave_time) : '') : 'leaves ' + pd(v.leave).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' }));
+        }
+        const row = el('button', { className: 'row appt vis', type: 'button' }, el('span', { className: 'what', textContent: v.who }, el('small', { textContent: bits.join(' · ') })), chev());
+        row.onclick = () => openVisitPage(v.id); a.append(row);
+      }
+      out.push(a);
     }
-    body.append(grid);
+    if (ap.length) { out.push(el('div', { className: 'calsub', textContent: 'Appointments' })); const b = el('div', { className: 'list' }); for (const x of ap) b.append(apptRow(x)); out.push(b); }
+    return out;
   }
-  function drawCal() {
+  function drawDays(body) {
+    const t = today0(), tk = ymd(t), r = calRange.day, short = (d) => d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) + yr(d);
+    let gapFrom = null, gapTo = null;
+    const flush = () => { if (!gapFrom) return; body.append(blk(short(gapFrom), el('div', { className: 'calgap', textContent: (sameK(gapFrom, gapTo) ? short(gapFrom) : md(gapFrom) + ' – ' + (gapFrom.getMonth() === gapTo.getMonth() ? gapTo.getDate() : md(gapTo)) + yr(gapTo)) + ' · nothing planned' }))); gapFrom = gapTo = null; };
+    for (let i = -r.back; i <= r.fwd; i++) {
+      const d = addDays(t, i), k = ymd(d);
+      if (k !== tk && !visitsOn(k).length && !apptsOn(k).length) { gapFrom = gapFrom || d; gapTo = d; continue; } // runs of empty days fold into one quiet row
+      flush();
+      const box = blk(short(d), el('div', { className: 'caldlabel calsticky' + (k === tk ? ' now' : ''), textContent: (k === tk ? 'Today · ' : '') + d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) + yr(d) }), ...dayCards(k));
+      if (k === tk) box.dataset.today = '1';
+      body.append(box);
+    }
+    flush();
+  }
+  function drawYears(body) {
+    const now = new Date(), tk = ymd(now), r = calRange.year;
+    for (let y = now.getFullYear() - r.back; y <= now.getFullYear() + r.fwd; y++) {
+      const grid = el('div', { className: 'calyear' }), box = blk(String(y), el('div', { className: 'calylabel', textContent: y }), grid);
+      if (y === now.getFullYear()) box.dataset.today = '1';
+      for (let m = 0; m < 12; m++) {
+        const first = new Date(y, m, 1), n = new Date(y, m + 1, 0).getDate(), g = el('div', { className: 'g' });
+        for (let i = 0; i < first.getDay(); i++) g.append(el('span', { className: 'd' }));
+        let stayDays = 0;
+        for (let d = 1; d <= n; d++) { const k = ymd(new Date(y, m, d)), st = visitsOn(k).length > 0; if (st) stayDays++; g.append(el('span', { className: 'd' + (st ? ' stay' + (k < tk ? ' past' : '') : '') + (k === tk ? ' today' : ''), textContent: d })); }
+        const bt = el('button', { className: 'calmini' + (y === now.getFullYear() && m === now.getMonth() ? ' now' : ''), type: 'button' }, el('div', { className: 'mn', textContent: first.toLocaleDateString([], { month: 'short' }) }), g);
+        bt.setAttribute('aria-label', first.toLocaleDateString([], { month: 'long', year: 'numeric' }) + (stayDays ? ', someone staying on ' + stayDays + (stayDays === 1 ? ' day' : ' days') : ', nobody staying'));
+        bt.onclick = () => { setCalView('month', first.toLocaleDateString([], { month: 'long', year: 'numeric' })); };
+        grid.append(bt);
+      }
+      body.append(box);
+    }
+  }
+  function drawList(body) { // everything in date order: appointments, arrivals and departures, with Today marked
+    const tk = ymd(Date.now()), items = [];
+    for (const a of appointments) items.push({ k: ymd(a.at), t: new Date(a.at).toTimeString().slice(0, 5), row: () => apptRow(a) });
+    const vrow = (v, k, time, small) => () => { const d = pd(k); const row = el('button', { className: 'row appt vis', type: 'button' }, el('span', { className: 'when' }, el('b', { textContent: dayWord(d) || d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) }), time ? fmtT(time) : 'Visit'), el('span', { className: 'what', textContent: v.who }, el('small', { textContent: small })), chev()); row.onclick = () => openVisitPage(v.id); return row; };
+    for (const v of visits) {
+      const n = nights(v);
+      if (oneDay(v)) { items.push({ k: v.arrive, t: v.arrive_time || '00:00', row: vrow(v, v.arrive, v.arrive_time, 'Here for the day') }); continue; }
+      items.push({ k: v.arrive, t: v.arrive_time || '00:00', row: vrow(v, v.arrive, v.arrive_time, 'Arrives · ' + (n == null ? 'not sure when they leave' : 'staying ' + n + (n === 1 ? ' night' : ' nights'))) });
+      if (v.leave) items.push({ k: v.leave, t: v.leave_time || '23:59', row: vrow(v, v.leave, v.leave_time, 'Leaves') });
+    }
+    items.sort((a, b) => (a.k + a.t < b.k + b.t ? -1 : 1));
+    let month = null, list = null, marked = false;
+    const mark = () => { if (marked) return; marked = true; const here = visitsOn(tk).filter((v) => !oneDay(v)); const b = blk('Coming up', el('div', { className: 'caltoday', textContent: 'Today' })); b.dataset.today = '1'; if (here.length) b.append(el('div', { className: 'calline', style: 'padding:0 2px 8px' }, 'Staying with us: ', ...here.flatMap((v, i) => [i ? ', ' : '', link(v.who, () => openVisitPage(v.id))]))); body.append(b); month = null; };
+    for (const it of items) {
+      if (it.k >= tk) mark();
+      const d = pd(it.k), name = d.toLocaleDateString([], { month: 'long', year: 'numeric' });
+      if (name !== month) { month = name; list = el('div', { className: 'list' }); body.append(blk(name, el('div', { className: 'calwlabel calsticky', textContent: name }), list)); }
+      list.append(it.row());
+    }
+    mark();
+    if (!items.some((it) => it.k >= tk)) body.append(el('div', { className: 'list', style: 'margin-top:8px' }, el('div', { className: 'empty', textContent: 'Nothing coming up. Tap + to add an appointment or a visit.' })));
+    const loose = looseNotes();
+    if (loose.length) { const b = el('button', { className: 'quiet', type: 'button', style: 'display:block;margin-top:14px', textContent: 'Other notes (' + loose.length + ')' }); b.onclick = () => showTab('OtherNotes'); body.append(b); }
+  }
+  let calSig = '';
+  function drawCal(force) {
     for (const b of document.querySelectorAll('[data-cv]')) { b.classList.toggle('on', b.dataset.cv === calView); b.setAttribute('aria-selected', b.dataset.cv === calView); }
-    const t = today0(), ws = weekStart(calDate), we = addDays(ws, 6);
-    $('calTitle').textContent = calView === 'year' ? calDate.getFullYear() : calView === 'month' ? calDate.toLocaleDateString([], { month: 'long', year: 'numeric' })
-      : calView === 'week' ? md(ws) + ' – ' + (ws.getMonth() === we.getMonth() ? we.getDate() : md(we)) : calDate.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
-    const hasToday = calView === 'year' ? calDate.getFullYear() === t.getFullYear() : calView === 'month' ? calDate.getFullYear() === t.getFullYear() && calDate.getMonth() === t.getMonth() : calView === 'week' ? ws <= t && t <= we : sameK(calDate, t);
-    $('calToday').hidden = hasToday;
-    const body = $('calBody'); body.textContent = '';
-    ({ day: drawDay, week: drawWeek, month: drawMonth, year: drawYear })[calView](body);
-    $('calUnder').hidden = calView !== 'month';
-    if (calView === 'month') { const p = $('calPanel'); p.textContent = ''; p.append(el('h3', { textContent: calDate.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) }), ...dayLines(ymd(calDate))); }
+    $('calDow').hidden = calView !== 'month';
+    document.documentElement.style.setProperty('--calTop', $('calHdr').offsetHeight + 'px');
+    const sig = JSON.stringify([calView, calRange, ymd(Date.now()), visits.map((v) => v.id + v.updated_at), appointments.map((a) => a.id + a.updated_at), looseNotes().length]);
+    if (!force && sig === calSig) return; // nothing changed: leave the page, and her place in it, alone
+    calSig = sig;
+    const body = $('calBody'), frag = document.createDocumentFragment();
+    ({ list: drawList, day: drawDays, week: drawWeeks, month: drawMonths, year: drawYears })[calView](frag);
+    body.textContent = ''; body.append(frag);
+    calTitle();
   }
-  for (const b of document.querySelectorAll('[data-cv]')) b.onclick = () => { calView = b.dataset.cv; drawCal(); };
-  function calStep(n) {
-    const t = today0();
-    if (calView === 'day') calDate = addDays(calDate, n);
-    else if (calView === 'week') calDate = addDays(calDate, 7 * n);
-    else if (calView === 'month') { const d = new Date(calDate.getFullYear(), calDate.getMonth() + n, 1); calDate = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() ? t : d; }
-    else calDate = new Date(calDate.getFullYear() + n, calDate.getMonth(), 1);
-    drawCal();
+  const calHdrH = () => $('calHdr').offsetHeight;
+  function calTitle() { // the title names whatever is at the top of the page
+    let name = '';
+    for (const b of $('calBody').querySelectorAll('.calblk')) { if (b.getBoundingClientRect().top <= calHdrH() + 12) name = b.dataset.title; else break; }
+    const first = $('calBody').querySelector('.calblk');
+    $('calTitle').textContent = name || (first ? first.dataset.title : 'Calendar');
   }
-  $('calPrev').onclick = () => calStep(-1); $('calNext').onclick = () => calStep(1);
-  $('calToday').onclick = () => { calDate = today0(); drawCal(); };
+  function calScrollTo(node, smooth, lift) {
+    if (!node) return;
+    const y = Math.max(0, node.getBoundingClientRect().top + window.scrollY - calHdrH() - (lift || 0));
+    window.scrollTo({ top: y, behavior: smooth && Math.abs(y - window.scrollY) < 2500 ? 'smooth' : 'auto' });
+    setTimeout(calTitle, 60);
+  }
+  function calGoToday(smooth) {
+    const body = $('calBody'), row = calView === 'month' ? body.querySelector('[data-todayrow]') : null;
+    if (row) calScrollTo(row, smooth, row.previousElementSibling && row.previousElementSibling.classList.contains('calweek') ? row.previousElementSibling.offsetHeight : 44); // one week of context above
+    else calScrollTo(body.querySelector('[data-today]'), smooth, 0);
+  }
+  function setCalView(v, title) {
+    calView = v; ls.set('calView', v); drawCal(true);
+    const target = title && [...$('calBody').querySelectorAll('.calblk')].find((b) => b.dataset.title === title);
+    if (target) calScrollTo(target, false, 0); else calGoToday(false);
+  }
+  for (const b of document.querySelectorAll('[data-cv]')) b.onclick = () => setCalView(b.dataset.cv);
+  $('calToday').onclick = () => calGoToday(true);
+  // Scrolling is how she moves through time: keep the title in step, and add more months, weeks, days or years near either end.
+  let calTick = false, calGrowing = false;
+  window.addEventListener('scroll', () => {
+    if ($('tabAppointments').hidden || calTick) return;
+    calTick = true;
+    requestAnimationFrame(() => {
+      calTick = false; calTitle();
+      const r = calRange[calView]; if (!r || calGrowing) return;
+      const doc = document.documentElement, fromEnd = doc.scrollHeight - window.scrollY - window.innerHeight;
+      const cap = r.step * 10; // about ten years either way is plenty
+      if (fromEnd < 900 && r.fwd < cap) { calGrowing = true; r.fwd += r.step; drawCal(true); calGrowing = false; }
+      else if (window.scrollY < 900 && r.back < cap) { calGrowing = true; const before = doc.scrollHeight; r.back += r.step; drawCal(true); window.scrollTo(0, window.scrollY + doc.scrollHeight - before); calGrowing = false; }
+    });
+  }, { passive: true });
+  window.addEventListener('resize', () => { if (!$('tabAppointments').hidden) document.documentElement.style.setProperty('--calTop', calHdrH() + 'px'); });
+
+  // --- one day, in a sheet ---
+  let dayOpen = null;
+  function openDay(k) {
+    dayOpen = k; const d = pd(k);
+    $('dayTitle').textContent = d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) + yr(d);
+    const box = $('dayLines'); box.textContent = ''; box.append(...dayLines(k, false));
+    $('dayScrim').hidden = false;
+  }
+  function closeDay() { $('dayScrim').hidden = true; dayOpen = null; }
+  $('dayClose').onclick = closeDay;
+  $('dayScrim').onclick = (e) => { if (e.target === $('dayScrim')) closeDay(); };
+  $('dayAdd').onclick = () => { if (dayOpen) calDate = pd(dayOpen); closeDay(); $('addScrim').hidden = false; };
+
+  const markFilled = () => { for (const i of document.querySelectorAll('input[type=date], input[type=time]')) i.classList.toggle('has', !!i.value); };
+  document.addEventListener('input', markFilled); document.addEventListener('change', markFilled);
 
   // --- adding ---
   const closeAdd = () => { $('addScrim').hidden = true; };
-  $('calAdd').onclick = () => { $('addScrim').hidden = false; };
+  $('calAdd').onclick = () => { calDate = today0(); $('addScrim').hidden = false; };
   $('addCancel').onclick = closeAdd;
   $('addScrim').onclick = (e) => { if (e.target === $('addScrim')) closeAdd(); };
   $('addAppt').onclick = () => { closeAdd(); openAppt(null); };
@@ -1694,9 +1818,9 @@
     $('visitTitle').textContent = v ? 'Change visit' : 'Add a visit';
     $('visWho').value = visitEditing.who; $('visArr').value = visitEditing.arrive; $('visLea').value = visitEditing.leave || '';
     $('visUnsure').checked = !!v && !v.leave; $('visArrT').value = visitEditing.arrive_time || ''; $('visLeaT').value = visitEditing.leave_time || '';
-    $('visErr').textContent = ''; syncUnsure(); $('visitScrim').hidden = false;
+    $('visErr').textContent = ''; syncUnsure(); markFilled(); $('visitScrim').hidden = false;
   }
-  function syncUnsure() { const u = $('visUnsure').checked; if (u) { $('visLea').value = ''; $('visLeaT').value = ''; } $('visLea').disabled = u; $('visLeaT').disabled = u; }
+  function syncUnsure() { const u = $('visUnsure').checked; if (u) { $('visLea').value = ''; $('visLeaT').value = ''; } $('visLea').disabled = u; $('visLeaT').disabled = u; markFilled(); }
   $('visUnsure').onchange = syncUnsure;
   const closeVisit = () => { $('visitScrim').hidden = true; visitEditing = null; };
   $('visCancel').onclick = closeVisit;
@@ -1722,7 +1846,7 @@
   const longDay = (k) => pd(k).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
   function drawVisitPage(reset) {
     const v = openVisitObj();
-    if (!v) { if (!$('tabVisit').hidden) showTab('Appointments'); return; }
+    if (!v) { if (!$('tabVisit').hidden) { calBack = true; showTab('Appointments'); } return; }
     const n = nights(v);
     $('viTitle').textContent = v.who; $('viWhen').textContent = rangeText(v) + (oneDay(v) ? ', here for the day' : n == null ? ', not sure when they leave' : ', ' + n + (n === 1 ? ' night' : ' nights'));
     $('viWho').textContent = v.who; $('viArr').textContent = longDay(v.arrive) + (v.arrive_time ? ' at ' + fmtT(v.arrive_time) : '');
@@ -1735,7 +1859,7 @@
     sizeNoteBox();
   }
   for (const b of document.querySelectorAll('[data-vi]')) b.onclick = () => { if (viTab === 'notes') saveViNotes(); viTab = b.dataset.vi; drawVisitPage(false); };
-  $('viBack').onclick = () => showTab('Appointments');
+  $('viBack').onclick = () => { calBack = true; showTab('Appointments'); };
   $('viEdit').onclick = () => { const v = openVisitObj(); if (v) openVisit(v); };
   $('viDelete').onclick = async () => {
     const v = openVisitObj(); if (!v || !confirm('Delete this visit?')) return;
