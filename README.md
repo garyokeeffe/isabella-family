@@ -5,7 +5,7 @@ Google Cloud project; the data lives in your own Firestore database.
 
 - **Today**: time since the last feed, which side to start on next, and the last diaper. One big button starts a feed.
 - **Feeding timer**: shared between both phones. "Pause to burp" keeps the same feed open; the next big button starts the other side. "Done feeding" saves it. Starting again within 30 minutes carries on with the same feed.
-- **Bottles**: Formula and Pumped milk are tiles beside Left and Right, and Today has a "Give a bottle" button. When a feed with a bottle is finished, the app asks how much she drank (ml).
+- **Bottles**: Formula and Pumped milk are tiles beside Left and Right, and Today has a "Give a bottle" button. When a feed with a bottle is finished, the app asks how much she drank, in ounces to the nearest half.
 - **One feed, however it was logged**: pieces that start within 30 minutes of the previous piece ending count as one feed.
 - **Time between feeds runs from the END of one feed to the start of the next.** That is what the reminder, Today and Trends all use.
 - **Pee / Poop / Both**: one tap logs it with the time and who tapped.
@@ -81,7 +81,7 @@ Each person signs in once with their name and the passcode; the phone stays sign
 | `duration_min` | how long the feed took, start to finish |
 | `left_min`, `right_min` | minutes on each side |
 | `formula_min`, `pumped_min` | minutes on a bottle of formula or pumped milk |
-| `formula_ml`, `pumped_ml` | how much she drank, when entered |
+| `formula_oz`, `pumped_oz` | ounces she drank (nearest half), when entered |
 | `last_side` | side the feed ended on (drives "start on the ... next") |
 | `in_progress` | true while a feeding timer is running |
 | `paused_at` | when a running feed was paused |

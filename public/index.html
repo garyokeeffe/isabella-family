@@ -526,11 +526,11 @@
       </div>
       <div class="field" id="editFormulaField">
         <div class="lab">Formula she drank</div>
-        <div class="stepper"><button type="button" data-ml="formula:-5" aria-label="5 ml less formula">−</button><span class="val" id="editFormula"></span><button type="button" data-ml="formula:5" aria-label="5 ml more formula">+</button></div>
+        <div class="stepper"><button type="button" data-ml="formula:-0.5" aria-label="Half an ounce less formula">−</button><span class="val" id="editFormula"></span><button type="button" data-ml="formula:0.5" aria-label="Half an ounce more formula">+</button></div>
       </div>
       <div class="field" id="editPumpedField">
         <div class="lab">Pumped milk she drank</div>
-        <div class="stepper"><button type="button" data-ml="pumped:-5" aria-label="5 ml less pumped milk">−</button><span class="val" id="editPumped"></span><button type="button" data-ml="pumped:5" aria-label="5 ml more pumped milk">+</button></div>
+        <div class="stepper"><button type="button" data-ml="pumped:-0.5" aria-label="Half an ounce less pumped milk">−</button><span class="val" id="editPumped"></span><button type="button" data-ml="pumped:0.5" aria-label="Half an ounce more pumped milk">+</button></div>
       </div>
       <div class="field">
         <div class="lab">Finished on</div>
@@ -727,14 +727,14 @@
   const TILE_NAME = { left: 'Left', right: 'Right', formula: 'Formula', pumped: 'Pumped milk' };
   const isBottle = (t) => BOTTLES.includes(t);
   const minsOf = (e) => TILES.reduce((t, k) => t + (e[k + '_min'] || 0), 0) || e.duration_min || 0;
-  const usedBottle = (e, k) => (e[k + '_min'] || 0) > 0 || e[k + '_ml'] != null;
-  const missingAmount = (e) => BOTTLES.filter((k) => (e[k + '_min'] || 0) > 0 && e[k + '_ml'] == null); // a bottle was given but the amount was skipped
-  // "left 12, right 9, formula 30 ml" for one feed or for several pieces of the same feed
+  const usedBottle = (e, k) => (e[k + '_min'] || 0) > 0 || e[k + '_oz'] != null;
+  const missingAmount = (e) => BOTTLES.filter((k) => (e[k + '_min'] || 0) > 0 && e[k + '_oz'] == null); // a bottle was given but the amount was skipped
+  // "left 12, right 9, formula 1.5 oz" for one feed or for several pieces of the same feed
   function partsOf(feeds) {
     const sum = (k) => feeds.reduce((t, e) => t + (e[k] || 0), 0), p = [];
     if (sum('left_min')) p.push('left ' + sum('left_min'));
     if (sum('right_min')) p.push('right ' + sum('right_min'));
-    for (const k of BOTTLES) if (feeds.some((e) => usedBottle(e, k))) p.push(TILE_NAME[k].toLowerCase() + (feeds.some((e) => missingAmount(e).includes(k)) ? ', add amount' : ' ' + sum(k + '_ml') + ' ml'));
+    for (const k of BOTTLES) if (feeds.some((e) => usedBottle(e, k))) p.push(TILE_NAME[k].toLowerCase() + (feeds.some((e) => missingAmount(e).includes(k)) ? ', add amount' : ' ' + sum(k + '_oz') + ' oz'));
     return p;
   }
   const sessionSides = (s) => partsOf(s.feeds).join(', ');
@@ -864,27 +864,27 @@
   function openAmount(id) {
     const e = find(id); if (!e) return;
     const kinds = BOTTLES.filter((k) => usedBottle(e, k)); if (!kinds.length) return;
-    amt = { id, kinds, formula: e.formula_ml == null ? null : e.formula_ml, pumped: e.pumped_ml == null ? null : e.pumped_ml };
+    amt = { id, kinds, formula: e.formula_oz == null ? null : e.formula_oz, pumped: e.pumped_oz == null ? null : e.pumped_oz };
     drawAmount(); $('amtScrim').hidden = false;
   }
   function drawAmount() {
     const host = $('amtRows'); host.textContent = '';
     for (const k of amt.kinds) {
-      const set = (v) => { amt[k] = Math.min(150, Math.max(0, v)); drawAmount(); };
+      const set = (v) => { amt[k] = Math.min(10, Math.max(0, v)); drawAmount(); };
       const minus = el('button', { type: 'button', textContent: '−' }), plus = el('button', { type: 'button', textContent: '+' });
-      minus.setAttribute('aria-label', '5 ml less'); plus.setAttribute('aria-label', '5 ml more');
-      minus.onclick = () => set((amt[k] == null ? 0 : amt[k]) - 5); plus.onclick = () => set((amt[k] == null ? 0 : amt[k]) + 5);
+      minus.setAttribute('aria-label', 'Half an ounce less'); plus.setAttribute('aria-label', 'Half an ounce more');
+      minus.onclick = () => set((amt[k] == null ? 0 : amt[k]) - 0.5); plus.onclick = () => set((amt[k] == null ? 0 : amt[k]) + 0.5);
       const chips = el('div', { className: 'seg' });
-      for (const v of [15, 30, 45, 60, 90]) { const c = el('button', { className: 'chip' + (amt[k] === v ? ' on' : ''), type: 'button', textContent: v }); c.setAttribute('aria-label', v + ' ml'); c.onclick = () => set(v); chips.append(c); }
-      host.append(el('div', { className: 'amtrow' }, el('div', { className: 'lab', textContent: TILE_NAME[k] + ' (ml)' }),
-        el('div', { className: 'stepper' }, minus, el('span', { className: 'val', textContent: amt[k] == null ? '–' : amt[k] + ' ml' }), plus), chips));
+      for (const v of [0.5, 1, 1.5, 2, 3]) { const c = el('button', { className: 'chip' + (amt[k] === v ? ' on' : ''), type: 'button', textContent: v }); c.setAttribute('aria-label', v + ' oz'); c.onclick = () => set(v); chips.append(c); }
+      host.append(el('div', { className: 'amtrow' }, el('div', { className: 'lab', textContent: TILE_NAME[k] + ' (ounces)' }),
+        el('div', { className: 'stepper' }, minus, el('span', { className: 'val', textContent: amt[k] == null ? '–' : amt[k] + ' oz' }), plus), chips));
     }
     $('amtSave').disabled = amt.kinds.every((k) => amt[k] == null);
   }
   const closeAmount = () => { $('amtScrim').hidden = true; amt = null; };
   $('amtSkip').onclick = closeAmount;
   $('amtScrim').onclick = (e) => { if (e.target === $('amtScrim')) closeAmount(); };
-  $('amtSave').onclick = () => { const e = find(amt.id); if (e) enqueue({ op: 'put', ev: { ...plain(e), formula_ml: amt.formula, pumped_ml: amt.pumped } }); closeAmount(); };
+  $('amtSave').onclick = () => { const e = find(amt.id); if (e) enqueue({ op: 'put', ev: { ...plain(e), formula_oz: amt.formula, pumped_oz: amt.pumped } }); closeAmount(); };
   $('fedAmt').onclick = () => { if ($('fedAmt').dataset.id) openAmount($('fedAmt').dataset.id); };
 
   // ----- render -----
@@ -1002,7 +1002,7 @@
       const d = by.get(dayKey(s.start));
       if (prev && d) d.gaps.push(Math.max(0, new Date(s.start) - prev.end) / 60000); // from the end of one feed to the start of the next
       prev = s;
-      if (d) { d.feeds++; for (const e of s.feeds) { d.left += e.left_min || 0; d.right += e.right_min || 0; d.mins += minsOf(e); d.formula += e.formula_ml || 0; d.pumped += e.pumped_ml || 0; } }
+      if (d) { d.feeds++; for (const e of s.feeds) { d.left += e.left_min || 0; d.right += e.right_min || 0; d.mins += minsOf(e); d.formula += e.formula_oz || 0; d.pumped += e.pumped_oz || 0; } }
     }
     for (const e of src) { const d = e.kind === 'diaper' && by.get(dayKey(e.at)); if (d) { d.diapers++; if (e.pee) d.wet++; if (e.poop) d.dirty++; } }
     return days;
@@ -1079,8 +1079,8 @@
       [Math.round(mins) + ' min', 'feeding a day', 'today so far: ' + today.mins + ' min'],
       [feeds ? Math.round(mins / feeds) + ' min' : '–', 'average feed', ''],
       [gaps.length ? hm(gaps.reduce((a, b) => a + b, 0) / gaps.length) : '–', 'between feeds', 'end of one to start of the next'],
-      [Math.round(avg((d) => d.formula)) + ' ml', 'formula a day', 'today so far: ' + today.formula + ' ml'],
-      [Math.round(avg((d) => d.pumped)) + ' ml', 'pumped milk a day', 'today so far: ' + today.pumped + ' ml'],
+      [(Math.round(avg((d) => d.formula) * 2) / 2) + ' oz', 'formula a day', 'today so far: ' + today.formula + ' oz'],
+      [(Math.round(avg((d) => d.pumped) * 2) / 2) + ' oz', 'pumped milk a day', 'today so far: ' + today.pumped + ' oz'],
       [L + R ? Math.round((100 * L) / (L + R)) + ' / ' + Math.round((100 * R) / (L + R)) : '–', 'left / right %', 'share of feeding time'],
       [diapers ? Math.round(mins / diapers) + ' min' : '–', 'feeding per diaper', one(diapers) + ' diapers a day'],
     ];
@@ -1138,7 +1138,7 @@
     if (editing.kind === 'diaper') for (const c of document.querySelectorAll('[data-diaper]')) c.classList.toggle('on', !!editing[c.dataset.diaper]);
     else {
       $('editLeft').textContent = (editing.left_min || 0) + ' min'; $('editRight').textContent = (editing.right_min || 0) + ' min';
-      for (const [k, id] of [['formula', 'editFormula'], ['pumped', 'editPumped']]) { $(id + 'Field').hidden = !usedBottle(editing, k); $(id).textContent = editing[k + '_ml'] == null ? 'Not set' : editing[k + '_ml'] + ' ml'; }
+      for (const [k, id] of [['formula', 'editFormula'], ['pumped', 'editPumped']]) { $(id + 'Field').hidden = !usedBottle(editing, k); $(id).textContent = editing[k + '_oz'] == null ? 'Not set' : editing[k + '_oz'] + ' oz'; }
       for (const c of document.querySelectorAll('[data-last]')) c.classList.toggle('on', lastSide(editing) === c.dataset.last);
     }
   }
@@ -1164,7 +1164,7 @@
   };
   for (const c of document.querySelectorAll('[data-ml]')) c.onclick = () => {
     const [k, d] = c.dataset.ml.split(':');
-    editing[k + '_ml'] = Math.min(500, Math.max(0, (editing[k + '_ml'] || 0) + Number(d)));
+    editing[k + '_oz'] = Math.min(10, Math.max(0, (editing[k + '_oz'] || 0) + Number(d)));
     editing.note = $('editNote').value; drawEdit();
   };
   for (const c of document.querySelectorAll('[data-last]')) c.onclick = () => { editing.last_side = c.dataset.last; editing.note = $('editNote').value; drawEdit(); };

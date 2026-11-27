@@ -302,8 +302,9 @@ function cleanEvent(input, existing) {
     out.last_tile = side(src.last_tile);
     out.formula_min = out.in_progress ? null : num(src.formula_min, 600);
     out.pumped_min = out.in_progress ? null : num(src.pumped_min, 600);
-    out.formula_ml = num(src.formula_ml, 1000); // how much she drank, when known
-    out.pumped_ml = num(src.pumped_ml, 1000);
+    const oz = (v) => (v == null || v === '' || isNaN(Number(v)) ? null : Math.min(20, Math.max(0, Math.round(Number(v) * 2) / 2))); // ounces, to the nearest half
+    out.formula_oz = oz(src.formula_oz); // how much she drank, when known
+    out.pumped_oz = oz(src.pumped_oz);
     out.duration_min = out.in_progress ? null : num(src.duration_min, 600);
     out.left_min = out.in_progress ? null : num(src.left_min, 600);
     out.right_min = out.in_progress ? null : num(src.right_min, 600);
@@ -350,7 +351,7 @@ function cleanNote(input, existing) {
 
 // ---------- export ----------
 
-const CSV_COLS = ['id', 'at_utc', 'at_local', 'kind', 'pee', 'poop', 'duration_min', 'left_min', 'right_min', 'formula_min', 'formula_ml', 'pumped_min', 'pumped_ml', 'last_side', 'in_progress', 'by', 'note', 'created_at', 'updated_at'];
+const CSV_COLS = ['id', 'at_utc', 'at_local', 'kind', 'pee', 'poop', 'duration_min', 'left_min', 'right_min', 'formula_min', 'formula_oz', 'pumped_min', 'pumped_oz', 'last_side', 'in_progress', 'by', 'note', 'created_at', 'updated_at'];
 
 function localStamp(iso) {
   return new Date(iso).toLocaleString('sv-SE', { timeZone: TZ_NAME }); // YYYY-MM-DD HH:MM:SS
