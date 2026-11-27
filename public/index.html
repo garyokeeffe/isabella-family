@@ -92,7 +92,20 @@
   .feeding .clock.dim { opacity: .5; }
   .pausedline { color: var(--brass); font-weight: 600; font-size: 19px; margin-top: 8px; }
   .side:disabled { opacity: .75; }
-  .side { min-height: 78px !important; }
+  .side { min-height: 72px !important; font-size: 21px !important; }
+  .side .nm { display: flex; align-items: center; gap: 6px; }
+  .side .nm svg { width: 20px; height: 20px; }
+  .side.pick { border: 2px solid var(--brass); }
+  .bottlebtn { grid-column: 1 / -1; min-height: 56px; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .bottlebtn svg, .pb svg { width: 22px; height: 22px; }
+  .pb { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 56px; }
+  .needs { color: var(--brass) !important; font-weight: 600; }
+  .amtlink { color: var(--brass); font-weight: 600; text-decoration: underline; font-size: 18px; padding: 6px 0; display: block; }
+  .amtrow { margin-bottom: 22px; }
+  .amtrow .stepper { justify-content: center; margin-bottom: 12px; }
+  .amtrow .stepper .val { font-size: 32px; min-width: 130px; }
+  .amtrow .seg { grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .amtrow .chip { min-height: 48px; padding: 6px 2px; }
   .done { min-height: 54px; margin-top: 16px; }
   .status .lbl2 { font-size: 18px; color: var(--muted); }
   .status .due { font-size: 20px; color: var(--brass); font-weight: 600; margin-top: 8px; }
@@ -252,6 +265,7 @@
     <g id="i-heart" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.3S3.5 15 3.5 9.2A4.5 4.5 0 0 1 12 7.1a4.5 4.5 0 0 1 8.5 2.1c0 5.800-8.500 11.100-8.500 11.100Z"/></g>
     <g id="i-drop" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2S5.5 10.4 5.5 15a6.5 6.5 0 0 0 13 0c0-4.600-6.500-11.800-6.500-11.800Z"/><path d="M9 15.2a3 3 0 0 0 2.4 2.9"/></g>
     <g id="i-poop" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.2 20.5h13.6a3.1 3.1 0 0 0-1-6 2.9 2.9 0 0 0-2-4.700c0-2.800-2-4.800-4.600-5.600.7 2-.3 3.400-1.700 4.300a2.900 2.900 0 0 0-2.900 4.400c-.4.400-.9.900-1.200 1.600a3.100 3.100 0 0 0-.2 6Z"/><path d="M8.2 14.5h7.6M9.7 9.8h5"/></g>
+    <g id="i-bottle" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6.200c0-2 .9-3.400 2-3.400s2 1.400 2 3.400"/><rect x="8.300" y="6.200" width="7.400" height="2.600" rx=".8"/><path d="M8.800 8.800c-1 1.200-1.500 2.400-1.500 3.900V19a2.200 2.200 0 0 0 2.200 2.200h5A2.200 2.200 0 0 0 16.700 19v-6.300c0-1.500-.5-2.700-1.500-3.900M7.300 13.500h3M7.300 16.500h3"/></g>
     <g id="i-both" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 4S2.8 8.2 2.8 11a3.7 3.7 0 0 0 7.4 0C10.2 8.2 6.5 4 6.5 4Z"/><path d="M11 20.5h9.2a2.3 2.3 0 0 0-.7-4.400 2.200 2.200 0 0 0-1.500-3.600c0-2-1.400-3.500-3.300-4.100.5 1.500-.2 2.500-1.300 3.200a2.200 2.200 0 0 0-2.100 3.300 2.300 2.300 0 0 0-.3 5.600Z"/></g>
     <g id="i-page" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4.5"/></g>
     <g id="i-bars" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11M12 20V5M19 20v-6M3.5 20h17"/></g>
@@ -304,6 +318,7 @@
         <div class="lbl2" id="fedLabel"></div>
         <div class="big" id="fedBig">No feeds yet</div>
         <div class="slim" id="fedDetail" style="margin-top:2px"></div>
+        <button class="amtlink" type="button" id="fedAmt" hidden></button>
         <div class="due" id="fedDue"></div>
         <div class="next" id="fedNext"></div>
         <div class="slim" id="diaperLine"></div>
@@ -316,16 +331,23 @@
       <div class="since" id="feedSince"></div>
       <div class="pausedline" id="pausedLine" hidden></div>
       <div class="sides">
-        <button class="side" type="button" data-side="left"><span>Left</span><small id="leftTime">0:00</small></button>
-        <button class="side" type="button" data-side="right"><span>Right</span><small id="rightTime">0:00</small></button>
+        <button class="side" type="button" data-side="left"><span class="nm">Left</span><small id="leftTime">0:00</small></button>
+        <button class="side" type="button" data-side="right"><span class="nm">Right</span><small id="rightTime">0:00</small></button>
+        <button class="side" type="button" data-side="formula"><span class="nm"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bottle"/></svg>Formula</span><small id="formulaTime">0:00</small></button>
+        <button class="side" type="button" data-side="pumped"><span class="nm"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bottle"/></svg>Pumped milk</span><small id="pumpedTime">0:00</small></button>
       </div>
       <button class="finish" type="button" id="mainBtn">Pause to burp</button>
       <button class="wide" type="button" id="backBtn" hidden></button>
+      <div class="seg two" id="pauseBottles" style="margin-top:12px" hidden>
+        <button class="chip pb" type="button" data-pb="formula"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bottle"/></svg>Formula</button>
+        <button class="chip pb" type="button" data-pb="pumped"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bottle"/></svg>Pumped milk</button>
+      </div>
       <div class="sidehint" id="reassure" hidden>No rush. If you don't come back, this feed saves itself.</div>
     </div>
 
     <div class="actions">
       <button class="act feed" data-log="feed" id="startBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg><span class="lbl" id="startLbl">Start feeding</span></button>
+      <button class="wide bottlebtn" type="button" id="bottleBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bottle"/></svg>Give a bottle</button>
       <div class="cont" id="contBox" hidden><span id="contLine"></span><button type="button" id="newFeedBtn">No, start a new feed</button></div>
       <button class="act" data-log="pee"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-drop"/></svg><span class="lbl">Pee</span></button>
       <button class="act" data-log="poop"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-poop"/></svg><span class="lbl">Poop</span></button>
@@ -502,6 +524,14 @@
         <div class="lab">Right side</div>
         <div class="stepper"><button type="button" data-min="right:-1" aria-label="One minute less on the right">−</button><span class="val" id="editRight"></span><button type="button" data-min="right:1" aria-label="One minute more on the right">+</button></div>
       </div>
+      <div class="field" id="editFormulaField">
+        <div class="lab">Formula she drank</div>
+        <div class="stepper"><button type="button" data-ml="formula:-5" aria-label="5 ml less formula">−</button><span class="val" id="editFormula"></span><button type="button" data-ml="formula:5" aria-label="5 ml more formula">+</button></div>
+      </div>
+      <div class="field" id="editPumpedField">
+        <div class="lab">Pumped milk she drank</div>
+        <div class="stepper"><button type="button" data-ml="pumped:-5" aria-label="5 ml less pumped milk">−</button><span class="val" id="editPumped"></span><button type="button" data-ml="pumped:5" aria-label="5 ml more pumped milk">+</button></div>
+      </div>
       <div class="field">
         <div class="lab">Finished on</div>
         <div class="seg two">
@@ -543,6 +573,18 @@
     <div class="btns">
       <button class="btn ghost" type="button" id="apptCancel">Cancel</button>
       <button class="btn" type="button" id="apptSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- how much she drank from the bottle -->
+<div class="scrim" id="amtScrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="amtTitle">
+    <h3 id="amtTitle">How much did she drink?</h3>
+    <div id="amtRows"></div>
+    <div class="btns" style="flex-direction:column;gap:2px">
+      <button class="btn" type="button" id="amtSave" style="flex:none;width:100%" disabled>Save</button>
+      <button class="quiet" type="button" id="amtSkip" style="display:block;margin:0 auto">Skip for now</button>
     </div>
   </div>
 </div>
@@ -660,12 +702,10 @@
   const mmss = (ms) => { const s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s % 60).padStart(2, '0'); };
   const diaperWord = (e) => (e.pee && e.poop ? 'Pee + poop' : e.poop ? 'Poop' : 'Pee');
   function feedDetail(e) {
-    const l = e.left_min || 0, r = e.right_min || 0;
-    if (l && r) return 'Left ' + l + ', right ' + r;
-    if (l || e.method === 'breast_left') return 'Left only';
-    if (r || e.method === 'breast_right') return 'Right only';
-    if (e.method === 'breast_both') return 'Both sides';
-    return '';
+    const p = partsOf([e]), bottle = BOTTLES.some((k) => usedBottle(e, k));
+    if (!p.length) return e.method === 'breast_left' ? 'Left only' : e.method === 'breast_right' ? 'Right only' : e.method === 'breast_both' ? 'Both sides' : '';
+    if (p.length === 1 && !bottle) return (e.left_min ? 'Left' : 'Right') + ' only';
+    const t = p.join(', '); return t[0].toUpperCase() + t.slice(1);
   }
   const describe = (e) => (e.kind === 'diaper' ? diaperWord(e) : e.in_progress ? 'Feeding now' : 'Fed' + (e.duration_min ? ' ' + e.duration_min + ' min' : ''));
   const lastSide = (e) => e.last_side || (e.method === 'breast_left' ? 'left' : e.method === 'breast_right' ? 'right' : null);
@@ -683,106 +723,187 @@
     }
     return out; // oldest first
   }
-  const minsOf = (e) => (e.left_min || 0) + (e.right_min || 0) || e.duration_min || 0;
-  const sessionSides = (s) => { const l = s.feeds.reduce((t, e) => t + (e.left_min || 0), 0), r = s.feeds.reduce((t, e) => t + (e.right_min || 0), 0); return l && r ? 'left ' + l + ', right ' + r : l ? 'left ' + l + ' min' : r ? 'right ' + r + ' min' : ''; };
+  const TILES = ['left', 'right', 'formula', 'pumped'], BOTTLES = ['formula', 'pumped'];
+  const TILE_NAME = { left: 'Left', right: 'Right', formula: 'Formula', pumped: 'Pumped milk' };
+  const isBottle = (t) => BOTTLES.includes(t);
+  const minsOf = (e) => TILES.reduce((t, k) => t + (e[k + '_min'] || 0), 0) || e.duration_min || 0;
+  const usedBottle = (e, k) => (e[k + '_min'] || 0) > 0 || e[k + '_ml'] != null;
+  const missingAmount = (e) => BOTTLES.filter((k) => (e[k + '_min'] || 0) > 0 && e[k + '_ml'] == null); // a bottle was given but the amount was skipped
+  // "left 12, right 9, formula 30 ml" for one feed or for several pieces of the same feed
+  function partsOf(feeds) {
+    const sum = (k) => feeds.reduce((t, e) => t + (e[k] || 0), 0), p = [];
+    if (sum('left_min')) p.push('left ' + sum('left_min'));
+    if (sum('right_min')) p.push('right ' + sum('right_min'));
+    for (const k of BOTTLES) if (feeds.some((e) => usedBottle(e, k))) p.push(TILE_NAME[k].toLowerCase() + (feeds.some((e) => missingAmount(e).includes(k)) ? ', add amount' : ' ' + sum(k + '_ml') + ' ml'));
+    return p;
+  }
+  const sessionSides = (s) => partsOf(s.feeds).join(', ');
   const tally = (list) => { const f = sessionsOf(list).length, w = list.filter((e) => e.pee).length, d = list.filter((e) => e.poop).length; return f + (f === 1 ? ' feed, ' : ' feeds, ') + w + ' wet, ' + d + ' dirty'; };
 
   // ----- feeding timer -----
   const feeding = () => events().find((e) => e.kind === 'feed' && e.in_progress);
-  const sideMs = (e, side) => (e[side + '_ms'] || 0) + (e.side === side && e.side_since ? Math.max(0, Date.now() - new Date(e.side_since)) : 0);
-  // Which side to start on: the opposite of the one the last finished feed ended on.
-  function nextSide() { const last = events().find((e) => e.kind === 'feed' && !e.in_progress); const s = last && lastSide(last); return s ? other(s) : null; }
+  const sideMs = (e, tile) => (e[tile + '_ms'] || 0) + (e.side === tile && e.side_since ? Math.max(0, Date.now() - new Date(e.side_since)) : 0);
+  const totalMs = (e) => TILES.reduce((t, k) => t + sideMs(e, k), 0);
+  // Which breast to start on: the opposite of the last one used. Bottles in between do not change it.
+  function nextSide() { for (const e of events()) if (e.kind === 'feed' && !e.in_progress && lastSide(e)) return other(lastSide(e)); return null; }
   const buzz = () => { if (navigator.vibrate) navigator.vibrate(30); };
   // For 30 minutes after a feed is finished, starting again carries on with that same feed.
   function continuable() { if (feeding()) return null; const last = events().find((e) => e.kind === 'feed'); return last && Date.now() - feedEnd(last) <= SAME_FEED_MS ? last : null; }
 
-  function startFeed(separate) {
-    // The side she is due to start on is selected straight away; tap the other one only if that is wrong.
-    const at = new Date().toISOString(), ns = nextSide();
-    const ev = { id: uuid(), at, by: who, note: '', kind: 'feed', in_progress: true, side: ns, side_since: ns ? at : null, paused_at: null, left_ms: 0, right_ms: 0, last_side: ns, separate: !!separate };
+  function startFeed(separate, bottle) {
+    // Breast: the side she is due on is selected straight away. Bottle: she picks formula or pumped milk next, and the time counts from this tap.
+    const at = new Date().toISOString(), ns = bottle ? null : nextSide();
+    const ev = { id: uuid(), at, by: who, note: '', kind: 'feed', in_progress: true, side: ns, side_since: ns ? at : null, paused_at: null, pick_since: bottle ? at : null,
+      left_ms: 0, right_ms: 0, formula_ms: 0, pumped_ms: 0, last_side: ns, last_tile: ns, separate: !!separate };
     enqueue({ op: 'put', ev });
-    toast(ns ? 'Feeding started on the ' + ns : 'Feeding started', () => enqueue({ op: 'del', id: ev.id }));
+    toast(bottle ? 'Bottle feed started' : ns ? 'Feeding started on the ' + ns : 'Feeding started', () => enqueue({ op: 'del', id: ev.id }));
   }
-  function keepFeeding(last) {
-    const before = plain(last), now = new Date().toISOString(), side = lastSide(last) ? other(lastSide(last)) : null;
-    const ev = { ...before, in_progress: true, duration_min: null, side, side_since: side ? now : null, paused_at: side ? null : now, last_side: side || before.last_side,
-      left_ms: before.left_ms || (before.left_min || 0) * 60000, right_ms: before.right_ms || (before.right_min || 0) * 60000 };
+  function keepFeeding(last, bottle) {
+    const before = plain(last), now = new Date().toISOString(), side = bottle ? null : lastSide(last) ? other(lastSide(last)) : null;
+    const ev = { ...before, in_progress: true, duration_min: null, side, side_since: side ? now : null, pick_since: bottle ? now : null, paused_at: side || bottle ? null : now,
+      last_side: side || before.last_side, last_tile: side || before.last_tile };
+    for (const k of TILES) ev[k + '_ms'] = before[k + '_ms'] || (before[k + '_min'] || 0) * 60000;
     enqueue({ op: 'put', ev });
-    toast(side ? 'Carrying on, ' + side + ' side' : 'Carrying on with the same feed', () => enqueue({ op: 'put', ev: before }));
+    toast(bottle ? 'Adding a bottle to the same feed' : side ? 'Carrying on, ' + side + ' side' : 'Carrying on with the same feed', () => enqueue({ op: 'put', ev: before }));
   }
-  function bank(ev) { // move the running side's time into its total
+  function bank(ev) { // move the running tile's time into its total
     if (ev.side && ev.side_since) ev[ev.side + '_ms'] = sideMs(ev, ev.side);
     ev.side_since = null;
   }
-  function pauseFeed() { const cur = feeding(); if (!cur || !cur.side) return; const ev = plain(cur); bank(ev); ev.side = null; ev.paused_at = new Date().toISOString(); enqueue({ op: 'put', ev }); }
-  function goSide(side) { // start, switch to, or come back to a side
-    const cur = feeding(); if (!cur || cur.side === side) return;
-    const ev = plain(cur), was = ev.side, correcting = was && Date.now() - new Date(cur.at) < 60000 && !cur.left_ms && !cur.right_ms;
+  function pauseFeed() { const cur = feeding(); if (!cur || !cur.side) return; const ev = plain(cur); bank(ev); ev.side = null; ev.pick_since = null; ev.paused_at = new Date().toISOString(); enqueue({ op: 'put', ev }); }
+  function goSide(tile) { // start on, switch to, or come back to: left, right, formula or pumped milk
+    const cur = feeding(); if (!cur || cur.side === tile) return;
+    const ev = plain(cur), was = ev.side, untouched = !TILES.some((k) => cur[k + '_ms']);
+    const correcting = was && untouched && Date.now() - new Date(cur.at) < 60000;
     bank(ev);
-    if (correcting) { ev[side + '_ms'] = (ev[side + '_ms'] || 0) + ev[was + '_ms']; ev[was + '_ms'] = 0; } // wrong side picked at the start: the seconds move across
-    ev.side = side; ev.side_since = new Date().toISOString(); ev.last_side = side; ev.paused_at = null;
+    if (correcting) { ev[tile + '_ms'] = (ev[tile + '_ms'] || 0) + ev[was + '_ms']; ev[was + '_ms'] = 0; } // wrong tile at the very start: the seconds move across
+    // After "Give a bottle", or when no side was picked at the start, the time since that tap belongs to the tile she now picks.
+    ev.side_since = !was && cur.pick_since ? cur.pick_since : !was && untouched && !cur.paused_at ? cur.at : new Date().toISOString();
+    ev.side = tile; ev.last_tile = tile; ev.paused_at = null; ev.pick_since = null;
+    if (!isBottle(tile)) ev.last_side = tile;
     enqueue({ op: 'put', ev });
   }
   function finishFeed(quiet) {
     const cur = feeding(); if (!cur) return;
-    const before = plain(cur), ev = plain(cur), end = cur.paused_at ? new Date(cur.paused_at).getTime() : Date.now(); // a paused feed ended when it was paused
+    const stoppedAt = cur.paused_at || cur.pick_since; // paused, or never picked a bottle: it ended back then
+    const before = plain(cur), ev = plain(cur), end = stoppedAt ? new Date(stoppedAt).getTime() : Date.now();
     bank(ev);
-    ev.side = null; ev.paused_at = null; ev.in_progress = false;
+    ev.side = null; ev.paused_at = null; ev.pick_since = null; ev.in_progress = false;
     ev.duration_min = Math.max(1, Math.round((end - new Date(ev.at)) / 60000));
-    ev.left_min = Math.round((ev.left_ms || 0) / 60000); ev.right_min = Math.round((ev.right_ms || 0) / 60000);
-    if (ev.left_ms > 0 && !ev.left_min) ev.left_min = 1;
-    if (ev.right_ms > 0 && !ev.right_min) ev.right_min = 1;
+    for (const k of TILES) { ev[k + '_min'] = Math.round((ev[k + '_ms'] || 0) / 60000); if (ev[k + '_ms'] > 0 && !ev[k + '_min']) ev[k + '_min'] = 1; }
     ev.method = ev.left_min && ev.right_min ? 'breast_both' : ev.left_min ? 'breast_left' : ev.right_min ? 'breast_right' : null;
+    if (!TILES.some((k) => ev[k + '_min']) && before.pick_since) return enqueue({ op: 'del', id: ev.id }); // "Give a bottle" tapped and nothing chosen: nothing to keep
     enqueue({ op: 'put', ev });
-    if (!quiet) toast('Feed saved', () => enqueue({ op: 'put', ev: before }));
+    if (quiet) return;
+    toast('Feed saved', () => enqueue({ op: 'put', ev: before }));
+    if (missingAmount(ev).length) openAmount(ev.id); // a bottle was part of this feed: ask how much, once
   }
-  $('mainBtn').onclick = () => { buzz(); const cur = feeding(); if (!cur) return; if (cur.side) pauseFeed(); else goSide(cur.last_side ? other(cur.last_side) : nextSide() || 'left'); };
-  $('backBtn').onclick = () => { buzz(); const cur = feeding(); if (cur && cur.last_side) goSide(cur.last_side); };
+  let mainAct = null, backAct = null;
+  $('mainBtn').onclick = () => { buzz(); if (mainAct) mainAct(); };
+  $('backBtn').onclick = () => { buzz(); if (backAct) backAct(); };
+  for (const b of document.querySelectorAll('[data-pb]')) b.onclick = () => { buzz(); goSide(b.dataset.pb); };
   $('doneBtn').onclick = () => { buzz(); finishFeed(); };
   $('feedCancel').onclick = () => { const cur = feeding(); if (cur) { const keep = plain(cur); enqueue({ op: 'del', id: cur.id }); toast('Feed deleted', () => enqueue({ op: 'put', ev: keep })); } };
   $('newFeedBtn').onclick = () => { buzz(); startFeed(true); };
+  $('bottleBtn').onclick = () => { buzz(); const c = continuable(); if (c) keepFeeding(c, true); else startFeed(false, true); };
   for (const b of document.querySelectorAll('[data-side]')) b.onclick = () => { buzz(); goSide(b.dataset.side); };
 
   function paintFeeding() {
     const cur = feeding(), cont = cur ? null : continuable();
-    $('feedingBox').hidden = !cur; $('idle').hidden = !!cur; $('startBtn').hidden = !!cur; $('feedEnd').hidden = !cur; $('counts').hidden = !!cur;
+    $('feedingBox').hidden = !cur; $('idle').hidden = !!cur; $('startBtn').hidden = !!cur; $('bottleBtn').hidden = !!cur; $('feedEnd').hidden = !cur; $('counts').hidden = !!cur;
     // idle: the big button either starts a feed or, shortly after one, carries on with it
     $('contBox').hidden = !cont;
     const lbl = $('startLbl'); lbl.textContent = cont ? 'Keep feeding' : 'Start feeding';
     if (cont) {
-      const side = lastSide(cont) ? other(lastSide(cont)) : null;
+      const side = lastSide(cont) ? other(lastSide(cont)) : nextSide();
       if (side) lbl.append(el('small', { textContent: side + ' side' }));
       $('contLine').textContent = 'Adds to the feed that started at ' + clock(sessionsOf(events()).pop().start);
     }
     if (!cur) return;
-    if (cur.paused_at && Date.now() - new Date(cur.paused_at) >= SAME_FEED_MS) return finishFeed(true); // left paused: it saves itself
-    const paused = !cur.side && (cur.paused_at || cur.left_ms || cur.right_ms), fresh = !cur.side && !paused;
-    $('feedHead').textContent = cur.side ? 'Feeding on the ' + cur.side : paused ? 'Paused' : 'Which side is she on?';
-    $('feedClock').textContent = mmss(sideMs(cur, 'left') + sideMs(cur, 'right')); $('feedClock').classList.toggle('dim', !!paused);
+    const stoppedAt = cur.paused_at || cur.pick_since;
+    if (stoppedAt && Date.now() - new Date(stoppedAt) >= SAME_FEED_MS) return finishFeed(true); // left alone for 30 minutes: it saves itself
+    const banked = TILES.some((k) => cur[k + '_ms']);
+    const picking = !cur.side && !!cur.pick_since, paused = !cur.side && !picking && !!(cur.paused_at || banked);
+    $('feedHead').textContent = cur.side ? (isBottle(cur.side) ? 'Bottle of ' + TILE_NAME[cur.side].toLowerCase() : 'Feeding on the ' + cur.side) : picking ? 'What\'s in the bottle?' : paused ? 'Paused' : 'Which side is she on?';
+    $('feedClock').textContent = mmss(totalMs(cur) + (picking ? Date.now() - new Date(cur.pick_since) : 0)); $('feedClock').classList.toggle('dim', paused);
     $('feedSince').textContent = 'started ' + clock(cur.at) + (cur.by && cur.by !== who ? ' by ' + cur.by : '');
     $('pausedLine').hidden = !paused;
     if (paused) $('pausedLine').textContent = (cur.paused_at ? 'Paused ' + Math.max(0, Math.floor((Date.now() - new Date(cur.paused_at)) / 60000)) + 'm. ' : 'Paused. ') + 'Still the same feed.';
-    $('leftTime').textContent = mmss(sideMs(cur, 'left')); $('rightTime').textContent = mmss(sideMs(cur, 'right'));
     for (const b of document.querySelectorAll('[data-side]')) {
-      b.classList.toggle('on', cur.side === b.dataset.side); b.setAttribute('aria-pressed', cur.side === b.dataset.side);
-      b.disabled = !!paused; // while paused the two big buttons underneath do the choosing
+      const t = b.dataset.side;
+      $(t + 'Time').textContent = mmss(sideMs(cur, t));
+      b.classList.toggle('on', cur.side === t); b.setAttribute('aria-pressed', cur.side === t);
+      b.classList.toggle('pick', picking && isBottle(t));
+      b.disabled = paused; // while paused the buttons underneath do the choosing
     }
-    const nextUp = cur.last_side ? other(cur.last_side) : null;
-    $('mainBtn').hidden = fresh; $('mainBtn').textContent = cur.side ? 'Pause to burp' : nextUp ? 'Start the ' + nextUp + ' side' : 'Carry on';
-    $('backBtn').hidden = !paused || !cur.last_side; if (cur.last_side) $('backBtn').textContent = 'Back on the ' + cur.last_side;
+    // the big button, and what sits under it
+    mainAct = backAct = null;
+    const show = (id, text, act) => { $(id).hidden = !text; if (text) $(id).textContent = text; return act; };
+    const pb = $('pauseBottles'); pb.hidden = !paused; pb.classList.remove('two'); pb.style.gridTemplateColumns = '';
+    for (const b of pb.children) b.hidden = false;
+    if (cur.side) { mainAct = show('mainBtn', 'Pause to burp', pauseFeed); show('backBtn', ''); }
+    else if (paused) {
+      const lt = cur.last_tile || cur.last_side;
+      if (isBottle(lt)) { // paused from a bottle
+        const due = cur.last_side ? other(cur.last_side) : nextSide() || 'left';
+        mainAct = show('mainBtn', 'Back to the bottle', () => goSide(lt));
+        backAct = show('backBtn', 'Start the ' + due + ' side', () => goSide(due));
+        for (const b of pb.children) b.hidden = b.dataset.pb === lt; pb.style.gridTemplateColumns = '1fr';
+      } else { // paused from a breast
+        const nextUp = cur.last_side ? other(cur.last_side) : nextSide() || 'left';
+        mainAct = show('mainBtn', 'Start the ' + nextUp + ' side', () => goSide(nextUp));
+        backAct = show('backBtn', cur.last_side ? 'Back on the ' + cur.last_side : '', () => goSide(cur.last_side));
+        pb.classList.add('two');
+      }
+    } else { show('mainBtn', ''); show('backBtn', ''); }
     $('reassure').hidden = !paused;
   }
+
+  // ----- how much she drank -----
+  let amt = null;
+  function openAmount(id) {
+    const e = find(id); if (!e) return;
+    const kinds = BOTTLES.filter((k) => usedBottle(e, k)); if (!kinds.length) return;
+    amt = { id, kinds, formula: e.formula_ml == null ? null : e.formula_ml, pumped: e.pumped_ml == null ? null : e.pumped_ml };
+    drawAmount(); $('amtScrim').hidden = false;
+  }
+  function drawAmount() {
+    const host = $('amtRows'); host.textContent = '';
+    for (const k of amt.kinds) {
+      const set = (v) => { amt[k] = Math.min(150, Math.max(0, v)); drawAmount(); };
+      const minus = el('button', { type: 'button', textContent: '−' }), plus = el('button', { type: 'button', textContent: '+' });
+      minus.setAttribute('aria-label', '5 ml less'); plus.setAttribute('aria-label', '5 ml more');
+      minus.onclick = () => set((amt[k] == null ? 0 : amt[k]) - 5); plus.onclick = () => set((amt[k] == null ? 0 : amt[k]) + 5);
+      const chips = el('div', { className: 'seg' });
+      for (const v of [15, 30, 45, 60, 90]) { const c = el('button', { className: 'chip' + (amt[k] === v ? ' on' : ''), type: 'button', textContent: v }); c.setAttribute('aria-label', v + ' ml'); c.onclick = () => set(v); chips.append(c); }
+      host.append(el('div', { className: 'amtrow' }, el('div', { className: 'lab', textContent: TILE_NAME[k] + ' (ml)' }),
+        el('div', { className: 'stepper' }, minus, el('span', { className: 'val', textContent: amt[k] == null ? '–' : amt[k] + ' ml' }), plus), chips));
+    }
+    $('amtSave').disabled = amt.kinds.every((k) => amt[k] == null);
+  }
+  const closeAmount = () => { $('amtScrim').hidden = true; amt = null; };
+  $('amtSkip').onclick = closeAmount;
+  $('amtScrim').onclick = (e) => { if (e.target === $('amtScrim')) closeAmount(); };
+  $('amtSave').onclick = () => { const e = find(amt.id); if (e) enqueue({ op: 'put', ev: { ...plain(e), formula_ml: amt.formula, pumped_ml: amt.pumped } }); closeAmount(); };
+  $('fedAmt').onclick = () => { if ($('fedAmt').dataset.id) openAmount($('fedAmt').dataset.id); };
 
   // ----- render -----
   function render() {
     const all = events();
     const sess = sessionsOf(all), last = sess[sess.length - 1];
     const lastDiaper = all.find((e) => e.kind === 'diaper');
-    $('fedLabel').textContent = last ? 'Last feed started' : '';
-    $('fedBig').textContent = last ? ago(last.start) : 'No feeds yet';
-    $('fedDetail').textContent = last ? 'at ' + clock(last.start) + (sessionSides(last) ? ', ' + sessionSides(last) : '') : '';
+    $('fedLabel').textContent = last ? 'Last feed ended' : '';
+    const endIso = last ? new Date(last.end).toISOString() : null;
+    $('fedBig').textContent = last ? ago(endIso) : 'No feeds yet';
+    if (last) {
+      const a = clock(last.start), b = clock(endIso), ap = / ?([AP]M)$/i, same = ap.test(a) && ap.test(b) && a.match(ap)[1] === b.match(ap)[1];
+      const known = partsOf(last.feeds).filter((p) => !/add amount$/.test(p)).join(', ');
+      $('fedDetail').textContent = (same ? a.replace(ap, '') : a) + ' to ' + b + (known ? ', ' + known : '');
+    } else $('fedDetail').textContent = '';
+    const need = last && last.feeds.find((e) => missingAmount(e).length), fa = $('fedAmt');
+    fa.hidden = !need; if (need) { fa.dataset.id = need.id; fa.textContent = missingAmount(need).map((k) => TILE_NAME[k].toLowerCase()).join(' and ') + ', add amount'; }
     const due = $('fedDue'); due.textContent = ''; due.classList.remove('late');
-    if (last) { const by = new Date(new Date(last.start).getTime() + rem.hours * 3600e3); const late = by < Date.now(); due.classList.toggle('late', late); due.textContent = (late ? 'Next feed was due at ' : 'Next feed by ') + clock(by.toISOString()); }
+    if (last) { const by = new Date(last.end + rem.hours * 3600e3); const late = by < Date.now(); due.classList.toggle('late', late); due.textContent = (late ? 'Next feed was due at ' : 'Next feed by ') + clock(by.toISOString()); }
     const nx = $('fedNext'); nx.textContent = '';
     const ns = nextSide();
     if (ns) nx.append('Start on the ', el('b', { textContent: ns }), ' next');
@@ -800,7 +921,7 @@
       const row = el('button', { className: 'row' + (e._pending ? ' pending' : '') + (part ? ' part' : ''), type: 'button' }); row.dataset.id = e.id;
       const what = el('span', { className: 'what', textContent: describe(e) });
       const detail = [e.kind === 'feed' ? feedDetail(e) : '', e.note].filter(Boolean).join('. ');
-      if (detail) what.append(el('small', { textContent: detail }));
+      if (detail) what.append(el('small', { className: e.kind === 'feed' && missingAmount(e).length ? 'needs' : '', textContent: detail }));
       if (!part) row.append(icon(e.kind === 'feed' ? 'heart' : e.pee && e.poop ? 'both' : e.poop ? 'poop' : 'drop', 'ico' + (e.poop ? ' poop' : '')));
       row.append(el('span', { className: 't', textContent: clock(e.at) }), what);
       if (e.by && e.by !== who) row.append(el('span', { className: 'by', textContent: e.by }));
@@ -819,6 +940,7 @@
         const s = it.s, open = openSessions.has(s.id), running = s.feeds.some((e) => e.in_progress);
         const what = el('span', { className: 'what', textContent: running ? 'Feeding now' : 'Fed ' + s.feeds.reduce((t, e) => t + minsOf(e), 0) + ' min' });
         what.append(el('small', { textContent: [sessionSides(s).replace(/^./, (c) => c.toUpperCase()), 'logged in ' + s.feeds.length + ' parts'].filter(Boolean).join('. ') }));
+        if (s.feeds.some((e) => missingAmount(e).length)) what.lastChild.className = 'needs';
         const row = el('button', { className: 'row', type: 'button' }, icon('heart', 'ico'), el('span', { className: 't', textContent: clock(s.start) }), what, el('span', { className: 'parts', textContent: open ? 'Hide' : 'Show' }));
         row.setAttribute('aria-expanded', open); row.dataset.session = s.id; list.append(row);
         if (open) for (const e of s.feeds) list.append(evRow(e, true));
@@ -872,15 +994,15 @@
   function dayStats(n) {
     const start = new Date(); start.setHours(0, 0, 0, 0);
     const days = [];
-    for (let i = n - 1; i >= 0; i--) { const d = new Date(start); d.setDate(d.getDate() - i); days.push({ date: d, key: dayKey(d), feeds: 0, mins: 0, left: 0, right: 0, wet: 0, dirty: 0, diapers: 0, gaps: [] }); }
+    for (let i = n - 1; i >= 0; i--) { const d = new Date(start); d.setDate(d.getDate() - i); days.push({ date: d, key: dayKey(d), feeds: 0, mins: 0, left: 0, right: 0, wet: 0, dirty: 0, diapers: 0, gaps: [], formula: 0, pumped: 0 }); }
     const by = new Map(days.map((d) => [d.key, d]));
     const src = trendEvents || events();
     let prev = null;
     for (const s of sessionsOf(src)) { // a feed logged in pieces counts once, from its first start
       const d = by.get(dayKey(s.start));
-      if (prev && d) d.gaps.push((new Date(s.start) - new Date(prev.start)) / 60000);
+      if (prev && d) d.gaps.push(Math.max(0, new Date(s.start) - prev.end) / 60000); // from the end of one feed to the start of the next
       prev = s;
-      if (d) { d.feeds++; for (const e of s.feeds) { const l = e.left_min || 0, r = e.right_min || 0; d.left += l; d.right += r; d.mins += l + r || e.duration_min || 0; } }
+      if (d) { d.feeds++; for (const e of s.feeds) { d.left += e.left_min || 0; d.right += e.right_min || 0; d.mins += minsOf(e); d.formula += e.formula_ml || 0; d.pumped += e.pumped_ml || 0; } }
     }
     for (const e of src) { const d = e.kind === 'diaper' && by.get(dayKey(e.at)); if (d) { d.diapers++; if (e.pee) d.wet++; if (e.poop) d.dirty++; } }
     return days;
@@ -949,14 +1071,16 @@
     $('last24').textContent = tally(recent);
     const main = [
       [one(feeds), 'feeds a day', 'today so far: ' + today.feeds],
-      [gaps.length ? hm(Math.max(...gaps)) : '–', 'longest stretch', 'between two feeds'],
+      [gaps.length ? hm(Math.max(...gaps)) : '–', 'longest stretch', 'end of one feed to the next'],
       [one(avg((d) => d.wet)), 'wet diapers a day', 'today so far: ' + today.wet],
       [one(avg((d) => d.dirty)), 'dirty diapers a day', 'today so far: ' + today.dirty],
     ];
     const extra = [
       [Math.round(mins) + ' min', 'feeding a day', 'today so far: ' + today.mins + ' min'],
       [feeds ? Math.round(mins / feeds) + ' min' : '–', 'average feed', ''],
-      [gaps.length ? hm(gaps.reduce((a, b) => a + b, 0) / gaps.length) : '–', 'between feeds', 'start to start'],
+      [gaps.length ? hm(gaps.reduce((a, b) => a + b, 0) / gaps.length) : '–', 'between feeds', 'end of one to start of the next'],
+      [Math.round(avg((d) => d.formula)) + ' ml', 'formula a day', 'today so far: ' + today.formula + ' ml'],
+      [Math.round(avg((d) => d.pumped)) + ' ml', 'pumped milk a day', 'today so far: ' + today.pumped + ' ml'],
       [L + R ? Math.round((100 * L) / (L + R)) + ' / ' + Math.round((100 * R) / (L + R)) : '–', 'left / right %', 'share of feeding time'],
       [diapers ? Math.round(mins / diapers) + ' min' : '–', 'feeding per diaper', one(diapers) + ' diapers a day'],
     ];
@@ -1014,6 +1138,7 @@
     if (editing.kind === 'diaper') for (const c of document.querySelectorAll('[data-diaper]')) c.classList.toggle('on', !!editing[c.dataset.diaper]);
     else {
       $('editLeft').textContent = (editing.left_min || 0) + ' min'; $('editRight').textContent = (editing.right_min || 0) + ' min';
+      for (const [k, id] of [['formula', 'editFormula'], ['pumped', 'editPumped']]) { $(id + 'Field').hidden = !usedBottle(editing, k); $(id).textContent = editing[k + '_ml'] == null ? 'Not set' : editing[k + '_ml'] + ' ml'; }
       for (const c of document.querySelectorAll('[data-last]')) c.classList.toggle('on', lastSide(editing) === c.dataset.last);
     }
   }
@@ -1032,8 +1157,14 @@
     editing[key] = Math.min(180, Math.max(0, (editing[key] || 0) + Number(d)));
     editing[side + '_ms'] = editing[key] * 60000;
     const l = editing.left_min || 0, r = editing.right_min || 0;
-    if (l + r) editing.duration_min = l + r;
+    const all4 = TILES.reduce((t, k) => t + (editing[k + '_min'] || 0), 0);
+    if (all4) editing.duration_min = all4;
     editing.method = l && r ? 'breast_both' : l ? 'breast_left' : r ? 'breast_right' : null;
+    editing.note = $('editNote').value; drawEdit();
+  };
+  for (const c of document.querySelectorAll('[data-ml]')) c.onclick = () => {
+    const [k, d] = c.dataset.ml.split(':');
+    editing[k + '_ml'] = Math.min(500, Math.max(0, (editing[k + '_ml'] || 0) + Number(d)));
     editing.note = $('editNote').value; drawEdit();
   };
   for (const c of document.querySelectorAll('[data-last]')) c.onclick = () => { editing.last_side = c.dataset.last; editing.note = $('editNote').value; drawEdit(); };
@@ -1360,7 +1491,7 @@
   setInterval(() => {
     if (document.hidden || $('app').hidden) return;
     ticks++;
-    const busy = editing || apptEditing || noteEditing || apDirty;
+    const busy = editing || apptEditing || noteEditing || apDirty || amt;
     if (feeding()) { paintFeeding(); if (ticks % 10 === 0 && !busy) refresh(); } // pick up a switch or finish from the other phone quickly
     else if (ticks % 30 === 0 && !busy) refresh();
     else if (ticks % 20 === 0 && !busy) render();

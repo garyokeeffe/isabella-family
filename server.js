@@ -152,43 +152,53 @@ function feedSessions(events) {
   }
   return out;
 }
-// A feed left paused for 30 minutes is over: close it at the moment it was paused.
-async function closeStalePauses(events) {
+// Close a feed that nobody is going to come back to, at the given moment.
+function closedFeed(e, endMs, extraNote) {
+  const m = (k) => Math.round((e[k + '_ms'] || 0) / 60e3) || (e[k + '_ms'] > 0 ? 1 : 0);
+  const left = m('left'), right = m('right');
+  return cleanEvent({ in_progress: false, side: null, paused_at: null, pick_since: null, left_min: left, right_min: right, formula_min: m('formula'), pumped_min: m('pumped'),
+    duration_min: Math.max(1, Math.round((endMs - new Date(e.at)) / 60e3)), note: [e.note, extraNote].filter(Boolean).join(' '),
+    method: left && right ? 'breast_both' : left ? 'breast_left' : right ? 'breast_right' : null }, e);
+}
+async function closeStaleFeeds(events) {
   for (const e of events) {
-    if (e.kind !== 'feed' || !e.in_progress || !e.paused_at || Date.now() - new Date(e.paused_at) < SAME_FEED_MS) continue;
-    const left = Math.round((e.left_ms || 0) / 60e3) || (e.left_ms > 0 ? 1 : 0), right = Math.round((e.right_ms || 0) / 60e3) || (e.right_ms > 0 ? 1 : 0);
-    Object.assign(e, cleanEvent({ in_progress: false, side: null, paused_at: null, left_min: left, right_min: right,
-      duration_min: Math.max(1, Math.round((new Date(e.paused_at) - new Date(e.at)) / 60e3)),
-      method: left && right ? 'breast_both' : left ? 'breast_left' : right ? 'breast_right' : null }, e));
-    await store.put(e);
+    if (e.kind !== 'feed' || !e.in_progress) continue;
+    let closed = null;
+    // paused (or waiting for a bottle choice) for 30 minutes: it ended when she paused
+    if (e.paused_at && Date.now() - new Date(e.paused_at) >= SAME_FEED_MS) closed = closedFeed(e, new Date(e.paused_at).getTime());
+    else if (e.pick_since && Date.now() - new Date(e.pick_since) >= SAME_FEED_MS) closed = closedFeed(e, new Date(e.pick_since).getTime());
+    // the same tile running for two hours: the timer was forgotten. Keep what was banked and end it where that tile began.
+    else if (e.side && e.side_since && Date.now() - new Date(e.side_since) >= 2 * 3600e3) closed = closedFeed(e, new Date(e.side_since).getTime(), 'Timer was left running; check the minutes.');
+    if (closed) { Object.assign(e, closed); await store.put(e); }
   }
 }
 
-// Called every few minutes by Cloud Scheduler. Time is counted from the START of the last feed.
+// Called every few minutes by Cloud Scheduler. Time is counted from the END of the last feed to now.
 async function checkReminders() {
   const cfg = await getReminderConfig();
   const recent = await store.latest(16);
-  await closeStalePauses(recent);
+  await closeStaleFeeds(recent);
   const sessions = feedSessions(recent);
   if (!sessions.length) return { sent: 0, why: 'no feeds yet' };
-  const session = sessions[sessions.length - 1], last = session.feeds[session.feeds.length - 1];
-  const elapsed = Date.now() - new Date(session.start);
+  const session = sessions[sessions.length - 1];
+  if (session.feeds.some((e) => e.in_progress)) return { sent: 0, why: 'feeding now' }; // running or paused: nothing to remind about
+  const elapsed = Date.now() - session.end;
   const due = cfg.hours * 3600e3;
-  // A feed that is really under way means no reminder; a timer forgotten for hours does not get to silence them.
-  if (session.feeds.some((e) => e.in_progress) && elapsed < due) return { sent: 0, why: 'feeding now' };
   if (elapsed < due) return { sent: 0, why: 'not due' };
   if (elapsed > due + GIVE_UP_AFTER_MS) return { sent: 0, why: 'gave up' };
-  // Past the due time, only a side that has been running for under 90 minutes counts as really feeding.
-  if (session.feeds.some((e) => e.in_progress && e.side && e.side_since && Date.now() - new Date(e.side_since) < 90 * 60e3)) return { sent: 0, why: 'feeding now' };
-  const key = session.feeds[0].id;
+  const key = session.feeds[0].id + '@' + session.end;
   if (cfg.last_for === key && cfg.last_sent && Date.now() - new Date(cfg.last_sent) < NUDGE_EVERY_MS - 60e3) return { sent: 0, why: 'nudged recently' };
+  // which breast next: the opposite of the last one used, however many bottles came after it
+  const lastBreast = recent.filter((e) => e.kind === 'feed').sort((x, y) => (x.at < y.at ? 1 : -1))
+    .map((e) => e.last_side || (e.method === 'breast_left' ? 'left' : e.method === 'breast_right' ? 'right' : null)).find(Boolean);
+  const last = { last_side: lastBreast || null };
 
   const mins = Math.floor(elapsed / 60000);
   const ended = last.last_side || (last.method === 'breast_left' ? 'left' : last.method === 'breast_right' ? 'right' : null);
   const next = ended ? (ended === 'left' ? 'right' : 'left') : null;
   const payload = {
     title: 'Time to feed Isabella',
-    body: `Last feed started ${Math.floor(mins / 60)}h ${String(mins % 60).padStart(2, '0')}m ago.` + (next ? ` Start on the ${next}.` : ''),
+    body: `Isabella finished her last feed ${mins % 60 < 5 ? Math.floor(mins / 60) + (mins < 120 ? ' hour' : ' hours') : Math.floor(mins / 60) + 'h ' + String(mins % 60).padStart(2, '0') + 'm'} ago.` + (next ? ` Start on the ${next}.` : ''),
     tag: 'feed-reminder',
   };
   let sent = 0;
@@ -272,17 +282,28 @@ function cleanEvent(input, existing) {
       if (!isFinite(n) || n < 0 || n > max) throw new Error('bad number');
       return n;
     };
-    const side = (v) => (v === 'left' || v === 'right' ? v : null);
+    const side = (v) => (['left', 'right', 'formula', 'pumped'].includes(v) ? v : null); // the four things she can be fed from
+    const breast = (v) => (v === 'left' || v === 'right' ? v : null);
     out.in_progress = !!src.in_progress;
     out.side = out.in_progress ? side(src.side) : null;
     const since = out.side && src.side_since ? new Date(src.side_since) : null;
     out.side_since = since && !isNaN(since) ? since.toISOString() : null;
     const paused = out.in_progress && !out.side && src.paused_at ? new Date(src.paused_at) : null; // paused to burp: still the same feed
     out.paused_at = paused && !isNaN(paused) ? paused.toISOString() : null;
+    // "Give a bottle" was tapped but formula or pumped milk has not been picked yet; the time counts from here.
+    const pick = out.in_progress && !out.side && src.pick_since ? new Date(src.pick_since) : null;
+    out.pick_since = pick && !isNaN(pick) ? pick.toISOString() : null;
     out.separate = !!src.separate; // she said "this is a new feed" even though it follows closely on the last one
     out.left_ms = num(src.left_ms, 864e5) || 0;
     out.right_ms = num(src.right_ms, 864e5) || 0;
-    out.last_side = side(src.last_side);
+    out.formula_ms = num(src.formula_ms, 864e5) || 0;
+    out.pumped_ms = num(src.pumped_ms, 864e5) || 0;
+    out.last_side = breast(src.last_side); // drives "start on the left next"; bottles do not change it
+    out.last_tile = side(src.last_tile);
+    out.formula_min = out.in_progress ? null : num(src.formula_min, 600);
+    out.pumped_min = out.in_progress ? null : num(src.pumped_min, 600);
+    out.formula_ml = num(src.formula_ml, 1000); // how much she drank, when known
+    out.pumped_ml = num(src.pumped_ml, 1000);
     out.duration_min = out.in_progress ? null : num(src.duration_min, 600);
     out.left_min = out.in_progress ? null : num(src.left_min, 600);
     out.right_min = out.in_progress ? null : num(src.right_min, 600);
@@ -329,7 +350,7 @@ function cleanNote(input, existing) {
 
 // ---------- export ----------
 
-const CSV_COLS = ['id', 'at_utc', 'at_local', 'kind', 'pee', 'poop', 'duration_min', 'left_min', 'right_min', 'last_side', 'in_progress', 'by', 'note', 'created_at', 'updated_at'];
+const CSV_COLS = ['id', 'at_utc', 'at_local', 'kind', 'pee', 'poop', 'duration_min', 'left_min', 'right_min', 'formula_min', 'formula_ml', 'pumped_min', 'pumped_ml', 'last_side', 'in_progress', 'by', 'note', 'created_at', 'updated_at'];
 
 function localStamp(iso) {
   return new Date(iso).toLocaleString('sv-SE', { timeZone: TZ_NAME }); // YYYY-MM-DD HH:MM:SS

@@ -5,14 +5,16 @@ Google Cloud project; the data lives in your own Firestore database.
 
 - **Today**: time since the last feed, which side to start on next, and the last diaper. One big button starts a feed.
 - **Feeding timer**: shared between both phones. "Pause to burp" keeps the same feed open; the next big button starts the other side. "Done feeding" saves it. Starting again within 30 minutes carries on with the same feed.
-- **One feed, however it was logged**: pieces that start within 30 minutes of the previous piece ending count as one feed, timed from the first start. That is what the 3-hour reminder, Today, the Journal and Trends all use.
+- **Bottles**: Formula and Pumped milk are tiles beside Left and Right, and Today has a "Give a bottle" button. When a feed with a bottle is finished, the app asks how much she drank (ml).
+- **One feed, however it was logged**: pieces that start within 30 minutes of the previous piece ending count as one feed.
+- **Time between feeds runs from the END of one feed to the start of the next.** That is what the reminder, Today and Trends all use.
 - **Pee / Poop / Both**: one tap logs it with the time and who tapped.
 - **Journal**: the last 7 days by day, with totals. Tap a line to fix the time, minutes per side, note, or remove it.
 - **Trends**: a short view first, with the rest behind "Show all the numbers". 7 or 14 day averages (feeds, feeding minutes, time between feeds, left/right split, wet and dirty diapers, feeding minutes per diaper), three charts and a day-by-day table.
 - **Appointments**: any kind of appointment. Tap one to open its own page with two tabs: **Details** (what, when, where) and **Notes**, a full-screen text field that saves by itself.
 - **More**: a short menu. Feed reminders, Sleep sounds, Trends and averages, and Export and account each open on their own page.
 - **Sleep sounds**: loops of real recordings (rain, ocean waves, stream, white noise, pink noise) with an optional auto-off.
-- **Feed reminders**: a push notification on each phone that turned them on, once it has been 3 hours (adjustable) since the last feed started; repeats every 30 minutes until a feed starts. A Cloud Scheduler job checks every 5 minutes.
+- **Feed reminders**: a push notification on each phone that turned them on, once it has been 3 hours (adjustable) since the last feed ended; repeats every 30 minutes until a feed starts. A Cloud Scheduler job checks every 5 minutes.
 - **Night mode**: the moon button dims the whole app.
 - Works with a flaky connection: taps are kept on the phone and sent when it reconnects.
 - Spreadsheet (CSV) downloads live under More, "Export and account".
@@ -78,6 +80,8 @@ Each person signs in once with their name and the passcode; the phone stays sign
 | `pee`, `poop` | true/false (diapers) |
 | `duration_min` | how long the feed took, start to finish |
 | `left_min`, `right_min` | minutes on each side |
+| `formula_min`, `pumped_min` | minutes on a bottle of formula or pumped milk |
+| `formula_ml`, `pumped_ml` | how much she drank, when entered |
 | `last_side` | side the feed ended on (drives "start on the ... next") |
 | `in_progress` | true while a feeding timer is running |
 | `paused_at` | when a running feed was paused |
